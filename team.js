@@ -2,8 +2,8 @@
   'use strict';
 
   var destinations = [
-    { name: '松林观景台', distance: '8.4 km', next: '300 米后右转', route: [[44,152],[100,129],[160,135],[210,102],[253,116],[290,76],[348,63],[395,34]] },
-    { name: '山脚补给站', distance: '4.2 km', next: '400 米后左转', route: [[44,152],[105,147],[138,95],[193,101],[227,67],[280,89],[334,73],[395,108]] }
+    { name: '松林观景台', distance: '8.4 km', meters: 300, turn: '右转', route: [[44,152],[100,129],[160,135],[210,102],[253,116],[290,76],[348,63],[395,34]] },
+    { name: '山脚补给站', distance: '4.2 km', meters: 400, turn: '左转', route: [[44,152],[105,147],[138,95],[193,101],[227,67],[280,89],[334,73],[395,108]] }
   ];
   var stages = [
     { label: '见面组队', title: '两位车友，面对面建队', copy: '骑手已登录 APP，手机提供联网、GPS 与蓝牙。确认附近车友后，群里就能看到双方的身份和设备。' },
@@ -13,7 +13,7 @@
     { label: '下发电子号牌', title: '把名字、号码或队徽亮出来', copy: '在 APP 写入号码、骑手姓名，或选择车队 Logo。ESP32 将内容转发到三防电子墨水屏。' },
     { label: '骑完看里程', title: '骑完回群里看里程', copy: '手机记录这一趟的 GPS 里程。骑行结束后，群内排行榜按累计里程更新。' }
   ];
-  var initial = { stage: 0, completed: 0, destination: 0, movement: 0, number: '07', rider: '陈默', plate: 'identity' };
+  var initial = { stage: 0, completed: 0, destination: 0, movement: 0, number: '07', rider: '陈默', hasLogo: false };
 
   function escapeText(value) {
     return String(value).replace(/[&<>"']/g,function (character) {
@@ -94,42 +94,42 @@
 
   function esp(state) {
     var ready = state.completed >= 4, dest = destinations[state.destination];
-    return '<div class="team-device-header"><strong>ESP32 车载屏</strong><span>接收并显示</span></div>' +
-      '<div class="team-esp-screen">' +
-      (ready ? '<b>' + dest.next + '</b>' + mapMarkup(true) + legend(state) + '<p class="team-device-note">手机已下发 · ' + dest.name + '</p>' :
-        '<div class="team-standby"><b>等待手机同步</b><small>将显示导航路线与队友位置</small></div>') + '</div>';
+    return '<div class="team-device-label"><strong>ESP32 车把圆屏</strong><span>' + (ready ? '蓝牙已同步' : '等待同步') + '</span></div>' +
+      '<div class="team-esp-case"><div class="team-esp-screen">' +
+      (ready ? '<span class="team-round-arrow" aria-hidden="true">' + (dest.turn === '右转' ? '↱' : '↰') + '</span>' +
+        '<b class="team-round-distance">' + (dest.meters - state.movement * 35) + ' <small>m</small></b><b>' + dest.turn + '</b>' +
+        '<div class="team-round-map">' + mapMarkup(true) + legend(state) + '</div>' :
+        '<div class="team-standby"><b>等待手机同步</b><small>转向提醒与队友位置</small></div>') + '</div></div>';
   }
 
   function plate(state) {
     var synced = state.completed >= 5;
-    return '<div class="team-device-header"><strong>三防电子墨水屏</strong><span>由 ESP32 转发</span></div>' +
-      '<div class="team-ink-screen">' +
-      (!synced ? '<div class="team-standby"><b>等待写入</b><small>队号、姓名或车队 Logo</small></div>' :
-        (state.plate === 'logo' ? '<div class="team-ink-logo" aria-hidden="true"></div><strong>松林骑队</strong>' :
-          '<strong class="team-plate-number">' + escapeText(state.number) + '</strong>' +
-          '<span>' + escapeText(state.rider) + '</span>')) + '</div>';
+    return '<div class="team-device-label"><strong>三防电子墨水牌</strong><span>' + (synced ? 'ESP32 已转发' : '等待下发') + '</span></div>' +
+      '<div class="team-ink-case"><div class="team-ink-screen">' +
+      (!synced ? '<div class="team-standby"><b>等待写入</b><small>队号、姓名和车队 Logo</small></div>' :
+        '<div class="team-ink-content">' + (state.hasLogo ? '<div class="team-ink-logo" aria-label="松林骑队队徽" role="img"></div>' : '') +
+        '<strong class="team-plate-number">' + escapeText(state.number) + '</strong>' +
+        '<span><strong>' + escapeText(state.rider) + '</strong>' + (state.hasLogo ? '<small>松林骑队</small>' : '') + '</span></div>') + '</div></div>';
   }
 
   function mount(root) {
     var state = Object.assign({},initial);
     root.innerHTML =
-      '<div class="team-intro"><div><h2 id="team-title" tabindex="-1">跟着一趟骑行，走完组队流程</h2>' +
-      '<p>选任一步体验，也可以按顺序走完整趟。</p></div><span>概念演示 · 示例数据</span></div>' +
+      '<div class="team-intro"><div><h2 id="team-title" tabindex="-1">手机操作，两块屏同步</h2>' +
+      '<p>在手机上操作，看路线和号牌怎么更新。</p></div><span>概念演示 · 示例数据</span></div>' +
       '<div class="team-steps" role="group" aria-label="组队流程步骤">' +
       stages.map(function (stage,index) {
         return '<button type="button" class="team-step"><span aria-hidden="true">0' + (index + 1) + '</span>' + stage.label + '</button>';
       }).join('') + '</div>' +
-      '<div class="team-action"><div><h3 id="team-stage-title"></h3><p id="team-stage-copy"></p></div>' +
+      '<div class="team-stage"><aside class="team-action"><h3 id="team-stage-title"></h3><p id="team-stage-copy"></p>' +
+      '<p class="team-result" role="status"></p><div class="team-actions">' +
+      '<button type="button" class="secondary" id="team-next" hidden>下一步 →</button>' +
+      '<button type="button" class="team-reset" id="team-reset">重置演示</button></div></aside>' +
+      '<div class="team-devices"><article class="team-phone"><div class="team-phone-bezel"><div class="team-phone-content"></div>' +
       '<form class="team-form" id="team-form"><div class="team-fields"></div><div class="team-actions">' +
       '<button type="submit" class="primary" id="team-do"></button>' +
-      '<button type="button" class="secondary" id="team-logo" hidden>下发车队 Logo</button>' +
-      '<button type="button" class="secondary" id="team-next" hidden>下一步 →</button>' +
-      '<button type="button" class="team-reset" id="team-reset">重置演示</button></div></form>' +
-      '<p class="team-result" role="status"></p></div>' +
-      '<ol class="team-signal" aria-label="信息流"><li><b>手机 APP</b><span>联网、定位、处理信息</span></li>' +
-      '<li><b>蓝牙 → ESP32</b><span>显示导航和队友</span></li><li><b>ESP32 → 电子墨水屏</b><span>显示队号、姓名或队徽</span></li></ol>' +
-      '<div class="team-devices"><article class="team-device team-phone"></article>' +
-      '<article class="team-device team-esp"></article><article class="team-device team-plate"></article></div>';
+      '<button type="button" class="secondary" id="team-logo" hidden>下发车队 Logo</button></div></form></div></article>' +
+      '<div class="team-outputs"><article class="team-esp"></article><article class="team-plate"></article></div></div></div>';
 
     var find = function (selector) { return root.querySelector(selector); };
     var steps = Array.from(root.querySelectorAll('.team-step'));
@@ -137,10 +137,11 @@
     var next = find('#team-next'), logo = find('#team-logo'), result = find('.team-result');
 
     function renderPanels() {
-      find('.team-phone').innerHTML = phone(state);
+      find('.team-phone-content').innerHTML = phone(state);
       find('.team-esp').innerHTML = esp(state);
       find('.team-plate').innerHTML = plate(state);
-      find('.team-devices').dataset.focus = state.stage === 4 ? 'plate' : (state.stage === 3 ? 'esp' : 'phone');
+      find('.team-devices').dataset.focus = state.stage === 4 && state.completed >= 5 ? 'plate' :
+        (state.stage === 3 && state.completed >= 4 ? 'esp' : 'phone');
       root.querySelectorAll('.team-map').forEach(function (canvas) { draw(canvas,state); });
     }
 
@@ -210,8 +211,8 @@
       steps[0].focus({ preventScroll:true });
     });
     logo.addEventListener('click',function () {
-      state.plate = 'logo';
-      finish('手机把松林骑队 Logo 发给 ESP32，墨水屏已刷新为队徽。');
+      state.hasLogo = true;
+      finish('手机把松林骑队 Logo 发给 ESP32，墨水牌上的队徽已更新。');
     });
 
     find('#team-form').addEventListener('submit',function (event) {
@@ -250,7 +251,6 @@
           }
           state.number = number.value;
           state.rider = rider.value.trim();
-          state.plate = 'identity';
           finish('ESP32 已把队号和骑手姓名转发给墨水屏。');
           break;
         }
