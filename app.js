@@ -33,6 +33,60 @@
     }).join('') + '</div>';
   }
 
+  var captureStartGap = 48;
+  var captureEndGap = 24;
+
+  function captureMarkup(step) {
+    return '<div class="capture-demo"><div class="capture-readout">' +
+      '<span class="capture-state">' + (step ? '分享已开启 · 等待接近' : '出发前 · 等待双方开启分享') + '</span>' +
+      '<span>示例车距 <strong class="capture-gap">' + captureStartGap + ' m</strong></span></div>' +
+      '<div class="capture-road' + (step ? '' : ' is-preview') + '" role="img" aria-label="陈默在前，阿岳在后，两辆摩托车同向骑行">' +
+      '<div class="capture-direction" aria-hidden="true">' + (step ? '骑行方向 →' : '骑行示意 →') + '</div>' +
+      '<div class="capture-lane" aria-hidden="true">' +
+      '<span class="capture-rider capture-lead"><i></i><b>陈默</b></span>' +
+      '<span class="capture-rider capture-follower"><i></i><b>阿岳</b></span></div></div>' +
+      (step === 2 ? '<figure class="capture-photo" hidden>' +
+        image('ride-capture', '陈默车上的后向相机拍到同向跟骑的阿岳，阿岳坐在行驶中的摩托车上', true) +
+        '<figcaption><div><strong>阿岳收到 1 张抓拍</strong><small>陈默车载后向相机 · AI 生成示意图</small></div>' +
+        '<span>模拟分享成功</span></figcaption></figure>' : '') + '</div>';
+  }
+
+  function playCapture(panel, button, result) {
+    var road = panel.querySelector('.capture-road');
+    var distance = panel.querySelector('.capture-gap');
+    var phase = panel.querySelector('.capture-state');
+    var photoView = panel.querySelector('.capture-photo');
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var started;
+    var restoreFocus = document.activeElement === button;
+    button.disabled = true;
+    button.textContent = '接近中…';
+    phase.textContent = '骑行中 · 阿岳正在接近';
+
+    function frame(now) {
+      if (!road.isConnected) return;
+      if (started === undefined) started = now;
+      var progress = reducedMotion ? 1 : Math.min(1, (now - started) / 1900);
+      var gap = Math.round(captureStartGap + (captureEndGap - captureStartGap) * progress);
+      road.style.setProperty('--lead-x', (61 + progress * 18) + '%');
+      road.style.setProperty('--follower-x', (15 + progress * 41) + '%');
+      distance.textContent = gap + ' m';
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+        return;
+      }
+      road.classList.add('is-captured');
+      phase.textContent = '接近瞬间 · 自动抓拍';
+      photoView.hidden = false;
+      button.disabled = false;
+      button.textContent = '重新体验';
+      if (restoreFocus && document.activeElement === document.body) button.focus({preventScroll:true});
+      result.textContent = '车距缩短到示例触发点时自动拍下 1 张，照片已模拟分享给阿岳。';
+    }
+
+    requestAnimationFrame(frame);
+  }
+
   var scenes = [
     {
       name: '组队与车友社交', heading: '第一次见面，就能一起骑', image: 'convoy',
@@ -74,13 +128,14 @@
           }
         },
         {
-          name: '同伴接近，自动抓拍分享', desc: '留下会合瞬间，照片自动到车友手里。',
-          explain: '双方开启抓拍分享后，识别到同伴接近时自动拍照，并把这张照片分享给对方。',
-          actions: [['模拟同伴接近', '模拟同伴靠近，预览抓拍分享后收到的示意照片。']],
-          show: function (step) {
-            return step ? photo('team', '车友在观景台会合的概念照片', '模拟分享预览', '场景示意图 · 示例收件人：已配对车友') :
-              routeMap('paired','抓拍分享已开启','等待识别到同伴接近');
-          }
+          id: 'ride-capture',
+          name: '骑行中接近，自动抓拍',
+          desc: '两辆车同向骑行，队友靠近时拍下一张。',
+          explain: '出发前双方开启分享。骑行中阿岳从后方接近，陈默车上的后向相机自动抓拍，并把照片发给阿岳。',
+          actions: [['模拟双方开启分享', '双方已开启分享。骑行开始后等待队友接近。'],
+            ['模拟队友接近', '']],
+          show: captureMarkup,
+          play: playCapture
         }
       ]
     },
@@ -326,14 +381,18 @@
     }
     buttons.forEach(function (button, index) { button.setAttribute('aria-pressed', String(index === featureIndex)); });
     advance.textContent = step === feature.actions.length ? '重新体验' : feature.actions[step][0];
+    advance.disabled = false;
     status.textContent = announce && step ? feature.actions[step - 1][1] : '';
+    if (feature.play && step === feature.actions.length) feature.play(visual,advance,status);
   }
 
   function showScene(index, focus) {
     var scene = scenes[index];
     var isTeam = index === 0;
+    var view = new URLSearchParams(location.search).get('view');
+    var openCapture = isTeam && view === 'capture';
     sceneIndex = index;
-    featureIndex = 0;
+    featureIndex = openCapture ? scene.features.findIndex(function (feature) { return feature.id === 'ride-capture'; }) : 0;
     step = 0;
     document.title = scene.name + ' · ROADLINK';
     nav.forEach(function (link, i) { if (i === index) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
@@ -348,7 +407,7 @@
       scene.features.map(function (feature,i) {
         return '<button type="button" class="feature-button" data-feature="' + i + '" aria-pressed="false"><strong>' + feature.name + '</strong><small>' + feature.desc + '</small></button>';
       }).join('') +
-      '</div><article class="board" aria-labelledby="board-title"><header class="board-heading"><h3 id="board-title"></h3><span>' + (isTeam ? '独立示例 · 模拟数据' : '概念演示') + '</span></header>' +
+      '</div><article class="board" aria-labelledby="board-title"><header class="board-heading"><h3 id="board-title" tabindex="-1"></h3><span>' + (isTeam ? '独立示例 · 模拟数据' : '概念演示') + '</span></header>' +
       '<div class="board-visual" id="board-visual"></div><div class="board-copy"><p id="board-explain"></p>' +
       '<div class="board-controls"><button type="button" class="primary" id="advance"></button><span class="board-result" id="board-result" role="status"></span></div></div></article></div></section>' +
       (isTeam ? '</details>' : '') +
@@ -381,13 +440,19 @@
       document.getElementById(isTeam?'team-title':'experience-title').focus({preventScroll:true});
       (walkthrough || demo).scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
     });
-    var openDemo = walkthrough && new URLSearchParams(location.search).get('view') === 'demo';
-    if (openDemo) {
+    var openDemo = walkthrough && view === 'demo';
+    if (openCapture) {
+      demo.closest('details').open = true;
+      visual.closest('.board').scrollIntoView({behavior:'auto'});
+    } else if (openDemo) {
       walkthrough.scrollIntoView({behavior:'auto'});
     } else {
       window.scrollTo(0,0);
     }
-    if (focus) document.getElementById(openDemo ? 'team-title' : 'scene-heading').focus({preventScroll:true});
+    if (focus) {
+      var heading = openCapture ? boardTitle : document.getElementById(openDemo ? 'team-title' : 'scene-heading');
+      heading.focus({preventScroll:true});
+    }
   }
 
   function route(event) {

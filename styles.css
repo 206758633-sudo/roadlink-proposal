@@ -406,3 +406,66 @@ h1{margin-bottom:18px;font-size:clamp(38px,5.2vw,74px);letter-spacing:-.04em;lin
   .team-ink-screen{min-height:76px}
   .team-ink-content .team-plate-number{font-size:29px}
 }
+
+/* In-motion ride capture */
+#experience .board:has(.capture-demo){scroll-margin-top:104px}
+.capture-demo{width:100%;min-width:0;color:var(--paper)}
+.capture-readout{
+  display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:5px 12px;
+  padding-bottom:10px;color:var(--soft);font-size:13px;
+}
+.capture-state{color:var(--cyan);font-weight:650}
+.capture-gap{margin-left:4px;color:var(--accent);font:700 16px var(--mono)}
+.capture-road{
+  --lead-x:61%;--follower-x:15%;
+  position:relative;min-height:138px;isolation:isolate;overflow:hidden;
+  border:1px solid #4f6861;border-radius:11px;background:
+    radial-gradient(ellipse at 14% 17%,#304e42,transparent 49%),
+    repeating-linear-gradient(105deg,#263f35 0 7px,#263e34 7px 13px);
+}
+.capture-direction{
+  position:absolute;top:6px;right:10px;color:#e8f1e7;font-size:12px;
+  text-shadow:0 1px 4px #18221b;
+}
+.capture-lane{
+  position:absolute;inset:30px 0 16px;border-block:2px solid #a2ada6;background:
+    linear-gradient(#ddd2a78c 0 1px,transparent 1px 3px,#ddd2a78c 3px 4px) center 31%/100% 4px no-repeat,
+    #3b4547;
+}
+.capture-road.is-preview .capture-lane{opacity:.78}
+.capture-rider{
+  --bike:#ffca52;
+  position:absolute;top:65%;left:var(--lead-x);display:grid;justify-items:center;gap:3px;
+  width:44px;transform:translate(-50%,-29%);white-space:nowrap;
+}
+.capture-rider.capture-follower{--bike:#a9e6f0;left:var(--follower-x)}
+.capture-rider i{
+  display:block;position:relative;width:31px;height:11px;border-radius:6px;background:
+    radial-gradient(circle at 59% 49%,#182127 0 2px,#e7ebde 3px 4px,transparent 4.5px),
+    linear-gradient(90deg,#20292e 0 19%,var(--bike) 19% 82%,#e0eee5 82% 92%,#20292e 92%);
+  border:1px solid var(--bike);box-shadow:0 2px 6px #03080bba;
+}
+.capture-rider i::after{
+  content:"";position:absolute;right:7px;top:50%;width:2px;height:14px;
+  transform:translateY(-50%);border-radius:3px;background:var(--bike);
+}
+.capture-rider b{padding:0 4px;border-radius:3px;background:#1c292cf5;color:var(--bike);font-size:11px;line-height:1.45}
+.capture-road.is-captured .capture-lead i{outline:2px solid #ffdc74;outline-offset:3px}
+.capture-photo{
+  overflow:hidden;margin:12px 0 0;border:1px solid #58706a;border-radius:10px;background:#111d20;
+  animation:enter .24s ease-out;
+}
+.capture-photo[hidden]{display:none}
+.capture-photo img{display:block;width:100%;height:auto;aspect-ratio:2.05;object-fit:cover;object-position:50% 53%}
+.capture-photo figcaption{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+  gap:5px 12px;padding:9px 12px;font-size:13px;
+}
+.capture-photo small{display:block;color:var(--muted);font-size:12px}
+.capture-photo figcaption>span{color:var(--cyan);font-size:12px}
+#advance:disabled{cursor:default;opacity:.74}
+@media(max-width:760px){
+  .capture-road{min-height:116px}
+  .capture-lane{inset-block:28px 12px}
+  .capture-photo img{aspect-ratio:1.65}
+}
