@@ -35,9 +35,9 @@
 
   var scenes = [
     {
-      name: '组队与车友社交', heading: '骑在一起，记住这一程', image: 'convoy',
+      name: '组队与车友社交', heading: '第一次见面，就能一起骑', image: 'convoy',
       alt: '几名骑手沿林道保持间距骑行',
-      lead: '见面就能组队，路上知道彼此在哪，骑完还能一起看轨迹、比里程、收照片。',
+      lead: '手机负责组队、导航和记录，车载屏跟着显示路况，电子墨水牌亮出队号和姓名。',
       features: [
         {
           name: '快速配对与位置共享', desc: '碰面加入车队，地图上看到队友。',
@@ -331,6 +331,7 @@
 
   function showScene(index, focus) {
     var scene = scenes[index];
+    var isTeam = index === 0;
     sceneIndex = index;
     featureIndex = 0;
     step = 0;
@@ -338,8 +339,9 @@
     nav.forEach(function (link, i) { if (i === index) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
     root.innerHTML = '<section class="scene-hero" aria-labelledby="scene-heading"><div>' +
       '<p class="scene-name">' + scene.name + '</p><h1 id="scene-heading" tabindex="-1">' + scene.heading + '</h1>' +
-      '<p class="scene-lead">' + scene.lead + '</p><button type="button" class="primary" id="jump">上手体验 <span aria-hidden="true">↓</span></button></div>' +
+      '<p class="scene-lead">' + scene.lead + '</p><button type="button" class="primary" id="jump">' + (isTeam ? '开始组队演示' : '上手体验') + ' <span aria-hidden="true">↓</span></button></div>' +
       '<figure class="hero-photo">' + image(scene.image,scene.alt,true) + '</figure></section>' +
+      (isTeam ? '<section class="team-walkthrough" id="team-walkthrough" aria-labelledby="team-title"></section><details class="team-extras"><summary>查看轨迹回放、抓拍等互动玩法</summary>' : '') +
       '<section class="explore" id="experience" aria-labelledby="experience-title"><h2 id="experience-title" tabindex="-1">选一项，看看怎么用</h2>' +
       '<div class="demo-layout"><div class="feature-list" role="group" aria-label="本场景的功能">' +
       scene.features.map(function (feature,i) {
@@ -348,8 +350,11 @@
       '</div><article class="board" aria-labelledby="board-title"><header class="board-heading"><h3 id="board-title"></h3><span>概念演示</span></header>' +
       '<div class="board-visual" id="board-visual"></div><div class="board-copy"><p id="board-explain"></p>' +
       '<div class="board-controls"><button type="button" class="primary" id="advance"></button><span class="board-result" id="board-result" role="status"></span></div></div></article></div></section>' +
+      (isTeam ? '</details>' : '') +
       '<nav class="pager" aria-label="相邻场景">' + (index ? '<a href="#/s' + index + '">← ' + scenes[index - 1].name + '</a>' : '<span></span>') +
       (index < scenes.length - 1 ? '<a href="#/s' + (index + 2) + '">' + scenes[index + 1].name + ' →</a>' : '<a href="#/s1">返回组队与车友社交 ↗</a>') + '</nav>';
+    var walkthrough = document.getElementById('team-walkthrough');
+    if (walkthrough) window.mountRoadlinkTeam(walkthrough);
     demo = document.getElementById('experience');
     buttons = Array.from(demo.querySelectorAll('.feature-button'));
     boardTitle = document.getElementById('board-title');
@@ -372,8 +377,8 @@
       renderFeature(true);
     });
     document.getElementById('jump').addEventListener('click',function () {
-      document.getElementById('experience-title').focus({preventScroll:true});
-      demo.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+      document.getElementById(isTeam?'team-title':'experience-title').focus({preventScroll:true});
+      (walkthrough || demo).scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
     });
     window.scrollTo(0,0);
     if (focus) document.getElementById('scene-heading').focus({preventScroll:true});
