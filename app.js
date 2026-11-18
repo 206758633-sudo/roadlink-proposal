@@ -1,705 +1,395 @@
-/* ROADLINK · 六个场景提案 — 路由、进场与六个可交互的手机/车机界面示意 */
 (function () {
   'use strict';
-  var $ = function (s, r) { return (r || document).querySelector(s); };
-  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
-  var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var NS = 'http://www.w3.org/2000/svg';
 
-  /* ---------- 定时器小工具：切页时统一清掉 ---------- */
-  function clock() {
-    var ids = [];
-    return {
-      set: function (fn, ms) { var id = setTimeout(fn, ms); ids.push(id); return id; },
-      every: function (fn, ms) { var id = setInterval(fn, ms); ids.push(id); return id; },
-      clear: function () { ids.forEach(function (id) { clearTimeout(id); clearInterval(id); }); ids.length = 0; }
-    };
+  function image(name, alt, small) {
+    var file = 'assets/roadlink-' + name;
+    return '<img src="' + file + '.webp"' +
+      (small ? ' srcset="' + file + '-small.webp 720w, ' + file + '.webp 1280w" sizes="(max-width:760px) calc(100vw - 32px), 56vw"' : '') +
+      ' width="1280" height="720" decoding="async" alt="' + alt + '">';
   }
 
-  /* =========================================================
-     01 · CONVOY
-     ========================================================= */
-  function initConvoy(root) {
-    var path = $('#convPath', root), g = $('#convRiders', root);
-    var list = $('#convList', root), alertEl = $('#convAlert', root);
-    var modeTag = $('#convMode', root), netTag = $('#convNet', root);
-    if (!path || !g) return null;
-    var L = path.getTotalLength();
-    var riders = [
-      { p: 0.87, name: '阿哲', role: '头车', fuel: 72, lead: true },
-      { p: 0.75, name: '老周', role: '2 号', fuel: 45 },
-      { p: 0.62, name: '小陈', role: '3 号', fuel: 12 },
-      { p: 0.49, name: 'Jesco', role: '4 号', fuel: 88 },
-      { p: 0.37, name: '源', role: '收队', fuel: 61 }
-    ];
-    var nodes = riders.map(function (r, i) {
-      var el = document.createElementNS(NS, 'g');
-      el.setAttribute('class', 'rider' + (r.lead ? ' lead' : ''));
-      if (r.lead) {
-        var ring = document.createElementNS(NS, 'circle');
-        ring.setAttribute('r', '14'); ring.setAttribute('class', 'ring');
-        el.appendChild(ring);
-      }
-      var c = document.createElementNS(NS, 'circle');
-      c.setAttribute('r', '6'); el.appendChild(c);
-      var t = document.createElementNS(NS, 'text');
-      t.setAttribute('y', '19'); t.textContent = String(i + 1);
-      el.appendChild(t);
-      g.appendChild(el);
-      return el;
-    });
-    function place(i) {
-      var r = riders[i], pt = path.getPointAtLength(Math.max(0, Math.min(1, r.p)) * L);
-      nodes[i].style.transform = 'translate(' + pt.x + 'px,' + pt.y + 'px)';
-    }
-    riders.forEach(function (_, i) { place(i); });
-
-    function drawList() {
-      list.innerHTML = riders.map(function (r, i) {
-        return '<li class="' + (r.lead ? 'lead' : '') + (r.fuel < 20 ? ' low' : '') + '">' +
-          '<b>' + (i + 1) + '</b><span>' + r.name + ' · ' + r.role + '</span>' +
-          '<span class="fuel"><i>' + r.fuel + '%</i></span></li>';
-      }).join('');
-    }
-    drawList();
-
-    var MODES = {
-      trail: {
-        tag: '林道 · 无卫星信号', net: '相对定位 · 5 节点',
-        kind: '', lag: 2,
-        html: '<b>3 号车掉队 120 m</b>｜已通知头车与收队人，队形自动收拢', stamp: '+15s'
-      },
-      city: {
-        tag: '城市 · GPS 良好', net: '编队 4 车 · 平均间距 30 m',
-        kind: 'warn', lag: -1,
-        html: '<b>4 号车进入隧道</b>｜卫星信号丢失，已切换相对定位', stamp: '自动'
-      },
-      highway: {
-        tag: '高速 · 横风 6 级', net: 'V2V 编队 · 间距 80 m',
-        kind: 'warn', lag: 1,
-        html: '<b>2 号车侧风偏航</b>｜建议拉开至 120 m，减少并行超车', stamp: '提示'
-      }
-    };
-    var clk = clock();
-    var mode = 'trail';
-
-    function apply(name) {
-      mode = name;
-      var m = MODES[name] || MODES.trail;
-      clk.clear();
-      modeTag.textContent = m.tag;
-      netTag.textContent = m.net;
-      alertEl.className = 'conv-alert' + (m.kind ? ' ' + m.kind : '');
-      alertEl.querySelector('span').innerHTML = m.html;
-      alertEl.querySelector('.mono').textContent = m.stamp;
-      // 复位队形
-      riders[2].p = 0.62; riders[1].p = 0.75; riders[0].p = 0.87;
-      riders.forEach(function (_, i) { place(i); });
-      if (REDUCE) { alertEl.classList.add('show'); return; }
-      clk.set(function () {
-        alertEl.classList.add('show');
-        if (m.lag >= 0) { riders[m.lag].p -= 0.055; place(m.lag); }
-      }, 1800);
-      clk.set(function () { alertEl.classList.remove('show'); if (m.lag >= 0) { riders[m.lag].p += 0.055; place(m.lag); } }, 7600);
-      clk.set(function () {
-        alertEl.querySelector('span').innerHTML = '<b>加油顺位</b>｜3 号车剩 12%，建议 42 km 后加油';
-        alertEl.className = 'conv-alert show warn';
-      }, 9200);
-      clk.set(function () { alertEl.classList.remove('show'); }, 13500);
-    }
-
-    $$('[data-conv]', root).forEach(function (b) {
-      b.addEventListener('click', function () {
-        $$('[data-conv]', root).forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
-        b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
-        apply(b.dataset.conv);
-      });
-    });
-
-    return {
-      start: function () { apply(mode); },
-      stop: function () { clk.clear(); alertEl.classList.remove('show'); }
-    };
+  function panel(label, children, extra) {
+    return '<div class="panel' + (extra ? ' ' + extra : '') + '"><span class="panel-label">' + label + '</span>' + children + '</div>';
   }
 
-  /* =========================================================
-     02 · VISION / HUD
-     ========================================================= */
-  function initHud(root) {
-    var arc = $('#hudArc', root), warn = $('#hudWarn', root);
-    var distEl = $('#hudDist', root), speedEl = $('#hudSpeed', root);
-    var cornerEl = $('#hudCorner', root), cornerSub = $('#hudCornerSub', root);
-    var noEl = $('#hudCornerNo', root), adviceEl = $('#hudAdvice', root);
-    var modeEl = $('#hudMode', root), progEl = $('#hudProg', root), nextEl = $('#hudNext', root);
-    if (!arc) return null;
-    var L = arc.getTotalLength();
-    arc.style.strokeDasharray = L;
-    arc.style.strokeDashoffset = L;
-
-    var MODES = {
-      hairpin: { no: 'C4', corner: '右弯 · 曲率 22 m', sub: '发夹弯 · 建议一挡通过', advice: '建议入弯 38', speed: 58, fill: 0.92, mode: '跑山 · 低密度' },
-      s: { no: 'C7', corner: '连续 S 弯 · 曲率 34 m', sub: '3 个反向弯 · 视线短', advice: '建议入弯 52', speed: 66, fill: 0.7, mode: '跑山 · 低密度' },
-      fast: { no: 'C11', corner: '高速弯 · 曲率 120 m', sub: '视野良好 · 无对向记录', advice: '建议入弯 96', speed: 84, fill: 0.42, mode: '导航 · 标准' }
-    };
-    var dist = 240, clk = clock(), mode = 'hairpin';
-
-    function render() {
-      var m = MODES[mode];
-      distEl.textContent = '前方 ' + Math.round(dist) + ' m';
-      progEl.style.setProperty('--p', ((240 - dist) / 240 * 100) + '%');
-      nextEl.textContent = Math.max(0, Math.round(dist - 40)) + ' m';
-      if (dist < 55) {
-        warn.classList.add('show');
-        adviceEl.textContent = '收油 · 可过';
-        speedEl.textContent = String(Math.max(34, m.speed - 14));
-      } else {
-        warn.classList.remove('show');
-        adviceEl.textContent = m.advice;
-        speedEl.textContent = String(m.speed);
-      }
-    }
-    function apply(name) {
-      mode = name; var m = MODES[name] || MODES.hairpin;
-      clk.clear();
-      dist = 240;
-      cornerEl.textContent = m.corner;
-      cornerSub.textContent = m.sub;
-      noEl.textContent = m.no;
-      modeEl.textContent = m.mode;
-      arc.style.strokeDashoffset = L * (1 - m.fill);
-      render();
-      if (REDUCE) return;
-      clk.every(function () {
-        dist -= 3.4;
-        if (dist < 12) dist = 240;
-        render();
-      }, 130);
-    }
-    $$('[data-hud]', root).forEach(function (b) {
-      b.addEventListener('click', function () {
-        $$('[data-hud]', root).forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
-        b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
-        apply(b.dataset.hud);
-      });
-    });
-    return { start: function () { apply(mode); }, stop: function () { clk.clear(); warn.classList.remove('show'); } };
+  function screen(label, main, sub) {
+    return '<div class="screen"><span class="screen-caption">' + label + '</span><strong>' + main + '</strong><small>' + sub + '</small></div>';
   }
 
-  /* =========================================================
-     03 · GLOVE
-     ========================================================= */
-  function initGlove(root) {
-    var raw = $('#waveRaw', root), clean = $('#waveClean', root);
-    var script = $('#glScript', root), mic = $('#glMic', root);
-    var idle = $('#glIdle', root);
-    var stateT = $('#glStateT', root), stateS = $('#glStateS', root), wake = $('#glWake', root);
-    if (!raw || !mic) return null;
-    var N = 88, rawBars = [], cleanBars = [];
-    for (var i = 0; i < N; i++) {
-      var a = document.createElement('i'); raw.appendChild(a); rawBars.push(a);
-      var b = document.createElement('i'); clean.appendChild(b); cleanBars.push(b);
-    }
-    var clk = clock(), busy = false;
-
-    function jitter() {
-      rawBars.forEach(function (el) {
-        el.style.height = (10 + Math.random() * 84) + '%';
-        el.style.opacity = (0.22 + Math.random() * 0.45).toFixed(2);
-      });
-      cleanBars.forEach(function (el, i) {
-        var x = i / N;
-        var syl = Math.abs(Math.sin(x * Math.PI * 8.5));
-        var h = (9 + syl * 68) * (0.72 + Math.random() * 0.5);
-        el.style.height = Math.min(94, h) + '%';
-        el.style.opacity = (0.7 + Math.random() * 0.3).toFixed(2);
-      });
-    }
-    function bubble(text, who, mine) {
-      var el = document.createElement('div');
-      el.className = 'bubble' + (mine ? ' me' : '');
-      el.innerHTML = '<span class="who">' + who + '</span>' + text;
-      script.appendChild(el);
-      while (script.children.length > 3) script.removeChild(script.firstChild);
-      requestAnimationFrame(function () { el.classList.add('in'); });
-      script.scrollTop = script.scrollHeight;
-    }
-    function run() {
-      if (busy) return;
-      busy = true; mic.disabled = true;
-      script.innerHTML = '';
-      wake.textContent = '聆听中 · 96 dB';
-      stateT.textContent = '聆听中';
-      stateS.textContent = '风噪抑制 · 波束成形';
-
-      clk.set(function () { bubble('跟老张说晚半小时到', '你 · 手势唤醒', true); stateT.textContent = '识别中'; stateS.textContent = '端侧转写 · 0.4 s'; }, 500);
-      clk.set(function () {
-        bubble('已拟好：老张，路上有点堵，我晚半小时到，你们先进山。', 'AI 代理 · 待确认');
-        stateT.textContent = '等你说「发」'; stateS.textContent = '说「改」会让它重写';
-      }, 1700);
-      clk.set(function () {
-        bubble('已发送 ✓ 预计到达时间也同步给了车队。', 'AI 代理 · 你说「发」之后');
-        stateT.textContent = '完成 · 全程未摘手套';
-        stateS.textContent = '共 5.8 秒 · 0 次触屏';
-        wake.textContent = '就绪';
-        busy = false; mic.disabled = false;
-      }, 3300);
-    }
-    mic.addEventListener('click', run);
-    return {
-      start: function () {
-        if (!REDUCE) clk.every(jitter, 220); else jitter();
-      },
-      stop: function () {
-        clk.clear();
-        if (!busy) return;
-        busy = false;
-        mic.disabled = false;
-        script.replaceChildren(idle);
-        wake.textContent = '等待唤醒 …';
-        stateT.textContent = '点头，或点这里';
-        stateS.textContent = '三种手势任一唤醒 · 不用摘手套';
-      }
-    };
+  function photo(name, alt, title, message, className) {
+    return '<div class="photo-stage ' + (className || '') + '">' + image(name, alt, true) +
+      '<div class="photo-message"><b>' + title + '</b><small>' + message + '</small></div></div>';
   }
 
-  /* =========================================================
-     04 · GUARD
-     ========================================================= */
-  function initGuard(root) {
-    var car = $('#gdCar', root), range = $('#gdRange', root), ttc = $('#gdTTC', root), unitEl = $('#gdUnit', root), distEl = $('#gdDist', root);
-    var bar = $('#gdBar', root), msg = $('#gdMsg', root), modeTag = $('#gdMode', root);
-    if (!car) return null;
-    var clk = clock(), mode = 'brake', d = 60;
-
-    function setMsg(txt, cls, icon) {
-      msg.className = 'gd-msg' + (cls ? ' ' + cls : '');
-      msg.innerHTML = '<svg class="i" aria-hidden="true"><use href="#' + (icon || 'i-shield') + '"/></svg><span>' + txt + '</span>';
-    }
-    function render() {
-      var pct, txt, unit;
-      range.style.opacity = mode === 'brake' ? '1' : '0';
-      if (mode !== 'brake') car.classList.remove('brake');
-      if (mode === 'tyre') {
-        pct = 74; txt = '58'; unit = '℃ · 后胎';
-        car.style.opacity = '0'; distEl.style.opacity = '0';
-        setMsg('后胎 58 ℃ · 建议靠边降温 10 分钟', 'warn', 'i-alert');
-      } else if (mode === 'blind') {
-        pct = 68; txt = '1'; unit = '台 · 对向车';
-        car.style.opacity = '1'; car.style.left = '72%'; car.classList.add('oncoming'); distEl.style.opacity = '0';
-        setMsg('盲弯 · 对向车 60 m 后出现，已减速提示', 'warn', 'i-alert');
-      } else {
-        car.style.opacity = '1'; car.classList.remove('oncoming');
-        d -= 0.75; if (d < 7) d = 60;
-        var left = 22 + d * 0.9;
-        car.style.left = Math.min(84, left) + '%';
-        distEl.textContent = Math.round(d) + ' m';
-        distEl.style.left = Math.min(84, left) + '%';
-        distEl.style.opacity = '1';
-        var rw = Math.max(0, Math.min(70, 22 + d * 0.9 - 26));
-        range.style.width = rw + 'px';
-        var t = d / 16;
-        txt = t.toFixed(1); unit = 'TTC · 秒';
-        car.classList.toggle('brake', d < 30);
-        pct = Math.max(6, Math.min(100, (1 - (d - 6) / 58) * 100));
-        if (d < 22) setMsg('急刹！刹车灯已提前亮，队内已广播', 'bad', 'i-alert');
-        else if (d < 38) setMsg('前车制动 · 距离 ' + Math.round(d) + ' m', 'warn', 'i-shield');
-        else setMsg('前车稳定 · 距离 ' + Math.round(d) + ' m', '', 'i-shield');
-        bar.style.background = d < 22 ? 'var(--bad)' : d < 38 ? 'var(--warn)' : 'var(--ok)';
-      }
-      ttc.textContent = txt;
-      unitEl.textContent = unit;
-      bar.style.width = pct + '%';
-      if (mode !== 'brake') bar.style.background = 'var(--warn)';
-    }
-
-    $$('[data-guard]', root).forEach(function (b) {
-      b.addEventListener('click', function () {
-        $$('[data-guard]', root).forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
-        b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
-        mode = b.dataset.guard;
-        modeTag.textContent = mode === 'brake' ? '前向 · 60 GHz + 视觉' : mode === 'blind' ? '弯道 · 对向车推断' : 'TPMS · 胎温预测';
-        d = 60; clk.clear();
-        render();
-        if (!REDUCE && mode === 'brake') clk.every(render, 130);
-      });
-    });
-
-    return {
-      start: function () { d = 60; render(); if (!REDUCE && mode === 'brake') clk.every(render, 130); },
-      stop: function () { clk.clear(); car.classList.remove('brake'); }
-    };
+  function routeMap(type, label, detail) {
+    return '<div class="stage-width"><canvas class="device-canvas" width="720" height="246" data-map="' + type +
+      '" role="img" aria-label="' + label + '"></canvas><div class="map-key"><strong>' + label +
+      '</strong><span>' + detail + '</span></div></div>';
   }
 
-  /* =========================================================
-     05 · REPLAY
-     ========================================================= */
-  function initRep(root) {
-    var map = $('#repMap', root), play = $('#repPlay', root);
-    var positionInput = $('#repPosition', root), time = $('#repTime', root);
-    var modeTag = $('#repMode', root), eventsEl = $('#repEvents', root);
-    var title = $('#repInsightTitle', root), insight = $('#repInsightBody', root);
-    if (!map) return null;
+  function bubbles(messages) {
+    return '<div class="stage-width">' + messages.map(function (message) {
+      return '<p class="bubble' + (message[2] ? ' answer' : '') + '"><small>' + message[0] + '</small>' + message[1] + '</p>';
+    }).join('') + '</div>';
+  }
 
-    var modes = {
-      track: {
-        label: '赛道 · 单圈示例', duration: 103,
-        route: [[108,184],[74,171],[58,147],[60,115],[79,83],[110,64],[156,53],[200,61],[224,84],[242,113],[274,121],[302,110],[329,79],[362,59],[410,55],[462,67],[502,95],[520,130],[519,159],[497,189],[458,201],[400,201],[346,190],[283,183],[224,187],[168,193],[108,184]],
-        events: [
-          { time: 22, title: 'T3 出弯', note: '对比参考圈，这段出弯慢了约 0.4 秒。' },
-          { time: 54, title: 'T7 制动点', note: '这次制动比参考圈晚了约 6 米，可对照两圈的入弯节奏。' },
-          { time: 78, title: 'T9 倾角', note: '这段记录到 42° 倾角，可回看对应的转向与收油时机。' }
-        ]
-      },
-      mountain: {
-        label: '跑山 · 46 分钟示例', duration: 2760,
-        route: [[43,204],[85,187],[130,155],[174,144],[208,156],[220,180],[244,197],[278,194],[300,173],[289,147],[251,124],[227,105],[229,83],[254,65],[291,60],[323,77],[354,104],[383,114],[417,99],[440,67],[476,48],[520,52],[551,70]],
-        events: [
-          { time: 504, title: '接近盲弯', note: '记录入弯前的收油位置，便于回看进弯前的节奏。' },
-          { time: 1116, title: '对向有车', note: '这一段标记了会车时刻，停车后可回看车辆何时进入视野。' },
-          { time: 2010, title: '连续弯道', note: '这几个弯放在一段回看，方便比较每次入弯前的变化。' }
-        ]
-      },
-      commute: {
-        label: '通勤 · 32 分钟示例', duration: 1920,
-        route: [[45,188],[109,188],[128,173],[128,123],[146,108],[222,108],[238,91],[238,61],[256,43],[325,43],[341,59],[341,118],[358,135],[424,135],[440,120],[440,87],[458,71],[523,71],[550,87]],
-        events: [
-          { time: 360, title: '路口急刹', note: '从路口的急刹片段回看前车变化和当时的跟车距离。' },
-          { time: 810, title: '车辆加塞', note: '标记旁车进入车道的时刻，在时间线上可直接定位。' },
-          { time: 1510, title: '跟车急刹', note: '这是本次通勤的第二次急刹，可与路口片段分开查看。' }
-        ]
-      }
-    };
-    var ctx = map.getContext('2d');
-    var mode, distance, eventButtons, marks, position = 0;
-    var selected = -2, shownSecond = -1, playback = null;
+  var scenes = [
+    {
+      name: '组队与车友社交', heading: '骑在一起，记住这一程', image: 'convoy',
+      alt: '几名骑手沿林道保持间距骑行',
+      lead: '见面就能组队，路上知道彼此在哪，骑完还能一起看轨迹、比里程、收照片。',
+      features: [
+        {
+          name: '快速配对与位置共享', desc: '碰面加入车队，地图上看到队友。',
+          explain: '两人相互确认后加入同一车队，并在骑行期间共享位置。',
+          actions: [['确认配对', '两名车友已组队，地图同步两人的位置。']],
+          show: function (step) { return routeMap(step ? 'paired' : 'waiting', step ? '车队位置已共享' : '等待附近车友确认', step ? '● 我　● 队友' : '我 · 集合点'); }
+        },
+        {
+          name: '可编程外挂号牌', desc: '为车友设定醒目的编队号码。',
+          explain: '在手机上设置编队号码，同步到外挂展示牌，队友一眼能认出彼此。',
+          actions: [['同步新队号', '手机设置的 12 号已同步至编队展示牌。']],
+          show: function (step) {
+            return '<div class="feature-grid stage-width">' + screen('手机设置', '队号 12', step ? '已同步到外挂号牌' : '等待同步') +
+              '<div class="panel ride-plate"><span class="panel-label">编队展示牌</span><strong class="plate-num">' + (step ? '12' : '07') + '</strong></div></div>';
+          }
+        },
+        {
+          name: 'F1 式里程排名', desc: '用累计里程排位，让每次骑行都算数。',
+          explain: '榜单按累计骑行里程排位。完成一趟骑行，里程和名次就会重新计算。',
+          actions: [['结算本次骑行 +42 km', '你的累计里程更新为 454 公里，升至第 2 位。']],
+          show: function (step) {
+            var rows = step ? [['阿岳','486 km'],['我','454 km'],['小程','438 km']] : [['阿岳','486 km'],['小程','438 km'],['我','412 km']];
+            return '<table class="ranking"><thead><tr><th scope="col">排位</th><th scope="col">车友</th><th scope="col">累计里程</th></tr></thead><tbody>' +
+              rows.map(function (row, i) { return '<tr' + (row[0] === '我' ? ' class="top-rank"' : '') + '><td>' + (i + 1) + '</td><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>'; }).join('') +
+              '</tbody></table>';
+          }
+        },
+        {
+          name: '骑行轨迹回放', desc: '沿路线回看集合、经过与到达。',
+          explain: '骑完后按时间回看行程，知道一段画面或一次停靠发生在哪里。',
+          actions: [['回放到途中', '光标沿轨迹来到林道入口。'], ['回放到终点', '这趟骑行抵达观景台。']],
+          show: function (step) {
+            return routeMap('replay-' + step, ['集合点','林道入口','观景台'][step], ['00:00 / 28:40','12:20 / 28:40','28:40 / 28:40'][step]);
+          }
+        },
+        {
+          name: '同伴接近，自动抓拍分享', desc: '留下会合瞬间，照片自动到车友手里。',
+          explain: '双方开启抓拍分享后，识别到同伴接近时自动拍照，并把这张照片分享给对方。',
+          actions: [['模拟同伴接近', '识别到同伴靠近，已抓拍并自动分享这张会合照片。']],
+          show: function (step) {
+            return step ? photo('team', '车友在观景台会合的概念照片', '会合瞬间已分享', '收件人：已配对的车友') :
+              routeMap('paired','抓拍分享已开启','等待识别到同伴接近');
+          }
+        }
+      ]
+    },
+    {
+      name: '骑行显示与导航', heading: '下一步，抬眼就知道', image: 'hardware-visor',
+      alt: '从头盔内看向前方山路',
+      lead: '头盔留一句转向提醒，车把屏留完整路线，戴手套也能用按键切换。',
+      features: [
+        {
+          name: '头盔内导航贴片', desc: '在视野一侧看到下一次转向。',
+          explain: '贴片把转向方向和距离显示在视野一侧，骑手可以继续看前方路面。',
+          actions: [['模拟接近路口', '头盔画面中的转向距离从 300 米更新为 80 米。']],
+          show: function (step) {
+            return photo('hardware-visor', '骑手视角内的头盔导航投影示意', '前方右转', step ? '80 m · 头盔内提示' : '300 m · 头盔内提示');
+          }
+        },
+        {
+          name: 'Glimpse 圆屏二次开发', desc: '给物理按键分配自己常用的动作。',
+          explain: '拟以 Glimpse 圆屏为二次开发对象，让骑手为物理按键配置切页等动作。接口与适配待验证。',
+          actions: [['给短按分配「切换页面」', '短按已配置为切页。'], ['模拟短按', '圆屏已由导航页切到车队页。']],
+          show: function (step) {
+            return '<div class="dual-control stage-width"><div class="screen round-screen"><span>圆屏样例</span><strong>' +
+              (step === 2 ? '车队' : '导航') + '</strong><small>' + (step === 2 ? '两名车友' : '前方右转') + '</small></div>' +
+              panel('物理按键映射', '<span class="physical-key">车把实体键</span><p>短按 · ' + (step ? '切换页面' : '待分配动作') + '</p>') + '</div>';
+          }
+        },
+        {
+          name: 'CarPlay 屏与 HUD', desc: '看全程用大屏，看下一步用抬头显示。',
+          explain: 'CarPlay 屏承载完整路线，HUD（抬头显示）提炼眼下最重要的导航提示。实际联动需按设备适配。',
+          actions: [['模拟进入导航', '车把屏保留完整路线，HUD 单独显示下一次转向。']],
+          show: function (step) {
+            var dashboard = step ? '<div class="screen"><span class="screen-caption">车把 · CarPlay 屏方案</span><strong>完整路线</strong>' +
+              '<canvas class="device-canvas" width="380" height="144" data-map="guide" role="img" aria-label="车把屏中的示例路线"></canvas><small>观景台 · 剩余 8.4 km</small></div>' :
+              screen('车把 · CarPlay 屏方案', '等待导航', '地图、路线与到达信息');
+            return '<div class="feature-grid stage-width">' + dashboard +
+              screen('HUD · 抬头显示', step ? '前方右转' : '等待提示', step ? '300 m' : '方向与距离') + '</div>';
+          }
+        }
+      ]
+    },
+    {
+      name: 'AI 交互与手机操控', heading: '手套戴着，手机也能帮忙', image: 'voice',
+      alt: '骑手戴着手套握住车把',
+      lead: '用小设备操作手机，让 AI 把微信里的要点读出来，回信由骑手确认后发出。',
+      features: [
+        {
+          name: '戴手套操控手机', desc: '摸到实体键，AI 把意图交给手机执行。',
+          explain: '戴着手套短按小设备唤醒 AI，说出指令，AI 把这条操作交给手机。',
+          actions: [['模拟手套短按', 'AI 已唤醒，等待骑手指令。'], ['说「下一首」', 'AI 已解读指令，手机切换到下一首。']],
+          show: function (step) { return '<div class="feature-grid stage-width">' +
+            panel('手套可按的小设备', '<div class="physical-key">短按 · 唤醒 AI</div>') +
+            screen('手机音频', ['当前曲目','AI 正在听','下一首'][step], ['等待实体键','请说出操作','已切换曲目'][step]) + '</div>'; }
+        },
+        {
+          name: 'AI 总结微信', desc: '从几条群消息里提炼集合时间和地点。',
+          explain: 'AI 把车友群的新消息整理成几条要点，骑手可以听到简短摘要。',
+          actions: [['生成摘要', '摘要已提取集合时间、地点和出发前要做的事。']],
+          show: function (step) {
+            return bubbles(step ?
+              [['AI 微信摘要','09:10 在山脚加油站集合。先补油，再一起出发。',true]] :
+              [['车友群 · 阿岳','09:10 集合。'],['车友群 · 小程','在山脚加油站碰面。'],['车友群 · 阿岳','大家先补油再出发。']]);
+          }
+        },
+        {
+          name: 'AI 拟稿并代发微信', desc: '说一句需求，确认拟稿后发送。',
+          explain: '骑手说出想传达的内容，AI 拟成消息并展示给骑手确认。',
+          actions: [['让 AI 拟稿', 'AI 已拟好消息，等待骑手确认。'], ['确认模拟发送', '模拟微信消息已发送给车友群。']],
+          show: function (step) {
+            var messages = [['骑手指令','告诉群里我会晚到十分钟。']];
+            if (step) messages.push([step === 2 ? '车友群 · 模拟已发送' : 'AI 拟稿 · 等待确认','我会晚到十分钟，你们先在加油站等我。',true]);
+            return bubbles(messages);
+          }
+        }
+      ]
+    },
+    {
+      name: '安全与主动预警', heading: '风险出现，提醒提前一步', image: 'guard',
+      alt: '暮色路面上摩托车与前方车辆保持间距',
+      lead: '前后车况都能提示，异常时提醒骑手；检测到疑似摔车，可发出带位置的求救。',
+      features: [
+        {
+          name: '头盔后部减速提示灯', desc: '减速时亮起，让后车更容易看到。',
+          explain: '检测到减速时，头盔后部的提示灯亮起，让后方车友看见前车正在减速。',
+          actions: [['模拟减速', '头盔后部亮红灯，提醒后车。']],
+          show: function (step) {
+            return photo('helmet', '后部带小型红色减速提示灯的头盔概念图', step ? '减速提示灯亮起' : '减速灯待命',
+                         step ? '后方车友看到红色提示' : '等待检测到减速', step ? 'braking' : 'light-standby');
+          }
+        },
+        {
+          name: '后视摄像头', desc: '在前方屏幕看到后方车道情况。',
+          explain: '打开后视画面，检查后方车辆是否靠近。',
+          actions: [['打开模拟后视画面', '后视画面已显示后方一辆车。']],
+          show: function (step) {
+            return '<div class="camera-road stage-width"><span class="panel-label">' + (step ? '后视摄像头 · 画面示意' : '后视摄像头待启用') +
+              '</span>' + (step ? '<div class="car-shape" aria-hidden="true"></div><small>后方有一辆车</small>' : '<small>点下方按钮查看</small>') + '</div>';
+          }
+        },
+        {
+          name: '摔车监测与自动求救', desc: '疑似摔车且无人取消时发出求救。',
+          explain: '监测到疑似摔车后先留出取消时间。超时无人回应时，把位置与事件信息自动发给预设紧急联系人。',
+          actions: [['模拟检测到摔车', '求救确认窗口已出现。'], ['模拟超时无人回应', '系统自动把模拟求救包发给预设联系人。']],
+          show: function (step) {
+            return '<div class="stage-width">' + panel(['监测状态','疑似摔车','模拟求救已发送'][step],
+              '<p>' + ['正常骑行 · 持续监测','等待骑手取消，超时将自动发出','紧急联系人已收到位置与疑似摔车事件'][step] + '</p>', step ? 'risk-panel' : '') + '</div>';
+          }
+        },
+        {
+          name: '疲劳检测与提醒', desc: '发现疲劳迹象时提示休息。',
+          explain: '识别到可能的疲劳迹象后，把休息提醒送给骑手，骑手可在安全地点停车。',
+          actions: [['模拟检测到疲劳迹象', '显示休息提醒，请选安全地点停车。']],
+          show: function (step) {
+            return '<div class="stage-width">' + screen('骑行状态', step ? '找安全地点休息' : '持续观察状态', step ? '发现可能的疲劳迹象' : '等待状态变化') + '</div>';
+          }
+        },
+        {
+          name: '安全车距预警', desc: '跟车太近时提醒拉开距离。',
+          explain: '系统监测与前车的距离变化，距离过近时提醒骑手注意留出空间。',
+          actions: [['模拟前车距离缩短', '显示车距过近提醒。']],
+          show: function (step) {
+            return '<div class="camera-road stage-width"><span class="panel-label">前方车道 · 车距示意</span>' +
+              '<div class="car-shape' + (step ? ' close' : '') + '" aria-hidden="true"></div><strong>' +
+              (step ? '跟车过近 · 请留出空间' : '前车距离稳定') + '</strong></div>';
+          }
+        }
+      ]
+    },
+    {
+      name: '骑行社区', heading: '骑完了，故事还能继续', image: 'riderclub',
+      alt: '车友停好车后在观景点讨论骑行路线',
+      lead: '来社区找路线、问问题、看自己的骑行积累，也可以发一张 AI 改装构思和车友聊。',
+      features: [
+        {
+          name: '大冰数字人在线问答', desc: '社区提问，数字人提供回复。',
+          explain: '拟接入大冰数字人回复社区常见问题。这里用示例问答展示交互方式。',
+          actions: [['查看数字人示例回复', '示例回复已显示，可继续查看社区路线攻略。']],
+          show: function (step) {
+            var messages = [['车友提问','第一次跟队，出发前要问清哪些事？']];
+            if (step) messages.push(['大冰数字人 · 概念回复示例','先问清集合点、路线难度和补给安排，确认掉队时在哪里重新集合。',true]);
+            return bubbles(messages);
+          }
+        },
+        {
+          name: '路线攻略分享', desc: '把路线、补给和难度装进一张攻略。',
+          explain: '车友分享路线攻略，后来的人能在出发前浏览路线与关键停靠点。',
+          actions: [['打开分享的攻略', '已查看示例路线、路面与补给信息。']],
+          show: function (step) { return step ? routeMap('guide','周末山路环线 · 示例','约 86 km · 铺装路 · 中途加油') :
+            '<div class="stage-width">' + panel('车友分享', '<strong>周末山路环线</strong><p>一张路线卡，带你找到观景台和补给点。</p>') + '</div>'; }
+        },
+        {
+          name: '个人骑行数据总结', desc: '把每一趟骑行汇成一份个人周报。',
+          explain: '把已记录的骑行次数、总里程和主要路线汇总成周报。',
+          actions: [['生成本周总结', '示例周报已显示本周骑行次数、里程和主要路线。']],
+          show: function (step) {
+            return '<div class="stage-width">' + panel('个人骑行周报', step ?
+              '<div class="metric-row"><strong>3 次</strong><strong>128 km</strong></div><p>主要路线 · 山路环线</p>' :
+              '<p>汇总本周记录的骑行数据</p>') + '</div>';
+          }
+        },
+        {
+          name: '机车 AI 改装娱乐社区', desc: '试出一版外观构思，发到社区一起讨论。',
+          explain: '上传机车照片后生成虚拟外观构思，保存为社区改装帖草稿。',
+          actions: [['生成冰川蓝风格预览', '已生成机车外观风格示意。'], ['保存为社区草稿', '改装构思已保存为示例草稿。']],
+          show: function (step) {
+            return '<div class="stage-width color-demo"><figure>' + image('rescue','车友的机车外观照片',true) +
+              '<figcaption>原车照片</figcaption></figure><figure class="' + (step ? 'concept' : '') + '">' +
+              (step ? image('rescue','冷蓝色调的机车虚拟风格示意',true) : '<div class="camera-road"><span>等待生成预览</span></div>') +
+              '<figcaption>' + (step === 2 ? '冰川蓝风格 · 改装帖草稿' : (step ? 'AI 风格概念 · 冰川蓝' : 'AI 外观构思')) + '</figcaption></figure></div>';
+          }
+        }
+      ]
+    }
+  ];
 
-    function formatTime(value) {
-      var seconds = Math.floor(value);
-      return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
-    }
-    function pointAt(progress) {
-      var target = distance[distance.length - 1] * progress;
-      var end = 1;
-      while (end < distance.length - 1 && distance[end] < target) end++;
-      var a = mode.route[end - 1], b = mode.route[end];
-      var fraction = (target - distance[end - 1]) / (distance[end] - distance[end - 1]);
-      return { x: a[0] + (b[0] - a[0]) * fraction, y: a[1] + (b[1] - a[1]) * fraction, end: end };
-    }
-    function draw(progress) {
-      if (!ctx) return;
-      var cursor = pointAt(progress), road = mode.route;
-      ctx.setTransform(map.width / 600, 0, 0, map.height / 250, 0, 0);
-      ctx.clearRect(0, 0, 600, 250);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+  function drawMap(canvas, animate) {
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    var mode = canvas.dataset.map;
+    var route = [[52,178],[120,149],[188,159],[250,135],[299,86],[355,69],[412,98],[468,144],[530,135],[568,92],[638,72],[674,52]];
+    var replay = mode.indexOf('replay-') === 0;
+    var index = replay ? [0,5,11][Number(mode.slice(-1))] : (mode === 'guide' ? 11 : 3);
+    ctx.setTransform(canvas.width / 720,0,0,canvas.height / 246,0,0);
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    function paint(progress) {
+      ctx.clearRect(0,0,720,246);
       ctx.beginPath();
-      ctx.moveTo(road[0][0], road[0][1]);
-      road.slice(1).forEach(function (point) { ctx.lineTo(point[0], point[1]); });
-      ctx.strokeStyle = '#182d34';
-      ctx.lineWidth = 15;
+      route.forEach(function (point, i) { i ? ctx.lineTo(point[0], point[1]) : ctx.moveTo(point[0], point[1]); });
+      ctx.strokeStyle = '#446571';
+      ctx.lineWidth = 7;
       ctx.stroke();
-      ctx.strokeStyle = '#58747d';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
+      var base = Math.floor(progress), fraction = progress - base;
+      var left = route[base], right = route[Math.min(base + 1,route.length - 1)];
+      var current = [left[0] + (right[0] - left[0]) * fraction,left[1] + (right[1] - left[1]) * fraction];
       ctx.beginPath();
-      ctx.moveTo(road[0][0], road[0][1]);
-      for (var i = 1; i < cursor.end; i++) ctx.lineTo(road[i][0], road[i][1]);
-      ctx.lineTo(cursor.x, cursor.y);
-      ctx.strokeStyle = '#80d2df';
+      route.slice(0,base + 1).forEach(function (point, i) { i ? ctx.lineTo(point[0],point[1]) : ctx.moveTo(point[0],point[1]); });
+      ctx.lineTo(current[0],current[1]);
+      ctx.strokeStyle = '#a0e4ed';
       ctx.lineWidth = 4;
       ctx.stroke();
-
-      marks.forEach(function (mark, index) {
+      var points = mode === 'paired' || mode === 'guide' ? [current,route[6]] : [current];
+      points.forEach(function (point, j) {
         ctx.beginPath();
-        ctx.arc(mark.x, mark.y, index === selected ? 7 : 5, 0, Math.PI * 2);
-        ctx.fillStyle = index === selected ? '#f5c400' : '#43575b';
+        ctx.arc(point[0],point[1],11,0,Math.PI * 2);
+        ctx.fillStyle = j ? '#9ce1ec' : '#f9d251';
         ctx.fill();
-        ctx.strokeStyle = index === selected ? '#ffe17d' : '#a0aeb1';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#182229';
+        ctx.lineWidth = 3;
         ctx.stroke();
       });
-      ctx.beginPath();
-      ctx.arc(cursor.x, cursor.y, 11, 0, Math.PI * 2);
-      ctx.strokeStyle = '#ffd35a95';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cursor.x, cursor.y, 4.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff2bb';
-      ctx.fill();
     }
-    function render() {
-      var next = mode.events.reduce(function (index, item, i) {
-        return item.time <= position ? i : index;
-      }, -1);
-      if (selected !== next) {
-        selected = next;
-        var item = mode.events[selected];
-        title.textContent = item ? item.title : '回放开始';
-        insight.textContent = item ? item.note : '沿路线播放，或点选时间轴上的关键片段。';
-        eventButtons.forEach(function (button, i) {
-          button.setAttribute('aria-pressed', String(i === selected));
-        });
+    if (animate && replay && index > 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var from = index === 5 ? 0 : 5, start = performance.now();
+      function frame(now) {
+        if (!canvas.isConnected) return;
+        var progress = Math.min(1,(now - start) / 540);
+        paint(from + (index - from) * progress);
+        if (progress < 1) requestAnimationFrame(frame);
       }
-      var second = Math.floor(position);
-      if (second !== shownSecond) {
-        shownSecond = second;
-        positionInput.value = second;
-        positionInput.setAttribute('aria-valuetext', formatTime(second) + '，共 ' + formatTime(mode.duration));
-        time.textContent = formatTime(second) + ' / ' + formatTime(mode.duration);
-      }
-      var progress = position / mode.duration;
-      positionInput.style.setProperty('--progress', (progress * 100) + '%');
-      draw(progress);
+      requestAnimationFrame(frame);
+    } else {
+      paint(index);
     }
-    function pause() {
-      if (playback !== null) {
-        if (REDUCE) clearTimeout(playback); else cancelAnimationFrame(playback);
-        playback = null;
-      }
-      play.classList.remove('playing');
-      play.textContent = mode && position >= mode.duration ? '重播' : '播放';
-    }
-    function seek(value) {
-      position = value;
-      pause();
-      render();
-    }
-    function apply(key) {
-      pause();
-      mode = modes[key];
-      modeTag.textContent = mode.label;
-      distance = [0];
-      for (var i = 1; i < mode.route.length; i++) {
-        var a = mode.route[i - 1], b = mode.route[i];
-        distance.push(distance[i - 1] + Math.hypot(a[0] - b[0], a[1] - b[1]));
-      }
-      marks = mode.events.map(function (item) { return pointAt(item.time / mode.duration); });
-      eventButtons = mode.events.map(function (item) {
-        var button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'rep-event';
-        var stamp = document.createElement('span');
-        stamp.textContent = formatTime(item.time);
-        button.append(stamp, item.title);
-        button.addEventListener('click', function () { seek(item.time); });
-        return button;
-      });
-      eventsEl.replaceChildren.apply(eventsEl, eventButtons);
-      positionInput.max = mode.duration;
-      selected = -2;
-      shownSecond = -1;
-      seek(mode.events[0].time);
-    }
-    play.addEventListener('click', function () {
-      if (playback !== null) { pause(); return; }
-      if (position >= mode.duration) seek(0);
-      var start = performance.now(), from = position;
-      play.classList.add('playing');
-      play.textContent = '暂停';
+  }
 
-      function schedule() {
-        playback = REDUCE ? setTimeout(function () { tick(performance.now()); }, 450) : requestAnimationFrame(tick);
-      }
-      function tick(now) {
-        position = Math.min(mode.duration, from + (now - start) * mode.duration / 14000);
-        render();
-        if (position >= mode.duration) pause(); else schedule();
-      }
-      schedule();
-    });
-    positionInput.addEventListener('input', function () { seek(Number(positionInput.value)); });
-    var switches = $$('[data-rep]', root);
-    switches.forEach(function (button) {
-      button.addEventListener('click', function () {
-        if (button.getAttribute('aria-pressed') === 'true') return;
-        switches.forEach(function (item) {
-          item.classList.toggle('on', item === button);
-          item.setAttribute('aria-pressed', String(item === button));
-        });
-        apply(button.dataset.rep);
+  var root = document.getElementById('main-content');
+  var nav = Array.from(document.querySelectorAll('#scene-nav a'));
+  var sceneIndex = -1, featureIndex = 0, step = 0;
+  var demo, buttons, boardTitle, visual, explainer, advance, status;
+
+  function renderFeature(announce) {
+    var feature = scenes[sceneIndex].features[featureIndex];
+    boardTitle.textContent = feature.name;
+    explainer.textContent = feature.explain;
+    visual.innerHTML = feature.show(step);
+    visual.classList.toggle('is-photo', Boolean(visual.querySelector('.photo-stage')));
+    drawMap(visual.querySelector('canvas'), announce);
+    visual.classList.remove('enter');
+    if (announce) {
+      void visual.offsetWidth;
+      visual.classList.add('enter');
+    }
+    buttons.forEach(function (button, index) { button.setAttribute('aria-pressed', String(index === featureIndex)); });
+    advance.textContent = step === feature.actions.length ? '重新体验' : feature.actions[step][0];
+    status.textContent = announce && step ? feature.actions[step - 1][1] : '';
+  }
+
+  function showScene(index, focus) {
+    var scene = scenes[index];
+    sceneIndex = index;
+    featureIndex = 0;
+    step = 0;
+    document.title = scene.name + ' · ROADLINK';
+    nav.forEach(function (link, i) { if (i === index) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
+    root.innerHTML = '<section class="scene-hero" aria-labelledby="scene-heading"><div>' +
+      '<p class="scene-name">' + scene.name + '</p><h1 id="scene-heading" tabindex="-1">' + scene.heading + '</h1>' +
+      '<p class="scene-lead">' + scene.lead + '</p><button type="button" class="primary" id="jump">上手体验 <span aria-hidden="true">↓</span></button></div>' +
+      '<figure class="hero-photo">' + image(scene.image,scene.alt,true) + '</figure></section>' +
+      '<section class="explore" id="experience" aria-labelledby="experience-title"><h2 id="experience-title" tabindex="-1">选一项，看看怎么用</h2>' +
+      '<div class="demo-layout"><div class="feature-list" role="group" aria-label="本场景的功能">' +
+      scene.features.map(function (feature,i) {
+        return '<button type="button" class="feature-button" data-feature="' + i + '" aria-pressed="false"><strong>' + feature.name + '</strong><small>' + feature.desc + '</small></button>';
+      }).join('') +
+      '</div><article class="board" aria-labelledby="board-title"><header class="board-heading"><h3 id="board-title"></h3><span>概念演示</span></header>' +
+      '<div class="board-visual" id="board-visual"></div><div class="board-copy"><p id="board-explain"></p>' +
+      '<div class="board-controls"><button type="button" class="primary" id="advance"></button><span class="board-result" id="board-result" role="status"></span></div></div></article></div></section>' +
+      '<nav class="pager" aria-label="相邻场景">' + (index ? '<a href="#/s' + index + '">← ' + scenes[index - 1].name + '</a>' : '<span></span>') +
+      (index < scenes.length - 1 ? '<a href="#/s' + (index + 2) + '">' + scenes[index + 1].name + ' →</a>' : '<a href="#/s1">返回组队与车友社交 ↗</a>') + '</nav>';
+    demo = document.getElementById('experience');
+    buttons = Array.from(demo.querySelectorAll('.feature-button'));
+    boardTitle = document.getElementById('board-title');
+    visual = document.getElementById('board-visual');
+    explainer = document.getElementById('board-explain');
+    advance = document.getElementById('advance');
+    status = document.getElementById('board-result');
+    renderFeature(false);
+    buttons.forEach(function (button, i) {
+      button.addEventListener('click',function () {
+        if (featureIndex === i) return;
+        featureIndex = i;
+        step = 0;
+        renderFeature(true);
       });
     });
-    return { start: function () { if (!mode) apply('track'); }, stop: pause };
-  }
-
-  /* =========================================================
-     06 · VITALS
-     ========================================================= */
-  function initVit(root) {
-    var arc = $('#vitArc', root), score = $('#vitScore', root), diag = $('#vitDiag', root);
-    var sos = $('#vitSos', root), sent = $('#vitSent', root);
-    if (!arc) return null;
-    var clk = clock(), lineClk = clock(), done = false;
-    var C = 2 * Math.PI * 42;
-    arc.style.strokeDasharray = C;
-    arc.style.strokeDashoffset = C;
-
-    function showScore(value) {
-      score.textContent = value;
-      arc.style.strokeDashoffset = C * (1 - value / 100);
-    }
-    function finishDiagnosis() {
-      diag.classList.add('ready');
-      done = true;
-    }
-    function play() {
-      if (done) return;
-      var lines = $$('.ln', diag);
-      if (REDUCE) {
-        showScore(82);
-        lines.forEach(function (line) { line.classList.add('in'); });
-        finishDiagnosis();
-        return;
-      }
-      showScore(0);
-      lines.forEach(function (line) { line.classList.remove('in'); });
-      var v = 0;
-      clk.every(function () {
-        v += 2; if (v >= 82) { v = 82; clk.clear(); }
-        showScore(v);
-      }, 22);
-      clk.set(function () {
-        lines.forEach(function (line, i) { lineClk.set(function () { line.classList.add('in'); }, i * 360); });
-        lineClk.set(finishDiagnosis, 1150);
-      }, 700);
-    }
-    sos.addEventListener('click', function () {
-      sent.textContent = '✓ 模拟救援包已发出 · 匹配 3 家网点';
-      sent.classList.add('in');
-      var note = $('.vit-foot .note', root);
-      if (note) note.style.display = 'none';
-      sos.innerHTML = '<svg class="i" aria-hidden="true"><use href="#i-check"/></svg>模拟已发出';
+    advance.addEventListener('click',function () {
+      var actions = scene.features[featureIndex].actions;
+      step = step === actions.length ? 0 : step + 1;
+      renderFeature(true);
     });
-    return { start: play, stop: function () { clk.clear(); lineClk.clear(); } };
-  }
-
-  /* =========================================================
-     路由
-     ========================================================= */
-  var ORDER = ['home', 'ai', 'hardware', 'scenes', 's1', 's2', 's3', 's4', 's5', 's6'];
-  var TITLES = {
-    home: 'ROADLINK · 两轮车的 AI 引擎',
-    ai: 'AI 引擎 · ROADLINK',
-    hardware: '硬件方案 · ROADLINK',
-    scenes: '六个场景 · ROADLINK 提案',
-    s1: '01 编队协同 · ROADLINK', s2: '02 弯道视界 · ROADLINK', s3: '03 免手交互 · ROADLINK',
-    s4: '04 主动安全 · ROADLINK', s5: '05 骑行记忆 · ROADLINK', s6: '06 车况救援 · ROADLINK',
-  };
-  var DEMOS = { s1: initConvoy, s2: initHud, s3: initGlove, s4: initGuard, s5: initRep, s6: initVit };
-  var demos = {}, io = {}, current = null;
-  var hdr = $('#hdr'), menu = $('#menu');
-  var compactNav = window.matchMedia('(max-width: 1024px)');
-
-  function keyFromHash() {
-    var k = (location.hash || '#/home').replace(/^#\/?/, '').split('?')[0];
-    return ORDER.indexOf(k) > -1 ? k : 'home';
-  }
-  function setNav(k) {
-    $$('#nav a').forEach(function (a) {
-      var here = a.dataset.k === k;
-      var parent = a.dataset.k === 'scenes' && /^s[1-6]$/.test(k);
-      a.classList.toggle('on', here || parent);
-      if (here || parent) a.setAttribute('aria-current', here ? 'page' : 'location');
-      else a.removeAttribute('aria-current');
+    document.getElementById('jump').addEventListener('click',function () {
+      document.getElementById('experience-title').focus({preventScroll:true});
+      demo.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
     });
-  }
-  function setMenu(open) {
-    hdr.classList.toggle('open', open);
-    menu.setAttribute('aria-expanded', String(open));
-    menu.setAttribute('aria-label', open ? '关闭导航' : '打开导航');
-  }
-  function focusHeading(view) {
-    var heading = $('h1, h2', view);
-    heading.setAttribute('tabindex', '-1');
-    heading.focus({ preventScroll: true });
-  }
-  function reveal(k, view) {
-    if (!('IntersectionObserver' in window)) { $$('[data-io]', view).forEach(function (e) { e.classList.add('in'); }); return; }
-    if (!io[k]) {
-      io[k] = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) { en.target.classList.add('in'); io[k].unobserve(en.target); }
-        });
-      }, { root: view.classList.contains('long') ? view : null, rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    }
-    $$('[data-io]', view).forEach(function (e) { io[k].observe(e); });
-  }
-  function show(k) {
-    var view = document.getElementById('v-' + k);
-    if (!view || current === k) return;
-    var navigated = current !== null;
-    if (current) {
-      var old = document.getElementById('v-' + current);
-      if (old) { old.inert = true; old.classList.remove('on'); }
-      if (demos[current]) { demos[current].stop(); }
-    }
-    current = k;
-    view.inert = false;
-    view.classList.add('on');
-    view.scrollTop = 0;
-    document.title = TITLES[k] || TITLES.home;
-    setNav(k);
-    setMenu(false);
-    reveal(k, view);
-    if (navigated) focusHeading(view);
-    if (!demos[k] && DEMOS[k]) demos[k] = DEMOS[k](view);
-    if (demos[k]) demos[k].start();
+    window.scrollTo(0,0);
+    if (focus) document.getElementById('scene-heading').focus({preventScroll:true});
   }
 
-  window.addEventListener('hashchange', function () { show(keyFromHash()); });
-  $('.skip-link').addEventListener('click', function (e) {
-    e.preventDefault();
-    var view = document.getElementById('v-' + current);
-    setMenu(false);
-    view.scrollTop = 0;
-    focusHeading(view);
-  });
-
-  $$('[data-scene-demo]').forEach(function (button) {
-    var section = document.getElementById(button.getAttribute('aria-controls'));
-    var heading = $('h3', section);
-    button.addEventListener('click', function () {
-      heading.focus({ preventScroll: true });
-      section.scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' });
-    });
-  });
-
-  /* 键盘 ← → 翻页 */
-  document.addEventListener('keydown', function (e) {
-    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
-    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    if (hdr.classList.contains('open') || e.target.closest('a, button, input, textarea, select, [contenteditable], [role="region"]')) return;
-    var i = ORDER.indexOf(current);
-    var next = ORDER[i + (e.key === 'ArrowRight' ? 1 : -1)];
-    if (next) { e.preventDefault(); location.hash = '#/' + next; }
-  });
-
-  /* 移动端菜单 */
-  menu.addEventListener('click', function () {
-    var open = !hdr.classList.contains('open');
-    setMenu(open);
-    if (open) ($('#nav a.on') || $('#nav a')).focus();
-  });
-  $('#nav').addEventListener('click', function (e) {
-    var link = e.target.closest('a');
-    if (!link || !hdr.classList.contains('open')) return;
-    setMenu(false);
-    if (link.hash === location.hash) focusHeading(document.getElementById('v-' + current));
-  });
-  function closeMenuOutside(e) {
-    if (hdr.classList.contains('open') && !hdr.contains(e.target)) setMenu(false);
+  function route(event) {
+    var match = location.hash.match(/^#\/s([1-5])$/);
+    var index = match ? Number(match[1])-1 : 0;
+    if (!match) history.replaceState(null,'','#/s1');
+    if (index !== sceneIndex) showScene(index,Boolean(event));
   }
-  document.addEventListener('click', closeMenuOutside);
-  document.addEventListener('focusin', closeMenuOutside);
-  document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape' || !hdr.classList.contains('open')) return;
-    setMenu(false);
-    menu.focus();
-  });
-  compactNav.addEventListener('change', function () { setMenu(false); });
 
-  $$('.view').forEach(function (view) { view.inert = true; });
-  show(keyFromHash());
+  window.addEventListener('hashchange',route);
+  document.querySelector('.skip-link').addEventListener('click',function (event) {
+    event.preventDefault();
+    document.getElementById('scene-heading').focus();
+  });
+  route();
 })();
