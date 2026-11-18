@@ -721,8 +721,8 @@
 
     <section class="scene-demo" id="s5-demo" aria-labelledby="s5-demo-title">
       <header class="scene-demo-heading">
-        <h3 class="section-title" id="s5-demo-title" tabindex="-1">复盘从关键片段开始</h3>
-        <p>切换「赛道」「跑山」或「通勤」，看每种骑行如何选出不同复盘重点。</p>
+        <h3 class="section-title" id="s5-demo-title" tabindex="-1">跟着路线回看关键片段</h3>
+        <p>播放看骑行位置，点片段跳到对应路段。切换赛道、跑山或通勤，看看 AI 会标出什么。</p>
       </header>
       <div class="demo">
         <div class="frame">
@@ -734,21 +734,35 @@
               <button class="chip" data-rep="commute" aria-pressed="false">通勤</button>
             </div>
           </div>
-          <div class="stage stage-rep" data-demo="rep">
+          <div class="stage-rep" data-demo="rep">
             <div class="rep-top">
-              <span class="tag" id="repMode">赛道 · 15 分钟</span>
-              <span class="tag amber" id="repLap">最佳 1:42.8</span>
+              <span id="repMode">赛道 · 单圈示例</span>
+              <span class="tag amber">AI 标记 3 个片段</span>
             </div>
-            <div class="rep-tl" id="repTL" aria-hidden="true"></div>
-            <div class="rep-cards" id="repCards"></div>
-            <div class="rep-bars" id="repBars"></div>
+            <div class="rep-map">
+              <canvas id="repMap" width="960" height="400" role="img" aria-label="模拟路线，琥珀色标记显示当前骑行位置"></canvas>
+              <span class="rep-map-label" aria-hidden="true"><i></i>回放位置</span>
+            </div>
+            <div class="rep-transport">
+              <button type="button" class="rep-play" id="repPlay">播放</button>
+              <input type="range" id="repPosition" aria-label="定位回放时间" min="0" max="103" value="22">
+              <span class="rep-time" id="repTime" aria-hidden="true">0:22 / 1:43</span>
+            </div>
+            <div class="rep-events" id="repEvents" role="group" aria-label="AI 标记的关键片段"></div>
+            <div class="rep-insight" role="status">
+              <span>AI 复盘</span>
+              <div>
+                <strong id="repInsightTitle">T3 出弯</strong>
+                <p id="repInsightBody">对比参考圈，这段出弯慢了约 0.4 秒。</p>
+              </div>
+            </div>
           </div>
         </div>
         <aside class="demo-story" aria-label="这个场景怎么运作">
           <dl>
             <div><dt>发生了什么</dt><dd>骑完只记得大概感受，找不到那次急刹的位置。</dd></div>
             <div><dt>AI 怎么做</dt><dd>识别关键骑行动作，把它们记到轨迹与时间线上。</dd></div>
-            <div><dt>骑手看到什么</dt><dd>按场景看到值得回看的片段和复盘要点。</dd></div>
+            <div><dt>骑手看到什么</dt><dd>点一次片段，就能同时看到发生位置和复盘要点。</dd></div>
           </dl>
         </aside>
       </div>

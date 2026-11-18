@@ -334,67 +334,194 @@
      05 · REPLAY
      ========================================================= */
   function initRep(root) {
-    var tl = $('#repTL', root), cards = $('#repCards', root), bars = $('#repBars', root);
-    var modeTag = $('#repMode', root), lapTag = $('#repLap', root);
-    if (!tl) return null;
-    var MODES = {
+    var map = $('#repMap', root), play = $('#repPlay', root);
+    var positionInput = $('#repPosition', root), time = $('#repTime', root);
+    var modeTag = $('#repMode', root), eventsEl = $('#repEvents', root);
+    var title = $('#repInsightTitle', root), insight = $('#repInsightBody', root);
+    if (!map) return null;
+
+    var modes = {
       track: {
-        mode: '赛道 · 15 分钟', lap: '最佳 1:42.8',
-        ev: [[1, '起跑'], [0, ''], [1, '急刹'], [0, ''], [1, '压弯'], [0, ''], [1, '超车'], [0, ''], [1, '压弯'], [0, ''], [1, '急刹'], [0, '']],
-        cards: [
-          { t: 'T3 出弯', b: '慢 0.4 s', s: '开油晚 8 m，肩部先出弯' },
-          { t: 'T7 刹车点', b: '晚 6 m', s: '比最佳圈晚刹，入弯 +4 km/h' },
-          { t: 'T9 倾角', b: '42°', s: '右侧余量还有 6°' }
-        ],
-        bars: [{ l: 'T1–T3', p: 88, v: '−0.42' }, { l: 'T4–T7', p: 66, v: '+0.11' }, { l: 'T8–T10', p: 94, v: '−0.68' }]
+        label: '赛道 · 单圈示例', duration: 103,
+        route: [[108,184],[74,171],[58,147],[60,115],[79,83],[110,64],[156,53],[200,61],[224,84],[242,113],[274,121],[302,110],[329,79],[362,59],[410,55],[462,67],[502,95],[520,130],[519,159],[497,189],[458,201],[400,201],[346,190],[283,183],[224,187],[168,193],[108,184]],
+        events: [
+          { time: 22, title: 'T3 出弯', note: '对比参考圈，这段出弯慢了约 0.4 秒。' },
+          { time: 54, title: 'T7 制动点', note: '这次制动比参考圈晚了约 6 米，可对照两圈的入弯节奏。' },
+          { time: 78, title: 'T9 倾角', note: '这段记录到 42° 倾角，可回看对应的转向与收油时机。' }
+        ]
       },
       mountain: {
-        mode: '跑山 · 46 分钟', lap: '弯道 38 个',
-        ev: [[1, '盲弯'], [0, ''], [1, '对向车'], [0, ''], [1, '压弯'], [0, ''], [1, '盲弯'], [0, ''], [1, '落石'], [0, ''], [0, ''], [0, '']],
-        cards: [
-          { t: '盲弯处理', b: '12 处', s: '入弯前 1.8 s 平均收油' },
-          { t: '对向车', b: '3 次', s: '2 次在弯心外侧，风险偏高' },
-          { t: '刹车余量', b: '偏紧', s: '3 个弯接近极限，建议降 8%' }
-        ],
-        bars: [{ l: '盲弯', p: 72, v: '−12' }, { l: '对向', p: 58, v: '3 次' }, { l: '夜路', p: 34, v: '18%' }]
+        label: '跑山 · 46 分钟示例', duration: 2760,
+        route: [[43,204],[85,187],[130,155],[174,144],[208,156],[220,180],[244,197],[278,194],[300,173],[289,147],[251,124],[227,105],[229,83],[254,65],[291,60],[323,77],[354,104],[383,114],[417,99],[440,67],[476,48],[520,52],[551,70]],
+        events: [
+          { time: 504, title: '接近盲弯', note: '记录入弯前的收油位置，便于回看进弯前的节奏。' },
+          { time: 1116, title: '对向有车', note: '这一段标记了会车时刻，停车后可回看车辆何时进入视野。' },
+          { time: 2010, title: '连续弯道', note: '这几个弯放在一段回看，方便比较每次入弯前的变化。' }
+        ]
       },
       commute: {
-        mode: '通勤 · 32 分钟', lap: '急刹 2 次',
-        ev: [[0, ''], [1, '急刹'], [0, ''], [0, ''], [1, '加塞'], [0, ''], [0, ''], [1, '急刹'], [0, ''], [0, ''], [0, ''], [0, '']],
-        cards: [
-          { t: '急刹', b: '2 次', s: '都在路口，跟车距离不足' },
-          { t: '平均速度', b: '32 km/h', s: '比上周慢 4 km/h' },
-          { t: '高光片段', b: '已生成', s: '下班日落，可一键分享' }
-        ],
-        bars: [{ l: '急刹', p: 26, v: '2 次' }, { l: '跟车', p: 44, v: '偏近' }, { l: '夜路', p: 62, v: '56%' }]
+        label: '通勤 · 32 分钟示例', duration: 1920,
+        route: [[45,188],[109,188],[128,173],[128,123],[146,108],[222,108],[238,91],[238,61],[256,43],[325,43],[341,59],[341,118],[358,135],[424,135],[440,120],[440,87],[458,71],[523,71],[550,87]],
+        events: [
+          { time: 360, title: '路口急刹', note: '从路口的急刹片段回看前车变化和当时的跟车距离。' },
+          { time: 810, title: '车辆加塞', note: '标记旁车进入车道的时刻，在时间线上可直接定位。' },
+          { time: 1510, title: '跟车急刹', note: '这是本次通勤的第二次急刹，可与路口片段分开查看。' }
+        ]
       }
     };
+    var ctx = map.getContext('2d');
+    var mode, distance, eventButtons, marks, position = 0;
+    var selected = -2, shownSecond = -1, playback = null;
 
-    var mode = 'track';
-    function apply(name) {
-      mode = name;
-      var m = MODES[name] || MODES.track;
-      modeTag.textContent = m.mode;
-      lapTag.textContent = m.lap;
-      tl.innerHTML = '<div class="track">' + m.ev.map(function (e, i) {
-        return '<div class="clip' + (e[0] ? ' ev' : '') + '" style="--w:' + (e[0] ? 1.6 : 1) + ';--dur:' + (4 + i % 4) + 's;--d:' + (i * .4) + 's">' +
-          (e[1] ? '<b>' + e[1] + '</b>' : '') + '<i></i></div>';
-      }).join('') + '</div><span class="playhead" aria-hidden="true"></span>';
-      cards.innerHTML = m.cards.map(function (c) {
-        return '<div class="rep-card"><span class="t">' + c.t + '</span><b>' + c.b + '</b><small>' + c.s + '</small></div>';
-      }).join('');
-      bars.innerHTML = m.bars.map(function (b, i) {
-        return '<div class="rep-bar' + (i === 0 ? ' best' : '') + '"><span>' + b.l + '</span><span class="b"><i style="--p:' + b.p + '%"></i></span><em>' + b.v + '</em></div>';
-      }).join('');
+    function formatTime(value) {
+      var seconds = Math.floor(value);
+      return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
     }
-    $$('[data-rep]', root).forEach(function (b) {
-      b.addEventListener('click', function () {
-        $$('[data-rep]', root).forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); });
-        b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
-        apply(b.dataset.rep);
+    function pointAt(progress) {
+      var target = distance[distance.length - 1] * progress;
+      var end = 1;
+      while (end < distance.length - 1 && distance[end] < target) end++;
+      var a = mode.route[end - 1], b = mode.route[end];
+      var fraction = (target - distance[end - 1]) / (distance[end] - distance[end - 1]);
+      return { x: a[0] + (b[0] - a[0]) * fraction, y: a[1] + (b[1] - a[1]) * fraction, end: end };
+    }
+    function draw(progress) {
+      if (!ctx) return;
+      var cursor = pointAt(progress), road = mode.route;
+      ctx.setTransform(map.width / 600, 0, 0, map.height / 250, 0, 0);
+      ctx.clearRect(0, 0, 600, 250);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(road[0][0], road[0][1]);
+      road.slice(1).forEach(function (point) { ctx.lineTo(point[0], point[1]); });
+      ctx.strokeStyle = '#182d34';
+      ctx.lineWidth = 15;
+      ctx.stroke();
+      ctx.strokeStyle = '#58747d';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(road[0][0], road[0][1]);
+      for (var i = 1; i < cursor.end; i++) ctx.lineTo(road[i][0], road[i][1]);
+      ctx.lineTo(cursor.x, cursor.y);
+      ctx.strokeStyle = '#80d2df';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      marks.forEach(function (mark, index) {
+        ctx.beginPath();
+        ctx.arc(mark.x, mark.y, index === selected ? 7 : 5, 0, Math.PI * 2);
+        ctx.fillStyle = index === selected ? '#f5c400' : '#43575b';
+        ctx.fill();
+        ctx.strokeStyle = index === selected ? '#ffe17d' : '#a0aeb1';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+      ctx.beginPath();
+      ctx.arc(cursor.x, cursor.y, 11, 0, Math.PI * 2);
+      ctx.strokeStyle = '#ffd35a95';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cursor.x, cursor.y, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff2bb';
+      ctx.fill();
+    }
+    function render() {
+      var next = mode.events.reduce(function (index, item, i) {
+        return item.time <= position ? i : index;
+      }, -1);
+      if (selected !== next) {
+        selected = next;
+        var item = mode.events[selected];
+        title.textContent = item ? item.title : '回放开始';
+        insight.textContent = item ? item.note : '沿路线播放，或点选时间轴上的关键片段。';
+        eventButtons.forEach(function (button, i) {
+          button.setAttribute('aria-pressed', String(i === selected));
+        });
+      }
+      var second = Math.floor(position);
+      if (second !== shownSecond) {
+        shownSecond = second;
+        positionInput.value = second;
+        positionInput.setAttribute('aria-valuetext', formatTime(second) + '，共 ' + formatTime(mode.duration));
+        time.textContent = formatTime(second) + ' / ' + formatTime(mode.duration);
+      }
+      var progress = position / mode.duration;
+      positionInput.style.setProperty('--progress', (progress * 100) + '%');
+      draw(progress);
+    }
+    function pause() {
+      if (playback !== null) {
+        if (REDUCE) clearTimeout(playback); else cancelAnimationFrame(playback);
+        playback = null;
+      }
+      play.classList.remove('playing');
+      play.textContent = mode && position >= mode.duration ? '重播' : '播放';
+    }
+    function seek(value) {
+      position = value;
+      pause();
+      render();
+    }
+    function apply(key) {
+      pause();
+      mode = modes[key];
+      modeTag.textContent = mode.label;
+      distance = [0];
+      for (var i = 1; i < mode.route.length; i++) {
+        var a = mode.route[i - 1], b = mode.route[i];
+        distance.push(distance[i - 1] + Math.hypot(a[0] - b[0], a[1] - b[1]));
+      }
+      marks = mode.events.map(function (item) { return pointAt(item.time / mode.duration); });
+      eventButtons = mode.events.map(function (item) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'rep-event';
+        var stamp = document.createElement('span');
+        stamp.textContent = formatTime(item.time);
+        button.append(stamp, item.title);
+        button.addEventListener('click', function () { seek(item.time); });
+        return button;
+      });
+      eventsEl.replaceChildren.apply(eventsEl, eventButtons);
+      positionInput.max = mode.duration;
+      selected = -2;
+      shownSecond = -1;
+      seek(mode.events[0].time);
+    }
+    play.addEventListener('click', function () {
+      if (playback !== null) { pause(); return; }
+      if (position >= mode.duration) seek(0);
+      var start = performance.now(), from = position;
+      play.classList.add('playing');
+      play.textContent = '暂停';
+
+      function schedule() {
+        playback = REDUCE ? setTimeout(function () { tick(performance.now()); }, 450) : requestAnimationFrame(tick);
+      }
+      function tick(now) {
+        position = Math.min(mode.duration, from + (now - start) * mode.duration / 14000);
+        render();
+        if (position >= mode.duration) pause(); else schedule();
+      }
+      schedule();
+    });
+    positionInput.addEventListener('input', function () { seek(Number(positionInput.value)); });
+    var switches = $$('[data-rep]', root);
+    switches.forEach(function (button) {
+      button.addEventListener('click', function () {
+        if (button.getAttribute('aria-pressed') === 'true') return;
+        switches.forEach(function (item) {
+          item.classList.toggle('on', item === button);
+          item.setAttribute('aria-pressed', String(item === button));
+        });
+        apply(button.dataset.rep);
       });
     });
-    return { start: function () { apply(mode); }, stop: function () {} };
+    return { start: function () { if (!mode) apply('track'); }, stop: pause };
   }
 
   /* =========================================================
