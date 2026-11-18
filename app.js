@@ -36,13 +36,13 @@
   var scenes = [
     {
       name: '组队与车友社交', heading: '第一次见面，就能一起骑', image: 'convoy',
-      alt: '几名骑手沿林道保持间距骑行',
+      alt: '骑手沿林道骑行的场景示意',
       lead: '手机负责组队、导航和记录，车载屏跟着显示路况，电子墨水牌亮出队号和姓名。',
       features: [
         {
           name: '快速配对与位置共享', desc: '碰面加入车队，地图上看到队友。',
           explain: '两人相互确认后加入同一车队，并在骑行期间共享位置。',
-          actions: [['确认配对', '两名车友已组队，地图同步两人的位置。']],
+          actions: [['确认配对', '两名示例车友已组队，地图显示示例位置。']],
           show: function (step) { return routeMap(step ? 'paired' : 'waiting', step ? '车队位置已共享' : '等待附近车友确认', step ? '● 我　● 队友' : '我 · 集合点'); }
         },
         {
@@ -57,7 +57,7 @@
         {
           name: 'F1 式里程排名', desc: '用累计里程排位，让每次骑行都算数。',
           explain: '榜单按累计骑行里程排位。完成一趟骑行，里程和名次就会重新计算。',
-          actions: [['结算本次骑行 +42 km', '你的累计里程更新为 454 公里，升至第 2 位。']],
+          actions: [['结算本次骑行 +42 km', '本例增加 42 公里，示例累计里程为 454 公里，升至第 2 位。']],
           show: function (step) {
             var rows = step ? [['阿岳','486 km'],['我','454 km'],['小程','438 km']] : [['阿岳','486 km'],['小程','438 km'],['我','412 km']];
             return '<table class="ranking"><thead><tr><th scope="col">排位</th><th scope="col">车友</th><th scope="col">累计里程</th></tr></thead><tbody>' +
@@ -76,9 +76,9 @@
         {
           name: '同伴接近，自动抓拍分享', desc: '留下会合瞬间，照片自动到车友手里。',
           explain: '双方开启抓拍分享后，识别到同伴接近时自动拍照，并把这张照片分享给对方。',
-          actions: [['模拟同伴接近', '识别到同伴靠近，已抓拍并自动分享这张会合照片。']],
+          actions: [['模拟同伴接近', '模拟同伴靠近，预览抓拍分享后收到的示意照片。']],
           show: function (step) {
-            return step ? photo('team', '车友在观景台会合的概念照片', '会合瞬间已分享', '收件人：已配对的车友') :
+            return step ? photo('team', '车友在观景台会合的概念照片', '模拟分享预览', '场景示意图 · 示例收件人：已配对车友') :
               routeMap('paired','抓拍分享已开启','等待识别到同伴接近');
           }
         }
@@ -340,14 +340,15 @@
     root.innerHTML = '<section class="scene-hero' + (isTeam ? ' scene-hero--team' : '') + '" aria-labelledby="scene-heading"><div>' +
       '<p class="scene-name">' + scene.name + '</p><h1 id="scene-heading" tabindex="-1">' + scene.heading + '</h1>' +
       '<p class="scene-lead">' + scene.lead + '</p><button type="button" class="primary" id="jump">' + (isTeam ? '开始组队演示' : '上手体验') + ' <span aria-hidden="true">↓</span></button></div>' +
-      '<figure class="hero-photo">' + image(scene.image,scene.alt,true) + '</figure></section>' +
+      '<figure class="hero-photo">' + image(scene.image,scene.alt,true) +
+      (isTeam ? '<figcaption>场景示意图</figcaption>' : '') + '</figure></section>' +
       (isTeam ? '<section class="team-walkthrough" id="team-walkthrough" aria-labelledby="team-title"></section><details class="team-extras"><summary>查看轨迹回放、抓拍等互动玩法</summary>' : '') +
       '<section class="explore" id="experience" aria-labelledby="experience-title"><h2 id="experience-title" tabindex="-1">选一项，看看怎么用</h2>' +
       '<div class="demo-layout"><div class="feature-list" role="group" aria-label="本场景的功能">' +
       scene.features.map(function (feature,i) {
         return '<button type="button" class="feature-button" data-feature="' + i + '" aria-pressed="false"><strong>' + feature.name + '</strong><small>' + feature.desc + '</small></button>';
       }).join('') +
-      '</div><article class="board" aria-labelledby="board-title"><header class="board-heading"><h3 id="board-title"></h3><span>概念演示</span></header>' +
+      '</div><article class="board" aria-labelledby="board-title"><header class="board-heading"><h3 id="board-title"></h3><span>' + (isTeam ? '独立示例 · 模拟数据' : '概念演示') + '</span></header>' +
       '<div class="board-visual" id="board-visual"></div><div class="board-copy"><p id="board-explain"></p>' +
       '<div class="board-controls"><button type="button" class="primary" id="advance"></button><span class="board-result" id="board-result" role="status"></span></div></div></article></div></section>' +
       (isTeam ? '</details>' : '') +

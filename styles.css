@@ -181,6 +181,10 @@ h1{margin-bottom:18px;font-size:clamp(38px,5.2vw,74px);letter-spacing:-.04em;lin
 .scene-hero--team .scene-lead{margin-bottom:13px;max-width:38ch;font-size:14px}
 .scene-hero--team .hero-photo{position:absolute;inset:0 0 0 40%;z-index:-2;border:0;border-radius:0}
 .scene-hero--team .hero-photo img{height:100%;object-position:50% 44%}
+.scene-hero--team figcaption{
+  position:absolute;right:10px;bottom:10px;padding:2px 7px;border-radius:4px;
+  background:#14211de8;color:#f4f1e8;font-size:11px;
+}
 .scene-hero--team::after{
   content:"";position:absolute;inset:0;z-index:-1;
   background:linear-gradient(90deg,#15231e 40%,#15231ee0 52%,#15231e12 84%);
@@ -266,7 +270,7 @@ h1{margin-bottom:18px;font-size:clamp(38px,5.2vw,74px);letter-spacing:-.04em;lin
 .team-form button{width:100%;min-width:0}
 .team-form .primary{background:#285142;color:#fff;padding-inline:8px;font-size:13px}
 .team-form .primary:hover{background:#386c59}
-.team-form .primary:disabled{cursor:default;background:#e5eadd;color:#4e6756}
+.team-form button:disabled{cursor:default;background:#e5eadd;color:#4e6756}
 .team-fields{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
 .team-fields:not(:empty){margin-bottom:8px}
 .team-fields label{display:grid;gap:3px;color:#405d4d;font-size:12px}
@@ -296,6 +300,10 @@ h1{margin-bottom:18px;font-size:clamp(38px,5.2vw,74px);letter-spacing:-.04em;lin
 .team-map-mode{
   position:absolute;bottom:7px;left:7px;padding:2px 6px;border-radius:4px;background:#f8fbf3;
   color:#245342;font-size:11px;font-weight:700;
+}
+.team-map-context{
+  position:absolute;top:7px;right:7px;padding:2px 6px;border-radius:4px;
+  background:#f8fbf3;color:#245342;font-size:11px;font-weight:700;
 }
 .team-next-turn{
   display:flex;justify-content:space-between;align-items:center;gap:5px;
@@ -338,12 +346,16 @@ h1{margin-bottom:18px;font-size:clamp(38px,5.2vw,74px);letter-spacing:-.04em;lin
 .team-round-distance{font:800 clamp(25px,3.1vw,48px)/1 var(--mono);color:white;letter-spacing:-.05em}
 .team-round-distance small{font-size:.55em}
 .team-esp-screen>b:not(.team-round-distance){font-size:13px}
-.team-round-line{position:relative;width:76%;height:23px;margin-top:6px;border-top:2px solid #3d6757}
-.team-round-line span{position:absolute;left:var(--position);top:6px;transform:translateX(-50%);font-size:10px;white-space:nowrap}
-.team-round-line span[style*="--previous"]{animation:team-rider-progress .42s cubic-bezier(.22,.61,.36,1)}
-@keyframes team-rider-progress{from{left:var(--previous)}to{left:var(--position)}}
-.team-round-line span::before{content:"";position:absolute;top:-12px;left:50%;width:8px;height:8px;transform:translateX(-50%);border-radius:50%;background:#ffc952}
-.team-round-line span+span::before{background:#8dc5ff}
+.team-round-arrow[data-turn="直行到终点"]{border:0;width:7px;background:var(--yellow);border-radius:2px;margin-right:0}
+.team-round-arrow[data-turn="直行到终点"]::after{
+  top:-5px;right:-6px;border:9px solid transparent;border-top:0;border-bottom:12px solid var(--yellow);
+}
+.team-round-arrow[data-turn="已到达"]{
+  width:20px;height:35px;border:solid var(--yellow);border-width:0 6px 6px 0;border-radius:0;
+  transform:rotate(45deg);margin:0 0 12px;
+}
+.team-round-arrow[data-turn="已到达"]::after{display:none}
+.team-round-gap{color:#b9d1c1;font-size:11px}
 .team-round-signal{width:29px;height:29px;margin-bottom:3px;border:1px solid #518170;border-radius:50%;box-shadow:inset 0 0 0 5px #223e33}
 .team-standby{display:grid;gap:3px;justify-items:center;text-align:center}
 .team-standby small{font-size:11px}
@@ -390,11 +402,7 @@ h1{margin-bottom:18px;font-size:clamp(38px,5.2vw,74px);letter-spacing:-.04em;lin
   .team-esp-screen{gap:2px}
   .team-round-arrow{width:21px;height:20px;border-width:5px;border-top-left-radius:8px}
   .team-round-arrow::after{top:-10px;right:-6px;border-top-width:7px;border-bottom-width:7px;border-left-width:9px}
-  .team-round-line{margin-top:4px;height:16px}
-  .team-round-line span{font-size:9px;top:4px}
-  .team-round-line span[style*="--previous"]{animation:team-rider-progress .42s cubic-bezier(.22,.61,.36,1)}
 @keyframes team-rider-progress{from{left:var(--previous)}to{left:var(--position)}}
-.team-round-line span::before{top:-8px;width:5px;height:5px}
   .team-ink-screen{min-height:76px}
   .team-ink-content .team-plate-number{font-size:29px}
 }
