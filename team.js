@@ -205,7 +205,7 @@
     return header + '<div class="team-device-body"><div class="team-map-summary"><div><small>车队目的地</small><b>' +
       (hasRoute ? dest.name : '还未设置') + '</b></div>' + (hasRoute ? '<strong>' + km(dest.meters) + ' km' + '</strong>' : '') + '</div>' +
       (hasRoute ? '<div class="team-map-frame">' + mapMarkup() +
-        '<span class="team-map-context">示意地图</span><span class="team-map-mode">' + (state.completed === 6 ? '已抵达终点' : (state.completed >= 3 ? '正在共享位置' : '路线已生成')) + '</span></div>' :
+        '<span class="team-map-context">示意地图</span><span class="team-map-mode">' + (state.progress >= dest.meters ? '已抵达终点' : (state.completed >= 3 ? '正在共享位置' : '路线已生成')) + '</span></div>' :
         '<div class="team-route-empty"><span aria-hidden="true"></span><p>选好目的地，路线会显示在这里</p></div>') +
       (state.stage === 1 ? members() : '') +
       (state.completed >= 2 ? nextTurn(dest,state.progress) : '') + '</div>';
