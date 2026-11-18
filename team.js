@@ -189,12 +189,10 @@
       '<div class="team-device-label"><strong>三防电子墨水牌</strong><span>' + (synced ? 'ESP32 已转发' : '待写入') + '</span></div>';
   }
 
-  function mount(root, ridePhoto) {
+  function mount(root) {
     var state = Object.assign({},initial);
     root.innerHTML =
-      '<header class="team-intro"><div><h1 id="scene-heading" tabindex="-1">组队与车友社交</h1>' +
-      '<p>在手机上操作，看车把圆屏和电子号牌怎么变。</p><span>模拟演示</span></div>' +
-      '<figure class="team-intro-photo">' + ridePhoto + '</figure></header>' +
+      '<div class="team-intro"><h2 id="team-title" tabindex="-1">组队互动演示</h2><span>模拟数据</span></div>' +
       '<div class="team-steps" role="group" aria-label="组队流程步骤">' +
       stages.map(function (stage,index) {
         return '<button type="button" class="team-step"><span aria-hidden="true">0' + (index + 1) + '</span>' + stage.label + '</button>';
@@ -214,7 +212,7 @@
     var find = function (selector) { return root.querySelector(selector); };
     var steps = Array.from(root.querySelectorAll('.team-step'));
     var fields = find('.team-fields'), primary = find('#team-do');
-    var next = find('#team-next'), reset = find('#team-reset'), logo = find('#team-logo'), result = find('.team-result');
+    var next = find('#team-next'), logo = find('#team-logo'), result = find('.team-result');
 
     function renderPanels(from) {
       find('.team-phone-content').innerHTML = phone(state);
@@ -239,7 +237,6 @@
       next.hidden = state.completed <= state.stage || state.stage === stages.length - 1;
       if (!next.hidden) next.textContent = '下一步 · ' + stages[state.stage + 1].label + ' →';
       logo.hidden = state.stage !== 4;
-      reset.hidden = state.completed === 0;
     }
 
     function renderStep() {
@@ -278,7 +275,7 @@
       renderPanels(from);
       result.textContent = message;
       if (moveFocus && primary.disabled) {
-        (next.hidden ? reset : next).focus({ preventScroll:true });
+        (next.hidden ? find('#team-reset') : next).focus({ preventScroll:true });
       }
     }
 
@@ -287,7 +284,7 @@
       showStage(state.stage + 1);
       steps[state.stage].focus({ preventScroll:true });
     });
-    reset.addEventListener('click',function () {
+    find('#team-reset').addEventListener('click',function () {
       state = Object.assign({},initial);
       renderStep();
       steps[0].focus({ preventScroll:true });
