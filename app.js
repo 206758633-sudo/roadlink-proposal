@@ -337,7 +337,7 @@
     step = 0;
     document.title = scene.name + ' · ROADLINK';
     nav.forEach(function (link, i) { if (i === index) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
-    root.innerHTML = '<section class="scene-hero" aria-labelledby="scene-heading"><div>' +
+    root.innerHTML = '<section class="scene-hero' + (isTeam ? ' scene-hero--team' : '') + '" aria-labelledby="scene-heading"><div>' +
       '<p class="scene-name">' + scene.name + '</p><h1 id="scene-heading" tabindex="-1">' + scene.heading + '</h1>' +
       '<p class="scene-lead">' + scene.lead + '</p><button type="button" class="primary" id="jump">' + (isTeam ? '开始组队演示' : '上手体验') + ' <span aria-hidden="true">↓</span></button></div>' +
       '<figure class="hero-photo">' + image(scene.image,scene.alt,true) + '</figure></section>' +
