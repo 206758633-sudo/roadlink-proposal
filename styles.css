@@ -810,10 +810,9 @@ table.data .part{color:var(--warn);font-family:var(--num);font-size:11px}
 .overview-hero .btn{margin-top:clamp(18px,3vh,28px)}
 .overview-section{margin-top:clamp(28px,5.4vh,62px)}
 .overview-section .section-title{margin-bottom:clamp(14px,2vh,21px)}
-.capability-grid,.device-grid{display:grid;gap:clamp(12px,1.4vw,20px)}
+.capability-grid{display:grid;gap:clamp(12px,1.4vw,20px)}
 .capability-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-.device-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.capability,.overview-device{
+.capability{
   min-width:0;
   padding:clamp(16px,2.2vw,28px);
   border:1px solid var(--line);
@@ -833,9 +832,6 @@ table.data .part{color:var(--warn);font-family:var(--num);font-size:11px}
 }
 .overview-section h4{margin:0;color:var(--paper);font-size:clamp(17px,1.6vw,21px);line-height:1.35}
 .overview-section article p{margin:8px 0 0;color:var(--soft);font-size:clamp(14px,1.15vw,16px);line-height:1.68}
-.overview-device{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:clamp(12px,1.4vw,20px)}
-.device-illustration{display:grid;place-items:center;min-height:108px}
-.device-illustration svg{width:100%;height:auto;max-height:168px}
 .overview-note{
   margin-top:clamp(18px,3vh,34px);
   padding:12px 0 12px 16px;
@@ -844,15 +840,95 @@ table.data .part{color:var(--warn);font-family:var(--num);font-size:11px}
 .overview-note b{font-size:16px}
 .overview-note p{margin:4px 0 0;color:var(--soft);font-size:14px;line-height:1.7}
 
-@media(max-width:760px){
-  .device-grid{grid-template-columns:1fr}
-  .overview-device{grid-template-columns:minmax(0,110px) minmax(0,1fr)}
-}
 @media(max-width:620px){
   .capability-grid{grid-template-columns:1fr}
   .capability{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:13px;align-items:start}
   .capability-icon{grid-row:span 2;margin-bottom:0}
   .capability p{grid-column:2}
+}
+
+/* ---------- hardware signal path and installation views ---------- */
+#v-hardware{--signal:#9adbe5}
+.hardware-hero h2 span{color:var(--signal)}
+.hardware-actions{display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:clamp(18px,3vh,28px)}
+.hardware-actions .btn{margin-top:0}
+.hardware-concept{border-color:#9adbe55c;background:#101c20;box-shadow:0 18px 42px #0006}
+.hardware-concept img{aspect-ratio:16/9}
+.hardware-concept figcaption strong{color:var(--signal)}
+.hardware-flow{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1px;
+  margin:0;
+  padding:0;
+  list-style:none;
+  overflow:hidden;
+  border:1px solid #9adbe53d;
+  border-radius:var(--r-lg);
+  background:#9adbe526;
+}
+.hardware-flow li{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:clamp(10px,1.5vw,20px);
+  min-height:94px;
+  padding:clamp(14px,1.75vw,25px);
+  background:linear-gradient(135deg,#17272d,#0c1518 78%);
+}
+.hardware-flow li:nth-child(2){background:linear-gradient(135deg,#20363d,#112228 80%)}
+.hardware-flow-icon{
+  display:grid;
+  width:44px;
+  height:44px;
+  place-items:center;
+  border:1px solid #9adbe55c;
+  border-radius:10px;
+  background:#9adbe515;
+  color:var(--signal);
+}
+.hardware-flow li:last-child .hardware-flow-icon{border-color:#f5c4004d;background:var(--accent-wash);color:var(--accent)}
+.hardware-flow p{margin:5px 0 0;color:var(--soft);font-size:14px;line-height:1.55}
+.hardware-flow-arrow.i{width:16px;height:16px;color:var(--signal)}
+.hardware-visor{border-color:#9adbe53d}
+.visor-window{position:relative}
+.visor-window img{aspect-ratio:16/9}
+.visor-overlay{
+  position:absolute;
+  right:11%;
+  bottom:23%;
+  display:grid;
+  gap:clamp(3px,.5vw,8px);
+  padding:clamp(7px,1.3vw,16px) clamp(8px,1.6vw,20px);
+  border:1px solid #ffd75f80;
+  border-radius:6px;
+  background:linear-gradient(135deg,#15130cba,#15130c72);
+  box-shadow:0 0 20px #ffca3b1c,inset 0 0 12px #ffca3b0e;
+  color:#ffe38a;
+  text-shadow:0 0 10px #ffca3b61;
+  white-space:nowrap;
+}
+.visor-mode{font-size:clamp(10px,1.03vw,14px);letter-spacing:.13em}
+.visor-turn{display:flex;align-items:center;gap:clamp(5px,.85vw,14px);line-height:1.15}
+.visor-turn .i{width:clamp(15px,2.1vw,32px);height:clamp(15px,2.1vw,32px);flex:none}
+.visor-turn strong{font-size:clamp(13px,1.8vw,25px)}
+.visor-distance{font-family:var(--num);font-size:clamp(14px,2.0vw,28px);font-weight:700}
+.visor-distance small{font-size:.6em}
+.visor-advice{font-size:clamp(10px,1.08vw,15px);letter-spacing:.02em}
+.hardware-visor figcaption strong{color:var(--signal)}
+.hardware-units{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,1.7vw,24px)}
+.hardware-unit{overflow:hidden;border:1px solid var(--line);border-radius:var(--r-lg);background:#10171b}
+.hardware-unit img{width:100%;height:auto;aspect-ratio:1.9;object-fit:cover;border-bottom:1px solid var(--line)}
+.hardware-unit-copy{padding:clamp(16px,2.1vw,26px)}
+.hardware-unit-copy > span{display:block;margin-bottom:4px;color:var(--signal);font-size:13px;letter-spacing:.08em}
+.hardware-unit:last-child .hardware-unit-copy > span{color:#ffdc74}
+
+@media(max-width:740px){
+  .hardware-flow,.hardware-units{grid-template-columns:minmax(0,1fr)}
+  .hardware-flow li{min-height:74px}
+  .hardware-flow-icon{width:38px;height:38px}
+  .hardware-flow-arrow.i{transform:rotate(90deg)}
+  .visor-overlay{right:8%;bottom:19%}
 }
 
 /* ================= 商业 / 融资 ================= */

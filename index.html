@@ -32,6 +32,26 @@
   <symbol id="a-glove" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 40v8M20 31v20M28 22v38M36 34v14M44 16v48M52 30v22M60 24v32M68 36v10M76 20v42M84 33v16M92 27v28M100 38v10M108 34v14"/></symbol>
   <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/><rect x="9.6" y="9.6" width="4.8" height="4.8" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/></symbol>
   <symbol id="i-device" viewBox="0 0 24 24"><rect x="4.5" y="3.5" width="15" height="11" rx="3"/><path d="M7.5 6.5h8M7.5 9.5h5"/><path d="M11 14.5v2.5h2v-2.5M8.5 20.5a4 4 0 0 0 7 0"/></symbol>
+  <linearGradient id="rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c343b"/><stop offset=".55" stop-color="#171d22"/><stop offset="1" stop-color="#0a0d10"/></linearGradient>
+  <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5c400" stop-opacity=".6"/><stop offset=".6" stop-color="#f5c400" stop-opacity="0"/></linearGradient>
+  <radialGradient id="rglow"><stop offset="0" stop-color="#f5c400" stop-opacity=".18"/><stop offset="1" stop-color="#f5c400" stop-opacity="0"/></radialGradient>
+  <g id="handlebar-art">
+    <ellipse cx="180" cy="272" rx="118" ry="14" fill="#000" opacity=".55"/>
+    <circle cx="180" cy="146" r="126" fill="url(#rglow)"/>
+    <rect x="72" y="30" width="216" height="158" rx="34" fill="url(#rb)" stroke="#ffffff2e"/>
+    <rect x="73" y="31" width="214" height="156" rx="33" fill="none" stroke="url(#rg)"/>
+    <rect x="88" y="46" width="184" height="126" rx="20" fill="#05070a" stroke="#ffffff1f"/>
+    <path d="M104 148a38 38 0 0 1 56-33" fill="none" stroke="#ffffff26" stroke-width="4" stroke-linecap="round"/>
+    <path d="M104 148a38 38 0 0 1 40-37" fill="none" stroke="#f5c400" stroke-width="4" stroke-linecap="round"/>
+    <text x="182" y="112" text-anchor="middle" fill="#f3f1ed" font-family="ui-monospace,Menlo,monospace" font-size="36" font-weight="700">72</text>
+    <text x="182" y="128" text-anchor="middle" fill="#8d8a85" font-family="ui-monospace,Menlo,monospace" font-size="8" letter-spacing="2">KM/H</text>
+    <text x="182" y="156" text-anchor="middle" fill="#f5c400" font-family="ui-monospace,Menlo,monospace" font-size="9" letter-spacing="1">C4 · 收油 58</text>
+    <g fill="#ffffff3d"><circle cx="150" cy="38" r="1.6"/><circle cx="160" cy="38" r="1.6"/><circle cx="170" cy="38" r="1.6"/></g>
+    <rect x="66" y="84" width="6" height="32" rx="3" fill="#ffffff26"/>
+    <rect x="288" y="84" width="6" height="32" rx="3" fill="#ffffff26"/>
+    <path d="M170 188v26h20v-26" fill="none" stroke="#ffffff33" stroke-width="6"/>
+    <path d="M148 238a32 32 0 0 0 64 0" fill="none" stroke="#ffffff3d" stroke-width="8" stroke-linecap="round"/>
+  </g>
 </defs></svg>
 
 <header class="hdr" id="hdr">
@@ -943,96 +963,98 @@
 <!-- ============ 硬件 ============ -->
 <section class="view long" id="v-hardware" aria-label="硬件方案">
   <div class="wrap">
-    <header class="chapter-hero overview-hero">
+    <header class="chapter-hero overview-hero hardware-hero">
       <div class="chapter-copy">
-        <p class="eyebrow">双件套硬件 · 可加装方案</p>
-        <h2>让现有车辆<br>也能用上骑行 AI。</h2>
-        <p class="lead">一件装在车把，一件装在头盔。车把终端负责计算与连接，头盔贴片把关键提示送到视线附近。</p>
-        <a class="btn pri" href="#/s2">看弯道提示演示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></a>
+        <p class="eyebrow">双件套硬件 · 骑行 AI</p>
+        <h2>骑行 AI，<br><span>从车端到视线。</span></h2>
+        <p class="lead">车把终端融合路况和车辆状态，在车上完成关键判断。头盔贴片把弯道、车队和风险提示送到骑手视线附近。</p>
+        <div class="hardware-actions">
+          <button type="button" class="btn pri" data-scene-demo aria-controls="hardware-visor-preview">看头盔 AI 投影 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <a class="btn" href="#/s2">体验弯道提示</a>
+        </div>
       </div>
-      <figure class="chapter-figure">
-        <img src="assets/roadlink-hardware-kit.webp" srcset="assets/roadlink-hardware-kit-small.webp 720w, assets/roadlink-hardware-kit.webp 1280w"
+      <figure class="chapter-figure hardware-concept">
+        <img src="assets/roadlink-hardware-installed.webp"
+             srcset="assets/roadlink-hardware-installed-small.webp 720w, assets/roadlink-hardware-installed.webp 1280w"
              sizes="(max-width: 740px) calc(100vw - 40px), 52vw" width="1280" height="720"
-             loading="lazy" decoding="async" alt="车把终端与小型头盔贴片摆在同一个工作台上，后方有一顶全盔">
-        <figcaption><strong>双件套外观概念图</strong><span>左为车把终端，右为头盔贴片</span></figcaption>
+             loading="lazy" decoding="async" alt="左侧终端夹装在车把上，右侧贴片装在头盔面罩上沿，两件设备以细线连接">
+        <figcaption><strong>装车概念图</strong><span>车把终端完成判断，头盔贴片呈现提示</span></figcaption>
       </figure>
     </header>
 
-    <section class="overview-section" aria-labelledby="hardware-roles-title">
-      <h3 class="section-title" id="hardware-roles-title">车上做判断，眼前看提示</h3>
-      <div class="device-grid">
-        <article class="overview-device">
-          <div class="device-illustration">
-        <svg viewBox="45 10 270 270" role="img" aria-label="车把终端外观示意">
-          <defs>
-            <linearGradient id="rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c343b"/><stop offset=".55" stop-color="#171d22"/><stop offset="1" stop-color="#0a0d10"/></linearGradient>
-            <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5c400" stop-opacity=".6"/><stop offset=".6" stop-color="#f5c400" stop-opacity="0"/></linearGradient>
-            <radialGradient id="rglow"><stop offset="0" stop-color="#f5c400" stop-opacity=".18"/><stop offset="1" stop-color="#f5c400" stop-opacity="0"/></radialGradient>
-          </defs>
-          <g id="handlebar-art">
-          <ellipse cx="180" cy="272" rx="118" ry="14" fill="#000" opacity=".55"/>
-          <circle cx="180" cy="146" r="126" fill="url(#rglow)"/>
-          <rect x="72" y="30" width="216" height="158" rx="34" fill="url(#rb)" stroke="#ffffff2e"/>
-          <rect x="73" y="31" width="214" height="156" rx="33" fill="none" stroke="url(#rg)"/>
-          <rect x="88" y="46" width="184" height="126" rx="20" fill="#05070a" stroke="#ffffff1f"/>
-          <path d="M104 148a38 38 0 0 1 56-33" fill="none" stroke="#ffffff26" stroke-width="4" stroke-linecap="round"/>
-          <path d="M104 148a38 38 0 0 1 40-37" fill="none" stroke="#f5c400" stroke-width="4" stroke-linecap="round"/>
-          <text x="182" y="112" text-anchor="middle" fill="#f3f1ed" font-family="ui-monospace,Menlo,monospace" font-size="36" font-weight="700">72</text>
-          <text x="182" y="128" text-anchor="middle" fill="#8d8a85" font-family="ui-monospace,Menlo,monospace" font-size="8" letter-spacing="2">KM/H</text>
-          <text x="182" y="156" text-anchor="middle" fill="#f5c400" font-family="ui-monospace,Menlo,monospace" font-size="9" letter-spacing="1">C4 · 收油 58</text>
-          <g fill="#ffffff3d"><circle cx="150" cy="38" r="1.6"/><circle cx="160" cy="38" r="1.6"/><circle cx="170" cy="38" r="1.6"/></g>
-          <rect x="66" y="84" width="6" height="32" rx="3" fill="#ffffff26"/>
-          <rect x="288" y="84" width="6" height="32" rx="3" fill="#ffffff26"/>
-          <path d="M170 188v26h20v-26" fill="none" stroke="#ffffff33" stroke-width="6"/>
-          <path d="M148 238a32 32 0 0 0 64 0" fill="none" stroke="#ffffff3d" stroke-width="8" stroke-linecap="round"/>
-          </g>
-        </svg>
+    <section class="overview-section hardware-workflow" aria-labelledby="hardware-flow-title">
+      <h3 class="section-title" id="hardware-flow-title">一次弯道提醒，怎么到眼前？</h3>
+      <ol class="hardware-flow" role="list">
+        <li>
+          <span class="hardware-flow-icon"><svg class="i" aria-hidden="true"><use href="#i-turn"/></svg></span>
+          <div><h4>感知路况</h4><p>读取前方弯道和当前车速</p></div>
+          <svg class="i hardware-flow-arrow" aria-hidden="true"><use href="#i-next"/></svg>
+        </li>
+        <li>
+          <span class="hardware-flow-icon"><svg class="i" aria-hidden="true"><use href="#i-chip"/></svg></span>
+          <div><h4>车端判断</h4><p>判断何时提醒、给出什么信息</p></div>
+          <svg class="i hardware-flow-arrow" aria-hidden="true"><use href="#i-next"/></svg>
+        </li>
+        <li>
+          <span class="hardware-flow-icon"><svg class="i" aria-hidden="true"><use href="#i-device"/></svg></span>
+          <div><h4>头盔提示</h4><p>把弯型、距离和建议送到眼前</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="overview-section" id="hardware-visor-preview" aria-labelledby="hardware-visor-title">
+      <h3 class="section-title" id="hardware-visor-title" tabindex="-1">头盔内的 AI 投影</h3>
+      <figure class="chapter-figure hardware-visor">
+        <div class="visor-window">
+          <img src="assets/roadlink-hardware-visor.webp"
+               srcset="assets/roadlink-hardware-visor-small.webp 720w, assets/roadlink-hardware-visor.webp 1280w"
+               sizes="(max-width: 1330px) calc(100vw - 40px), 1240px" width="1280" height="720"
+               loading="lazy" decoding="async" alt="从全盔内部透过面罩看向前方山路，视野两侧可见头盔内衬">
+          <div class="visor-overlay" role="group" aria-label="头盔内投影界面示意">
+            <span class="visor-mode">AI 路况提示</span>
+            <div class="visor-turn">
+              <svg class="i" aria-hidden="true"><use href="#i-turn"/></svg>
+              <strong>前方右弯</strong>
+              <span class="visor-distance">150 <small>m</small></span>
+            </div>
+            <span class="visor-advice">接近弯道 · 注意车速</span>
           </div>
-          <div class="device-description">
+        </div>
+        <figcaption><strong>骑手第一视角 · 投影示意</strong><span>头盔在视野一侧显示弯型、距离和简短提醒。</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="overview-section" aria-labelledby="hardware-roles-title">
+      <h3 class="section-title" id="hardware-roles-title">双件套，各自负责什么</h3>
+      <div class="hardware-units">
+        <article class="hardware-unit">
+          <img src="assets/roadlink-hardware-edge.webp"
+               srcset="assets/roadlink-hardware-edge-small.webp 720w, assets/roadlink-hardware-edge.webp 1280w"
+               sizes="(max-width: 740px) calc(100vw - 40px), 48vw" width="1280" height="720"
+               loading="lazy" decoding="async" alt="石墨色终端通过圆形夹具固定在车把上，屏幕显示一条琥珀色弯道线">
+          <div class="hardware-unit-copy">
+            <span>端侧计算</span>
             <h4>车把终端</h4>
-            <p>在车上汇总信息、完成判断，并把关键提醒同步给头盔。</p>
+            <p>在车上处理道路与车辆信息，把判断结果同步给头盔。关键提示优先由车端处理，减少对网络的依赖。</p>
           </div>
         </article>
-        <article class="overview-device">
-          <div class="device-illustration">
-        <svg viewBox="12 52 276 168" role="img" aria-label="头盔贴片与投射信息示意">
-          <defs>
-            <linearGradient id="hg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f5c400" stop-opacity=".55"/><stop offset="1" stop-color="#f5c400" stop-opacity="0"/></linearGradient>
-            <linearGradient id="hb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b333a"/><stop offset="1" stop-color="#0b0e11"/></linearGradient>
-            <radialGradient id="hglow"><stop offset="0" stop-color="#f5c400" stop-opacity=".16"/><stop offset="1" stop-color="#f5c400" stop-opacity="0"/></radialGradient>
-          </defs>
-          <circle cx="150" cy="150" r="118" fill="url(#hglow)"/>
-          <!-- projected info -->
-          <g>
-            <rect x="26" y="104" width="118" height="86" rx="12" fill="#06090b" stroke="#f5c4003d"/>
-            <text x="85" y="150" text-anchor="middle" fill="#f3f1ed" font-family="ui-monospace,Menlo,monospace" font-size="30" font-weight="700">58</text>
-            <text x="85" y="163" text-anchor="middle" fill="#8d8a85" font-family="ui-monospace,Menlo,monospace" font-size="7" letter-spacing="2">KM/H</text>
-            <text x="85" y="179" text-anchor="middle" fill="#f5c400" font-family="ui-monospace,Menlo,monospace" font-size="8" letter-spacing="1">C4 · 收油 58</text>
-            <text x="85" y="86" text-anchor="middle" fill="#8d8a85" font-family="ui-monospace,Menlo,monospace" font-size="8" letter-spacing="1.5">投射画面</text>
-          </g>
-          <!-- beam -->
-          <path d="M162 146 146 150l0 2 16 6z" fill="url(#hg)" opacity=".7"/>
-          <!-- module -->
-          <rect x="162" y="118" width="112" height="64" rx="18" fill="url(#hb)" stroke="#ffffff33"/>
-          <rect x="163" y="119" width="110" height="62" rx="17" fill="none" stroke="#f5c4002e"/>
-          <rect x="174" y="130" width="50" height="40" rx="11" fill="#05070a" stroke="#ffffff1f"/>
-          <circle cx="199" cy="150" r="10" fill="none" stroke="#f5c40066" stroke-width="1.4"/>
-          <circle cx="199" cy="150" r="3.6" fill="#f5c400"/>
-          <g fill="#ffffff33"><circle cx="236" cy="136" r="1.6"/><circle cx="242" cy="136" r="1.6"/><circle cx="248" cy="136" r="1.6"/></g>
-          <path d="M232 128h20M232 130v-4" stroke="#ffffff1f"/>
-        </svg>
-          </div>
-          <div class="device-description">
+        <article class="hardware-unit">
+          <img src="assets/roadlink-hardware-hud.webp"
+               srcset="assets/roadlink-hardware-hud-small.webp 720w, assets/roadlink-hardware-hud.webp 1280w"
+               sizes="(max-width: 740px) calc(100vw - 40px), 48vw" width="1280" height="720"
+               loading="lazy" decoding="async" alt="头盔面罩上沿的光学贴片特写，可见深色光学窗口">
+          <div class="hardware-unit-copy">
+            <span>抬头显示</span>
             <h4>头盔贴片</h4>
-            <p>把弯道、车队和风险提示放在视线附近，骑手少低头看屏幕。</p>
+            <p>用简短的图标和文字呈现当前最重要的一条提示，让骑手少低头看屏幕。</p>
           </div>
         </article>
       </div>
     </section>
 
     <aside class="overview-note">
-      <b>从已有车辆切入</b>
-      <p>保留骑手现有车辆和头盔，以双件套加装的方式提供智能体验，按车型和头盔逐步验证适配。</p>
+      <b>为现有车辆和头盔设计的加装方案</b>
+      <p>双件套保留原有车和头盔，按车型与头盔逐步验证适配。</p>
     </aside>
 
     <nav class="pager" aria-label="翻页">
