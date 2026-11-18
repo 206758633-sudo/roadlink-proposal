@@ -93,148 +93,154 @@
 <!-- ============ 六个场景 · 总览 ============ -->
 <section class="view long" id="v-scenes" aria-label="六个场景">
   <div class="wrap">
-    <header class="head">
+    <header class="scene-index-head">
       <div>
-        <p class="eyebrow" data-r style="--i:0">六个场景 · 一份判断</p>
-        <h2 data-r style="--i:1">每一个，都从群里<br>那句抱怨开始。</h2>
+        <p class="eyebrow">ROADLINK · 骑行情境</p>
+        <h2>一趟骑行，<br>六个关键时刻。</h2>
       </div>
-      <div class="stats" data-r style="--i:2">
-        <div class="stat"><span class="n">6</span><small>场景</small></div>
-        <div class="stat"><span class="n">17</span><small>条真实痛点</small></div>
-        <div class="stat"><span class="n">1</span><small>套端边云</small></div>
+      <div class="scene-index-intro">
+        <p class="lead">队友掉队、前车急刹、半路抛锚。选一个场景，亲手看看 AI 会在哪一步帮上忙。</p>
+        <a class="btn pri" href="#/s1">从编队协同开始 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></a>
       </div>
     </header>
-    <p class="lead" data-r style="--i:3">这些方向不是从技术出发的，是从你们自己的骑行里刨出来的：掉队、陷车、风噪、暖胎圈、抛锚说不清故障。每条后面都写清三件事——<b>谁在什么时候需要、AI 替他做了什么决定、凭什么现在做得到</b>。</p>
 
     <div class="scenes">
-      <a class="scene-card" href="#/s1" data-r style="--i:4">
+      <a class="scene-card" href="#/s1">
         <div class="scene-cover">
           <img src="assets/roadlink-convoy-small.webp" srcset="assets/roadlink-convoy-small.webp 720w, assets/roadlink-convoy.webp 1280w"
                sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 1060px) 47vw, 390px"
                width="720" height="405" loading="lazy" decoding="async" alt="">
+          <div class="scene-card-title">
+            <span class="scene-category">编队协同</span>
+            <h3>队尾有人跟不上</h3>
+          </div>
         </div>
         <div class="scene-copy">
-          <span class="n">01 / CONVOY</span>
-          <h3>编队协同</h3>
-          <p>把「微信群 + 对讲机」换成一支有共识的车队：谁在前、谁掉队、谁该加油，设备先知道。</p>
-          <div class="kpi"><i>掉队发现 &lt;15s</i><i>无卫星队形 &lt;10m</i></div>
-          <span class="scene-action">打开演示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
+          <p>林道失去卫星定位后，车队仍能用相对位置发现掉队，让头车和收队人知道该等谁。</p>
+          <span class="scene-action">体验掉队提醒 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
         </div>
       </a>
-      <a class="scene-card" href="#/s2" data-r style="--i:5">
+      <a class="scene-card" href="#/s2">
         <div class="scene-cover">
           <img src="assets/roadlink-corner-small.webp" srcset="assets/roadlink-corner-small.webp 720w, assets/roadlink-corner.webp 1280w"
                sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 1060px) 47vw, 390px"
                width="720" height="405" loading="lazy" decoding="async" alt="">
+          <div class="scene-card-title">
+            <span class="scene-category">弯道视界</span>
+            <h3>下一个弯还看不见</h3>
+          </div>
         </div>
         <div class="scene-copy">
-          <span class="n">02 / VISION</span>
-          <h3>弯道视界</h3>
-          <p>导航只告诉你怎么走，从不告诉你这个弯怎么过。群智弯道图谱 + 个人能力模型，入弯前 150 米给一句人话。</p>
-          <div class="kpi"><i>提前 150m</i><i>群智弯道 1 万+</i></div>
-          <span class="scene-action">打开演示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
+          <p>提前识别弯型和路况，把简短的控速提示投到头盔视线附近。</p>
+          <span class="scene-action">体验入弯提示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
         </div>
       </a>
-      <a class="scene-card" href="#/s3" data-r style="--i:6">
+      <a class="scene-card" href="#/s3">
         <div class="scene-cover">
           <img src="assets/roadlink-voice-small.webp" srcset="assets/roadlink-voice-small.webp 720w, assets/roadlink-voice.webp 1280w"
                sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 1060px) 47vw, 390px"
                width="720" height="405" loading="lazy" decoding="async" alt="">
+          <div class="scene-card-title">
+            <span class="scene-category">免手交互</span>
+            <h3>戴着手套，要发条消息</h3>
+          </div>
         </div>
         <div class="scene-copy">
-          <span class="n">03 / GLOVE</span>
-          <h3>免手交互</h3>
-          <p>戴手套点不了屏、风噪喊不动助手。把唤醒从「喊」改成「做」，一次唤醒连续办完三件事。</p>
-          <div class="kpi"><i>100km/h 唤醒 &gt;95%</i><i>单条消息 &lt;6s</i></div>
-          <span class="scene-action">打开演示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
+          <p>手势唤醒，语音说出需求。系统拟好消息，骑手确认后同步给队友。</p>
+          <span class="scene-action">体验风噪语音 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
         </div>
       </a>
-      <a class="scene-card" href="#/s4" data-r style="--i:7">
+      <a class="scene-card" href="#/s4">
         <div class="scene-cover">
           <img src="assets/roadlink-guard-small.webp" srcset="assets/roadlink-guard-small.webp 720w, assets/roadlink-guard.webp 1280w"
                sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 1060px) 47vw, 390px"
                width="720" height="405" loading="lazy" decoding="async" alt="">
+          <div class="scene-card-title">
+            <span class="scene-category">主动安全</span>
+            <h3>前车突然踩下刹车</h3>
+          </div>
         </div>
         <div class="scene-copy">
-          <span class="n">04 / GUARD</span>
-          <h3>主动安全</h3>
-          <p>前向感知 + 车车通信，把「看不见」变成「提前知道」。只在你能行动的那一秒出声。</p>
-          <div class="kpi"><i>TTC 预警 &gt;1.5s</i><i>误报 &lt;5%/小时</i></div>
-          <span class="scene-action">打开演示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
+          <p>识别车距和风险变化，按紧迫程度给骑手短提示。</p>
+          <span class="scene-action">体验分级预警 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
         </div>
       </a>
-      <a class="scene-card" href="#/s5" data-r style="--i:8">
+      <a class="scene-card" href="#/s5">
         <div class="scene-cover">
           <img src="assets/roadlink-replay-small.webp" srcset="assets/roadlink-replay-small.webp 720w, assets/roadlink-replay.webp 1280w"
                sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 1060px) 47vw, 390px"
                width="720" height="405" loading="lazy" decoding="async" alt="">
+          <div class="scene-card-title">
+            <span class="scene-category">骑行记忆</span>
+            <h3>跑完一圈，想知道还能改哪</h3>
+          </div>
         </div>
         <div class="scene-copy">
-          <span class="n">05 / REPLAY</span>
-          <h3>骑行记忆</h3>
-          <p>赛道日最贵的不是场地费，是跑完什么都没留下。事件驱动录制 + 教练模型，告诉你慢在哪。</p>
-          <div class="kpi"><i>复盘 90min→5min</i><i>存储 −80%</i></div>
-          <span class="scene-action">打开演示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
+          <p>把关键骑行动作标在轨迹和时间线上，停车后直接回看最值得复盘的片段。</p>
+          <span class="scene-action">体验片段复盘 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
         </div>
       </a>
-      <a class="scene-card" href="#/s6" data-r style="--i:9">
+      <a class="scene-card" href="#/s6">
         <div class="scene-cover">
           <img src="assets/roadlink-rescue-small.webp" srcset="assets/roadlink-rescue-small.webp 720w, assets/roadlink-rescue.webp 1280w"
                sizes="(max-width: 680px) calc(100vw - 40px), (max-width: 1060px) 47vw, 390px"
                width="720" height="405" loading="lazy" decoding="async" alt="">
+          <div class="scene-card-title">
+            <span class="scene-category">车况救援</span>
+            <h3>车坏在半路，得说清楚</h3>
+          </div>
         </div>
         <div class="scene-copy">
-          <span class="n">06 / VITALS</span>
-          <h3>车况救援</h3>
-          <p>抛锚最难受的不是坏在半路，是说不清哪里坏了。一页技师看得懂的故障摘要，和一次说得清的求救。</p>
-          <div class="kpi"><i>一次说清 &gt;90%</i><i>SOS 30s 建单</i></div>
-          <span class="scene-action">打开演示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
+          <p>安全停车后，把位置、车况与最后一段轨迹整理进救援包，方便技师判断。</p>
+          <span class="scene-action">体验模拟救援 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></span>
         </div>
       </a>
     </div>
 
-    <section class="sec" data-io>
-      <h3 class="section-title" id="pain-matrix-title">痛点覆盖 · 越野 / 赛道 / 旅行</h3>
-      <h3 style="margin-top:10px">三条骑行线，打的其实是同一套能力。</h3>
-      <p class="lead" style="font-size:14px;max-width:44em">左边是 17 条你们提的原话，右边是承接它的场景。实心＝直接解决，空心＝部分覆盖。这张表也用来砍需求：一行都没有实心的方向，不做。</p>
-      <div class="matrix-wrap" role="region" aria-labelledby="pain-matrix-title" tabindex="0">
-        <table class="matrix">
-          <thead>
-            <tr>
-              <th>痛点 · 需求原文</th>
-              <th>01<br>编队</th><th>02<br>视界</th><th>03<br>交互</th><th>04<br>安全</th><th>05<br>复盘</th><th>06<br>车况</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="grp"><td colspan="7">越野</td></tr>
-            <tr><td>独自陷车 / 倒车，没人知道，也说不清在哪</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td></tr>
-            <tr><td>林道没有能用的导航和轨迹，只能跟着领队</td><td><i class="half"></i></td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td></tr>
-            <tr><td>山里一掉队就失联，现有 Mesh 撑不住</td><td><i class="dot"></i></td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td><td class="none">—</td><td><i class="half"></i></td></tr>
-            <tr><td>「过不去」的地形没有预案，全靠人到现场判断</td><td class="none">—</td><td><i class="half"></i></td><td><i class="half"></i></td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td></tr>
-            <tr><td>越野盔 + 风镜 + 护颈，和耳机槽 / 麦克风臂直接冲突</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
-            <tr class="grp"><td colspan="7">赛道</td></tr>
-            <tr><td>一节只有 15–20 分钟，没有复盘就等于白跑</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td></tr>
-            <tr><td>胎压胎温靠猜，暖胎圈全凭经验</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td><i class="half"></i></td></tr>
-            <tr><td>刹车点、走线靠跟车和看视频学，没有即时反馈</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td></tr>
-            <tr><td>赛道日的分组、排队、清场都靠微信群</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
-            <tr><td>运动相机素材太多，没人剪</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td></tr>
-            <tr><td>一节的体能和注意力负荷没人管理</td><td class="none">—</td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td></tr>
-            <tr><td>跑山时容易按赛道习惯骑，对路况判断不足</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td><i class="half"></i></td><td><i class="dot"></i></td><td class="none">—</td></tr>
-            <tr class="grp"><td colspan="7">旅行骑行</td></tr>
-            <tr><td>抛锚时「求救无门」，连故障是什么都说不清</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td></tr>
-            <tr><td>组队靠微信群 + 对讲机拼凑，没有像样的协同工具</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
-            <tr><td>异地出问题：售后网点少，车和手机也连不上</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td></tr>
-            <tr><td>轻车小排量上高速，遇到横风和大车乱流就是死亡摇</td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td></tr>
-            <tr><td>头盔耳机：风噪、断连、重配对，十年没解</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
-          </tbody>
-        </table>
+    <details class="scene-details">
+      <summary>查看需求与场景对应表</summary>
+      <div class="scene-details-body">
+          <h3 class="section-title" id="pain-matrix-title">痛点覆盖 · 越野 / 赛道 / 旅行</h3>
+          <p class="lead" style="font-size:14px;max-width:44em">17 条骑行需求对应六个场景。实心代表直接覆盖，空心代表部分覆盖。</p>
+          <div class="matrix-wrap" role="region" aria-labelledby="pain-matrix-title" tabindex="0">
+            <table class="matrix">
+              <thead>
+                <tr>
+                  <th>痛点 · 需求原文</th>
+                  <th>01<br>编队</th><th>02<br>视界</th><th>03<br>交互</th><th>04<br>安全</th><th>05<br>复盘</th><th>06<br>车况</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="grp"><td colspan="7">越野</td></tr>
+                <tr><td>独自陷车 / 倒车，没人知道，也说不清在哪</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td></tr>
+                <tr><td>林道没有能用的导航和轨迹，只能跟着领队</td><td><i class="half"></i></td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td></tr>
+                <tr><td>山里一掉队就失联，现有 Mesh 撑不住</td><td><i class="dot"></i></td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td><td class="none">—</td><td><i class="half"></i></td></tr>
+                <tr><td>「过不去」的地形没有预案，全靠人到现场判断</td><td class="none">—</td><td><i class="half"></i></td><td><i class="half"></i></td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td></tr>
+                <tr><td>越野盔 + 风镜 + 护颈，和耳机槽 / 麦克风臂直接冲突</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
+                <tr class="grp"><td colspan="7">赛道</td></tr>
+                <tr><td>一节只有 15–20 分钟，没有复盘就等于白跑</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td></tr>
+                <tr><td>胎压胎温靠猜，暖胎圈全凭经验</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td><i class="half"></i></td></tr>
+                <tr><td>刹车点、走线靠跟车和看视频学，没有即时反馈</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td></tr>
+                <tr><td>赛道日的分组、排队、清场都靠微信群</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
+                <tr><td>运动相机素材太多，没人剪</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td></tr>
+                <tr><td>一节的体能和注意力负荷没人管理</td><td class="none">—</td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td></tr>
+                <tr><td>跑山时容易按赛道习惯骑，对路况判断不足</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td><i class="half"></i></td><td><i class="dot"></i></td><td class="none">—</td></tr>
+                <tr class="grp"><td colspan="7">旅行骑行</td></tr>
+                <tr><td>抛锚时「求救无门」，连故障是什么都说不清</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td></tr>
+                <tr><td>组队靠微信群 + 对讲机拼凑，没有像样的协同工具</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
+                <tr><td>异地出问题：售后网点少，车和手机也连不上</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td></tr>
+                <tr><td>轻车小排量上高速，遇到横风和大车乱流就是死亡摇</td><td class="none">—</td><td><i class="half"></i></td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td></tr>
+                <tr><td>头盔耳机：风噪、断连、重配对，十年没解</td><td class="none">—</td><td class="none">—</td><td><i class="dot"></i></td><td class="none">—</td><td class="none">—</td><td class="none">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="legend">
+            <span><i class="dot"></i>直接解决</span>
+            <span><i class="half"></i>部分覆盖 / 需要搭配</span>
+            <span>— 不相关，明确不做</span>
+          </div>
       </div>
-      <div class="legend">
-        <span><i class="dot"></i>直接解决</span>
-        <span><i class="half"></i>部分覆盖 / 需要搭配</span>
-        <span>— 不相关，明确不做</span>
-      </div>
-    </section>
+    </details>
 
     <footer class="foot"><span><b>ROADLINK</b> · 六个场景</span><span>下一步 · <a href="#/ai" style="color:var(--accent)">AI 引擎</a></span></footer>
   </div>
@@ -243,98 +249,109 @@
 <!-- ============ 场景 01 · CONVOY ============ -->
 <section class="view long" id="v-s1" aria-label="场景一 编队协同">
   <div class="wrap">
-    <header class="chapter-hero">
-      <div class="chapter-copy">
-        <p class="eyebrow">场景 01 / 06 · CONVOY · 编队协同</p>
-        <h2>一支车队，<br>只有一个视角。</h2>
-        <p class="lead">组队骑行不该靠微信群加对讲机拼凑。CONVOY 让每台车都带着队友的位置、续航与意图，<b>掉队 15 秒，前后车同时知道</b>。</p>
-      </div>
-      <figure class="chapter-figure">
+    <header class="scene-hero">
+      <figure class="chapter-figure scene-hero-photo">
         <img src="assets/roadlink-convoy.webp" srcset="assets/roadlink-convoy-small.webp 720w, assets/roadlink-convoy.webp 1280w"
-             sizes="(max-width: 740px) calc(100vw - 40px), 52vw" width="1280" height="720"
+             sizes="(max-width: 1330px) calc(100vw - 40px), 1240px" width="1280" height="720"
              loading="lazy" decoding="async" alt="林间碎石路上，三名摩托车骑手保持间距前行">
         <figcaption><strong>林道编队</strong><span>查看队友位置、续航与掉队提示</span></figcaption>
       </figure>
+      <div class="scene-brief">
+        <p class="eyebrow">编队协同 <span class="scene-progress">01 / 06</span></p>
+        <h2>开进林道，<br>队友掉队了。</h2>
+        <p class="lead">车队拐过几个弯，队尾突然跟不上。车把终端根据车间相对位置发现掉队，提醒头车和收队人。</p>
+        <div class="scene-hero-actions">
+          <button type="button" class="btn pri" data-scene-demo aria-controls="s1-demo">体验掉队提醒 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <a href="#/scenes" class="btn scene-back">返回场景总览</a>
+        </div>
+      </div>
     </header>
-    <div class="stats">
-      <div class="stat"><span class="n">&lt;15<em>s</em></span><small>掉队发现</small></div>
-      <div class="stat"><span class="n">&lt;10<em>m</em></span><small>无卫星队形误差</small></div>
-      <div class="stat"><span class="n">−50<em>%</em></span><small>加油决策时间</small></div>
-    </div>
 
-    <div class="demo">
-      <div class="frame">
-        <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">CONVOY · 编队实时视图</span><em><b></b>MESH 5/5</em></div>
-        <div class="stage stage-conv" data-demo="convoy">
-          <svg class="topo" viewBox="0 0 640 400" preserveAspectRatio="none" aria-hidden="true">
-            <g fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1">
-              <path d="M-20 300C80 250 120 330 220 290S380 210 460 250s140 70 220 30"/>
-              <path d="M-20 340C80 290 120 370 220 330S380 250 460 290s140 70 220 30"/>
-              <path d="M-20 260C80 210 120 290 220 250S380 170 460 210s140 70 220 30"/>
-              <path d="M-20 220C80 170 120 250 220 210S380 130 460 170s140 70 220 30"/>
-            </g>
-          </svg>
-          <svg class="map" viewBox="0 0 640 400" aria-hidden="true">
-            <path id="convPath" class="route" d="M38 330C120 330 140 248 222 248s108 52 178-8 70-120 160-112"/>
-            <path class="route-dash" d="M38 330C120 330 140 248 222 248s108 52 178-8 70-120 160-112"/>
-            <g id="convRiders"></g>
-          </svg>
-          <div class="conv-hud">
-            <div class="conv-top">
-              <span class="tag amber" id="convMode">林道 · 无卫星信号</span>
-              <span class="tag" id="convNet">相对定位 · 5 节点</span>
+    <section class="scene-demo" id="s1-demo" aria-labelledby="s1-demo-title">
+      <header class="scene-demo-heading">
+        <h3 class="section-title" id="s1-demo-title" tabindex="-1">队尾掉队，谁先收到提醒？</h3>
+        <p>切换「林道」「城市」或「高速」，观察队伍状态和提醒对象。</p>
+      </header>
+      <div class="demo">
+        <div class="frame">
+          <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">编队协同 · 界面模拟</span></div>
+          <div class="ctrl-row">
+            <div class="chips" role="group" aria-label="切换骑行场景">
+              <button class="chip on" data-conv="trail" aria-pressed="true">林道</button>
+              <button class="chip" data-conv="city" aria-pressed="false">城市</button>
+              <button class="chip" data-conv="highway" aria-pressed="false">高速</button>
             </div>
-            <div class="conv-bottom">
-              <div class="conv-alert" id="convAlert" role="status" aria-live="polite">
-                <svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>
-                <span><b>3 号车掉队 120 m</b>｜已通知头车与收队人，队形自动收拢</span>
-                <span class="mono">+15s</span>
+          </div>
+          <div class="stage stage-conv" data-demo="convoy">
+            <svg class="topo" viewBox="0 0 640 400" preserveAspectRatio="none" aria-hidden="true">
+              <g fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1">
+                <path d="M-20 300C80 250 120 330 220 290S380 210 460 250s140 70 220 30"/>
+                <path d="M-20 340C80 290 120 370 220 330S380 250 460 290s140 70 220 30"/>
+                <path d="M-20 260C80 210 120 290 220 250S380 170 460 210s140 70 220 30"/>
+                <path d="M-20 220C80 170 120 250 220 210S380 130 460 170s140 70 220 30"/>
+              </g>
+            </svg>
+            <svg class="map" viewBox="0 0 640 400" aria-hidden="true">
+              <path id="convPath" class="route" d="M38 330C120 330 140 248 222 248s108 52 178-8 70-120 160-112"/>
+              <path class="route-dash" d="M38 330C120 330 140 248 222 248s108 52 178-8 70-120 160-112"/>
+              <g id="convRiders"></g>
+            </svg>
+            <div class="conv-hud">
+              <div class="conv-top">
+                <span class="tag amber" id="convMode">林道 · 无卫星信号</span>
+                <span class="tag" id="convNet">相对定位 · 5 节点</span>
               </div>
-              <ul class="conv-list" id="convList" aria-label="车队状态"></ul>
+              <div class="conv-bottom">
+                <div class="conv-alert" id="convAlert" role="status" aria-live="polite">
+                  <svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>
+                  <span><b>3 号车掉队 120 m</b>｜已通知头车与收队人，队形自动收拢</span>
+                  <span class="mono">+15s</span>
+                </div>
+                <ul class="conv-list" id="convList" aria-label="车队状态"></ul>
+              </div>
             </div>
           </div>
         </div>
-        <div class="ctrl-row">
-          <div class="chips" role="group" aria-label="切换骑行场景">
-            <button class="chip on" data-conv="trail" aria-pressed="true">林道</button>
-            <button class="chip" data-conv="city" aria-pressed="false">城市</button>
-            <button class="chip" data-conv="highway" aria-pressed="false">高速</button>
-          </div>
-          <span class="hint">切换场景 · 观察队形与告警</span>
+        <aside class="demo-story" aria-label="这个场景怎么运作">
+          <dl>
+            <div><dt>发生了什么</dt><dd>队尾被路况拉开，头车看不见后面的情况。</dd></div>
+            <div><dt>AI 怎么做</dt><dd>用车间相对位置判断队形变化。</dd></div>
+            <div><dt>骑手看到什么</dt><dd>头车与收队人看到掉队对象和距离。</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <details class="scene-details">
+      <summary>方案细节与设计目标</summary>
+      <div class="scene-details-body">
+        <p class="note">以下为概念方案的设计目标，待实测验证。</p>
+        <div class="stats">
+          <div class="stat"><span class="n">&lt;15<em>s</em></span><small>掉队发现</small></div>
+          <div class="stat"><span class="n">&lt;10<em>m</em></span><small>无卫星队形误差</small></div>
+          <div class="stat"><span class="n">−50<em>%</em></span><small>加油决策时间</small></div>
         </div>
-      </div>
-      <aside class="cap">
-        <p class="kicker">实时视图</p>
-        <h3>队形、油量、意图，一屏看完</h3>
-        <p>这是林道场景：没有卫星信号，五台车靠 BLE Mesh 与 UWB 相对测距维持队形。第三台车放缓时，前后两台车同时收到告警。</p>
-        <ul>
-          <li><b>头车</b>看到全队续航与加油顺位</li>
-          <li><b>收队人</b>由系统自动指派，不用现场商量</li>
-          <li><b>无卫星</b>时仍然显示相对位置，而不是一个转圈的图标</li>
-        </ul>
-        <p class="carrier"><span>载体</span>车把终端（主）· 头盔贴片（告警）· 可编程号码牌</p>
-      </aside>
-    </div>
+        <section class="scene-support">
+          <h3 class="section-title">延伸用法</h3>
+          <div class="ideas">
+            <article class="idea"><div class="k">细分 · 头车</div><h4>决定速度、加油点、等待点</h4><p>系统只给三件事：全队短板续航、队形散开度、下一个安全等待点。</p><div class="chips"><span>续航木桶</span><span>队形评分</span></div></article>
+            <article class="idea"><div class="k">细分 · 收队</div><h4>自动接管掉队者与后向盲区</h4><p>谁掉队、差多远、要不要减速接应，屏幕直接给结论。</p><div class="chips"><span>后向 80m</span><span>接应路线</span></div></article>
+            <article class="idea"><div class="k">细分 · 临时队友</div><h4>4 位数字进队，离队即失效</h4><p>路上结伴很常见，但不交换通讯录；只共享位置、续航与代号。</p><div class="chips"><span>不拉群</span><span>20 人上限</span></div></article>
+            <article class="idea"><div class="k">能力 · 无卫星拓扑</div><h4>没有卫星也能锁定彼此</h4><p>UWB 测距 + Mesh 心跳维持相对坐标，断链毫秒级重路由。</p><div class="chips"><span>&lt;10m</span><span>30 分钟</span></div></article>
+            <article class="idea"><div class="k">能力 · 意图预判</div><h4>提前 3 秒猜到头车动作</h4><p>读 IMU、转向灯与刹车，判断进弯、靠边还是停车。</p><div class="chips"><span>200Hz</span><span>3 秒</span></div></article>
+            <article class="idea"><div class="k">能力 · 分级告警</div><h4>只通知该行动的那两台车</h4><p>三级响应：HUD 微光 → 骨传导短音 → 停车坐标。</p><div class="chips"><span>3 级</span><span>≤8 字</span></div></article>
+          </div>
+        </section>
 
-    <section class="sec" data-io>
-      <h3 class="section-title">六个小想法 · 细分与能力</h3>
-      <div class="ideas">
-        <article class="idea"><div class="k">细分 · 头车</div><h4>决定速度、加油点、等待点</h4><p>系统只给三件事：全队短板续航、队形散开度、下一个安全等待点。</p><div class="chips"><span>续航木桶</span><span>队形评分</span></div></article>
-        <article class="idea"><div class="k">细分 · 收队</div><h4>自动接管掉队者与后向盲区</h4><p>谁掉队、差多远、要不要减速接应，屏幕直接给结论。</p><div class="chips"><span>后向 80m</span><span>接应路线</span></div></article>
-        <article class="idea"><div class="k">细分 · 临时队友</div><h4>4 位数字进队，离队即失效</h4><p>路上结伴很常见，但不交换通讯录；只共享位置、续航与代号。</p><div class="chips"><span>不拉群</span><span>20 人上限</span></div></article>
-        <article class="idea"><div class="k">能力 · 无卫星拓扑</div><h4>没有卫星也能锁定彼此</h4><p>UWB 测距 + Mesh 心跳维持相对坐标，断链毫秒级重路由。</p><div class="chips"><span>&lt;10m</span><span>30 分钟</span></div></article>
-        <article class="idea"><div class="k">能力 · 意图预判</div><h4>提前 3 秒猜到头车动作</h4><p>读 IMU、转向灯与刹车，判断进弯、靠边还是停车。</p><div class="chips"><span>200Hz</span><span>3 秒</span></div></article>
-        <article class="idea"><div class="k">能力 · 分级告警</div><h4>只通知该行动的那两台车</h4><p>三级响应：HUD 微光 → 骨传导短音 → 停车坐标。</p><div class="chips"><span>3 级</span><span>≤8 字</span></div></article>
+        <section class="scene-support">
+          <div class="grid-3">
+            <article class="note-card warn"><div class="k">边界与失败处理</div><p>无卫星时退化为相对坐标；队友手机没电仍靠设备维持；休息可一键暂停告警；上限 20 人；只共享位置与续航。</p></article>
+            <article class="note-card"><div class="k">验收指标</div><p>掉队 P95 &lt;15s；30 分钟漂移 &lt;10m；误报 &lt;1 次/小时。</p></article>
+            <article class="note-card"><div class="k">明确不做</div><p>不做对讲硬件（Lumos 已众筹 $897,828），不做手机支架，不做后视摄像头。</p></article>
+          </div>
+        </section>
       </div>
-    </section>
-
-    <section class="sec" data-io>
-      <div class="grid-3">
-        <article class="note-card warn"><div class="k">边界与失败处理</div><p>无卫星时退化为相对坐标；队友手机没电仍靠设备维持；休息可一键暂停告警；上限 20 人；只共享位置与续航。</p></article>
-        <article class="note-card"><div class="k">验收指标</div><p>掉队 P95 &lt;15s；30 分钟漂移 &lt;10m；误报 &lt;1 次/小时。</p></article>
-        <article class="note-card"><div class="k">明确不做</div><p>不做对讲硬件（Lumos 已众筹 $897,828），不做手机支架，不做后视摄像头。</p></article>
-      </div>
-    </section>
+    </details>
 
     <nav class="pager" aria-label="场景翻页">
       <a href="#/scenes"><svg class="i" aria-hidden="true"><use href="#i-prev"/></svg>全部场景</a>
@@ -347,97 +364,108 @@
 <!-- ============ 场景 02 · VISION ============ -->
 <section class="view long" id="v-s2" aria-label="场景二 弯道视界">
   <div class="wrap">
-    <header class="chapter-hero">
-      <div class="chapter-copy">
-        <p class="eyebrow">场景 02 / 06 · VISION · 弯道视界</p>
-        <h2>先于你，<br>看见那个弯。</h2>
-        <p class="lead">导航只告诉你怎么走，从不告诉你这个弯怎么过。VISION 把群智曲率与你的历史能力合起来，<b>入弯前 150 米只给一句话</b>。</p>
-      </div>
-      <figure class="chapter-figure">
+    <header class="scene-hero">
+      <figure class="chapter-figure scene-hero-photo">
         <img src="assets/roadlink-corner.webp" srcset="assets/roadlink-corner-small.webp 720w, assets/roadlink-corner.webp 1280w"
-             sizes="(max-width: 740px) calc(100vw - 40px), 52vw" width="1280" height="720"
+             sizes="(max-width: 1330px) calc(100vw - 40px), 1240px" width="1280" height="720"
              loading="lazy" decoding="async" alt="骑手沿本车道驶近被岩壁遮挡的山路弯道">
         <figcaption><strong>山路盲弯</strong><span>在入弯前收到简短提示</span></figcaption>
       </figure>
+      <div class="scene-brief">
+        <p class="eyebrow">弯道视界 <span class="scene-progress">02 / 06</span></p>
+        <h2>弯还没看见，<br>提示先到了。</h2>
+        <p class="lead">山路前方被岩壁挡住。系统结合地图与车辆状态识别弯型，让骑手在入弯前抬眼就能看到关键信息。</p>
+        <div class="scene-hero-actions">
+          <button type="button" class="btn pri" data-scene-demo aria-controls="s2-demo">体验入弯提示 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <a href="#/scenes" class="btn scene-back">返回场景总览</a>
+        </div>
+      </div>
     </header>
-    <div class="stats">
-      <div class="stat"><span class="n">150<em>m</em></span><small>提示提前量</small></div>
-      <div class="stat"><span class="n">10k<em>+</em></span><small>群智弯道</small></div>
-      <div class="stat"><span class="n">1<em>行</em></span><small>只显示一行</small></div>
-    </div>
 
-    <div class="demo flip">
-      <div class="frame">
-        <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">VISION · 头盔贴片 · 单色 HUD</span><em><b></b>GPS · IMU</em></div>
-        <div class="stage stage-hud" data-demo="hud">
-          <div class="night"></div><div class="van"></div>
-          <div class="hud">
-            <div class="hud-top">
-              <div class="hud-nav">
-                <span class="arrow"><svg class="i" aria-hidden="true"><use href="#i-turn"/></svg></span>
-                <span class="txt"><b>右转 · 县道 012</b><small id="hudDist">前方 420 m</small></span>
-              </div>
-              <div class="hud-speed"><b id="hudSpeed">72</b><small>KM/H</small></div>
+    <section class="scene-demo" id="s2-demo" aria-labelledby="s2-demo-title">
+      <header class="scene-demo-heading">
+        <h3 class="section-title" id="s2-demo-title" tabindex="-1">换个弯，头盔提示怎么变？</h3>
+        <p>点「发夹弯」或「连续 S 弯」，看前方距离、弯型和提示如何变化。</p>
+      </header>
+      <div class="demo">
+        <div class="frame">
+          <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">弯道视界 · 界面模拟</span></div>
+          <div class="ctrl-row">
+            <div class="chips" role="group" aria-label="切换弯型">
+              <button class="chip on" data-hud="hairpin" aria-pressed="true">发夹弯</button>
+              <button class="chip" data-hud="s" aria-pressed="false">连续 S 弯</button>
+              <button class="chip" data-hud="fast" aria-pressed="false">高速弯</button>
             </div>
-            <div class="hud-corner">
-              <div class="t">
-                <div class="lab">下一个弯 · <span id="hudCornerNo">C4</span></div>
-                <b id="hudCorner">右弯 · 曲率 26 m</b>
-                <small id="hudCornerSub">盲弯 · 对向来车记录 3 次</small>
+          </div>
+          <div class="stage stage-hud" data-demo="hud">
+            <div class="night"></div><div class="van"></div>
+            <div class="hud">
+              <div class="hud-top">
+                <div class="hud-nav">
+                  <span class="arrow"><svg class="i" aria-hidden="true"><use href="#i-turn"/></svg></span>
+                  <span class="txt"><b>右转 · 县道 012</b><small id="hudDist">前方 420 m</small></span>
+                </div>
+                <div class="hud-speed"><b id="hudSpeed">72</b><small>KM/H</small></div>
               </div>
-              <span class="advice" id="hudAdvice">建议入弯 58</span>
+              <div class="hud-corner">
+                <div class="t">
+                  <div class="lab">下一个弯 · <span id="hudCornerNo">C4</span></div>
+                  <b id="hudCorner">右弯 · 曲率 26 m</b>
+                  <small id="hudCornerSub">盲弯 · 对向来车记录 3 次</small>
+                </div>
+                <span class="advice" id="hudAdvice">建议入弯 58</span>
+              </div>
+              <div class="hud-foot"><span id="hudMode">跑山 · 低密度</span><span class="bar-i"><i id="hudProg"></i></span><span id="hudNext">150 m</span></div>
             </div>
-            <div class="hud-foot"><span id="hudMode">跑山 · 低密度</span><span class="bar-i"><i id="hudProg"></i></span><span id="hudNext">150 m</span></div>
+            <div class="hud-curve" aria-hidden="true">
+              <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round">
+                <path d="M16 104a88 88 0 0 1 88-88" stroke-opacity=".16"/>
+                <path class="fill" id="hudArc" d="M16 104a88 88 0 0 1 88-88"/>
+              </svg>
+            </div>
+            <div class="hud-warn" id="hudWarn"></div>
           </div>
-          <div class="hud-curve" aria-hidden="true">
-            <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round">
-              <path d="M16 104a88 88 0 0 1 88-88" stroke-opacity=".16"/>
-              <path class="fill" id="hudArc" d="M16 104a88 88 0 0 1 88-88"/>
-            </svg>
-          </div>
-          <div class="hud-warn" id="hudWarn"></div>
         </div>
-        <div class="ctrl-row">
-          <div class="chips" role="group" aria-label="切换弯型">
-            <button class="chip on" data-hud="hairpin" aria-pressed="true">发夹弯</button>
-            <button class="chip" data-hud="s" aria-pressed="false">连续 S 弯</button>
-            <button class="chip" data-hud="fast" aria-pressed="false">高速弯</button>
-          </div>
-          <span class="hint">切换弯型 · 看提示怎么变</span>
-        </div>
-      </div>
-      <aside class="cap">
-        <p class="kicker">抬头显示</p>
-        <h3>入弯前，只留一句人话</h3>
-        <p>单色贴片在面罩右上方。直道补导航，进弯自动降密度——只剩速度和一句「收油 58」。手机留在口袋里。</p>
-        <ul>
-          <li>曲率来自<b>群智数据</b>，不是地图估算</li>
-          <li>盲弯与对向来车单独标记</li>
-          <li>新手与老手，两套阈值</li>
-        </ul>
-        <p class="carrier"><span>载体</span>头盔贴片（单色 HUD）· 手机（算路）</p>
-      </aside>
-    </div>
-
-    <section class="sec" data-io>
-      <h3 class="section-title">六个小想法 · 细分与能力</h3>
-      <div class="ideas">
-        <article class="idea"><div class="k">细分 · 盲弯</div><h4>看不见对向的那一下</h4><p>对向压线 ≥3 次标红，只给建议速度，不报角度与编号。</p><div class="chips"><span>150m</span><span>建议 48</span></div></article>
-        <article class="idea"><div class="k">细分 · 连续弯</div><h4>节奏被打断最容易出事</h4><p>一次进弯只提示一句「稳油 55」，翻身点单独给方向。</p><div class="chips"><span>不刷屏</span><span>翻身点</span></div></article>
-        <article class="idea"><div class="k">细分 · 夜雨雾</div><h4>视线最差时只做减法</h4><p>自动降速 15%，隐藏导航与来电，只留弯心与湿滑标记。</p><div class="chips"><span>亮度自适应</span><span>湿滑</span></div></article>
-        <article class="idea"><div class="k">能力 · 群智曲率</div><h4>由前车倾角与速度反推</h4><p>比地图描点更接近真实路面，施工与砂石一周内反映。</p><div class="chips"><span>10k+ 弯道</span><span>脱敏</span></div></article>
-        <article class="idea"><div class="k">能力 · 千人千面</div><h4>同一弯，新手 46、老手 62</h4><p>按你的稳态倾角与历史通过速度调整阈值。</p><div class="chips"><span>个人模型</span><span>动态</span></div></article>
-        <article class="idea"><div class="k">能力 · 单行 HUD</div><h4>视线不离开路面</h4><p>单色贴片只显示速度与一句话，出弯自动恢复导航。</p><div class="chips"><span>3000nit</span><span>零遮挡</span></div></article>
+        <aside class="demo-story" aria-label="这个场景怎么运作">
+          <dl>
+            <div><dt>发生了什么</dt><dd>岩壁挡住前方视线，普通导航只给路线。</dd></div>
+            <div><dt>AI 怎么做</dt><dd>结合弯道信息与行驶状态，提前判断提示时机。</dd></div>
+            <div><dt>骑手看到什么</dt><dd>头盔显示弯型、距离和一句控速提示。</dd></div>
+          </dl>
+        </aside>
       </div>
     </section>
 
-    <section class="sec" data-io>
-      <div class="grid-3">
-        <article class="note-card warn"><div class="k">边界与失败处理</div><p>新路按地图曲率保守取值；GPS 漂移用 IMU 补位；同一个弯 5 分钟内不重复；跑山模式屏蔽圈速与倾角。</p></article>
-        <article class="note-card"><div class="k">验收指标</div><p>提示提前 ≥150m；重复提示 ≤1 次；视线离开 &lt;0.5s。</p></article>
-        <article class="note-card"><div class="k">明确不做</div><p>不复刻 Glimpse 圆屏，不做 CarPlay 仪表，不做全彩 AR。</p></article>
+    <details class="scene-details">
+      <summary>方案细节与设计目标</summary>
+      <div class="scene-details-body">
+        <p class="note">以下为概念方案的设计目标，待实测验证。</p>
+        <div class="stats">
+          <div class="stat"><span class="n">150<em>m</em></span><small>提示提前量</small></div>
+          <div class="stat"><span class="n">10k<em>+</em></span><small>群智弯道</small></div>
+          <div class="stat"><span class="n">1<em>行</em></span><small>只显示一行</small></div>
+        </div>
+        <section class="scene-support">
+          <h3 class="section-title">延伸用法</h3>
+          <div class="ideas">
+            <article class="idea"><div class="k">细分 · 盲弯</div><h4>看不见对向的那一下</h4><p>对向压线 ≥3 次标红，只给建议速度，不报角度与编号。</p><div class="chips"><span>150m</span><span>建议 48</span></div></article>
+            <article class="idea"><div class="k">细分 · 连续弯</div><h4>节奏被打断最容易出事</h4><p>一次进弯只提示一句「稳油 55」，翻身点单独给方向。</p><div class="chips"><span>不刷屏</span><span>翻身点</span></div></article>
+            <article class="idea"><div class="k">细分 · 夜雨雾</div><h4>视线最差时只做减法</h4><p>自动降速 15%，隐藏导航与来电，只留弯心与湿滑标记。</p><div class="chips"><span>亮度自适应</span><span>湿滑</span></div></article>
+            <article class="idea"><div class="k">能力 · 群智曲率</div><h4>由前车倾角与速度反推</h4><p>比地图描点更接近真实路面，施工与砂石一周内反映。</p><div class="chips"><span>10k+ 弯道</span><span>脱敏</span></div></article>
+            <article class="idea"><div class="k">能力 · 千人千面</div><h4>同一弯，新手 46、老手 62</h4><p>按你的稳态倾角与历史通过速度调整阈值。</p><div class="chips"><span>个人模型</span><span>动态</span></div></article>
+            <article class="idea"><div class="k">能力 · 单行 HUD</div><h4>视线不离开路面</h4><p>单色贴片只显示速度与一句话，出弯自动恢复导航。</p><div class="chips"><span>3000nit</span><span>零遮挡</span></div></article>
+          </div>
+        </section>
+
+        <section class="scene-support">
+          <div class="grid-3">
+            <article class="note-card warn"><div class="k">边界与失败处理</div><p>新路按地图曲率保守取值；GPS 漂移用 IMU 补位；同一个弯 5 分钟内不重复；跑山模式屏蔽圈速与倾角。</p></article>
+            <article class="note-card"><div class="k">验收指标</div><p>提示提前 ≥150m；重复提示 ≤1 次；视线离开 &lt;0.5s。</p></article>
+            <article class="note-card"><div class="k">明确不做</div><p>不复刻 Glimpse 圆屏，不做 CarPlay 仪表，不做全彩 AR。</p></article>
+          </div>
+        </section>
       </div>
-    </section>
+    </details>
 
     <nav class="pager" aria-label="场景翻页">
       <a href="#/s1"><svg class="i" aria-hidden="true"><use href="#i-prev"/></svg>上一场景 · 编队协同</a>
@@ -450,80 +478,92 @@
 <!-- ============ 场景 03 · GLOVE ============ -->
 <section class="view long" id="v-s3" aria-label="场景三 免手交互">
   <div class="wrap">
-    <header class="chapter-hero">
-      <div class="chapter-copy">
-        <p class="eyebrow">场景 03 / 06 · GLOVE · 免手交互</p>
-        <h2>手套之外，<br>还有指令。</h2>
-        <p class="lead">戴手套点不了屏，96dB 风噪喊不动助手。GLOVE 把唤醒从「喊」改成「做」，<b>一次唤醒，连续办完一件事</b>。</p>
-      </div>
-      <figure class="chapter-figure">
+    <header class="scene-hero">
+      <figure class="chapter-figure scene-hero-photo">
         <img src="assets/roadlink-voice.webp" srcset="assets/roadlink-voice-small.webp 720w, assets/roadlink-voice.webp 1280w"
-             sizes="(max-width: 740px) calc(100vw - 40px), 52vw" width="1280" height="720"
+             sizes="(max-width: 1330px) calc(100vw - 40px), 1240px" width="1280" height="720"
              loading="lazy" decoding="async" alt="戴全盔的骑手双手握住车把">
         <figcaption><strong>头盔语音交互</strong><span>双手留在车把，指令从语音进入</span></figcaption>
       </figure>
+      <div class="scene-brief">
+        <p class="eyebrow">免手交互 <span class="scene-progress">03 / 06</span></p>
+        <h2>手套戴着，<br>一句话也能说清。</h2>
+        <p class="lead">骑到一半想告诉队友晚点到。骑手用手势唤醒，说出需求，系统拟好消息，等确认后再发送。</p>
+        <div class="scene-hero-actions">
+          <button type="button" class="btn pri" data-scene-demo aria-controls="s3-demo">体验风噪语音 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <a href="#/scenes" class="btn scene-back">返回场景总览</a>
+        </div>
+      </div>
     </header>
-    <div class="stats">
-      <div class="stat"><span class="n">&gt;95<em>%</em></span><small>100km/h 唤醒率</small></div>
-      <div class="stat"><span class="n">&lt;6<em>s</em></span><small>单条消息</small></div>
-      <div class="stat"><span class="n">0<em>次</em></span><small>摘手套</small></div>
-    </div>
 
-    <div class="demo">
-      <div class="frame">
-        <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">GLOVE · 语音代理 · 96 dB 风噪</span><em><b></b>ON-DEVICE</em></div>
-        <div class="stage stage-glove" data-demo="glove">
-          <div class="gl-head">
-            <div class="l"><span class="tag amber">风噪 96 dB</span><span class="tag" id="glMode">骨传导 + 双麦</span></div>
-            <span class="tag" id="glWake">等待唤醒 …</span>
+    <section class="scene-demo" id="s3-demo" aria-labelledby="s3-demo-title">
+      <header class="scene-demo-heading">
+        <h3 class="section-title" id="s3-demo-title" tabindex="-1">一句话，从风噪里发到队友手上</h3>
+        <p>点麦克风，看看风噪下的语音如何变成一条待确认的消息。</p>
+      </header>
+      <div class="demo">
+        <div class="frame">
+          <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">免手交互 · 界面模拟</span></div>
+          <div class="stage stage-glove" data-demo="glove">
+            <div class="gl-head">
+              <div class="l"><span class="tag amber">风噪 96 dB</span><span class="tag" id="glMode">骨传导 + 双麦</span></div>
+              <span class="tag" id="glWake">等待唤醒 …</span>
+            </div>
+            <div class="gl-row"><span class="lbl">RAW · 麦克风原始</span><span class="val">96 dB · 风噪</span></div>
+            <div class="wave" id="waveRaw"></div>
+            <div class="gl-row"><span class="lbl amber">AI · 风噪抑制后</span><span class="val">字准率 94%</span></div>
+            <div class="wave clean" id="waveClean"></div>
+            <div class="gl-script" id="glScript" aria-live="polite"><p class="gl-idle" id="glIdle">点一下麦克风，跑一遍 96 dB 风噪下的完整对话</p></div>
+            <div class="gl-actions">
+              <button class="mic" id="glMic" aria-label="开始一段语音指令"><svg class="i" aria-hidden="true"><use href="#i-mic"/></svg></button>
+              <div class="gl-state"><b id="glStateT">点头，或点这里</b><span id="glStateS">三种手势任一唤醒 · 不用摘手套</span></div>
+            </div>
           </div>
-          <div class="gl-row"><span class="lbl">RAW · 麦克风原始</span><span class="val">96 dB · 风噪</span></div>
-          <div class="wave" id="waveRaw"></div>
-          <div class="gl-row"><span class="lbl amber">AI · 风噪抑制后</span><span class="val">字准率 94%</span></div>
-          <div class="wave clean" id="waveClean"></div>
-          <div class="gl-script" id="glScript" aria-live="polite"><p class="gl-idle" id="glIdle">点一下麦克风，跑一遍 96 dB 风噪下的完整对话</p></div>
-          <div class="gl-actions">
-            <button class="mic" id="glMic" aria-label="开始一段语音指令"><svg class="i" aria-hidden="true"><use href="#i-mic"/></svg></button>
-            <div class="gl-state"><b id="glStateT">点头，或点这里</b><span id="glStateS">三种手势任一唤醒 · 不用摘手套</span></div>
+          <div class="ctrl-row">
+            <span class="tag">唤醒词 0.4s</span><span class="tag">多轮任务</span><span class="tag">只播结论</span>
+            <span class="hint">点击麦克风，跑一遍完整流程</span>
           </div>
         </div>
-        <div class="ctrl-row">
-          <span class="tag">唤醒词 0.4s</span><span class="tag">多轮任务</span><span class="tag">只播结论</span>
-          <span class="hint">点击麦克风，跑一遍完整流程</span>
-        </div>
-      </div>
-      <aside class="cap">
-        <p class="kicker">风噪里听清，然后把事办了</p>
-        <h3>从一句话，到一条已发送的微信</h3>
-        <p>两段波形是同一句话：上面是麦克风原始信号，下面是抑制后的结果。右边是 AI 把一句话拆成任务、拟稿、等你点头、发送。</p>
-        <ul>
-          <li>唤醒不靠喊：<b>三种物理手势</b> + 超短指令</li>
-          <li>只播结论，不念全文</li>
-          <li>默认不录音上云，只传唤醒后 8 秒</li>
-        </ul>
-        <p class="carrier"><span>载体</span>车把终端（双麦阵列）· 骨传导 / 头盔贴片</p>
-      </aside>
-    </div>
-
-    <section class="sec" data-io>
-      <h3 class="section-title">六个小想法 · 细分与能力</h3>
-      <div class="ideas">
-        <article class="idea"><div class="k">细分 · 等红灯</div><h4>完整读、拟、改、发</h4><p>静止时允许多轮对话，确认只用点头或一句「发」。</p><div class="chips"><span>多轮</span><span>不摘手套</span></div></article>
-        <article class="idea"><div class="k">细分 · 高速</div><h4>只报「谁 + 一句话结论」</h4><p>100km/h 不做长播报，回复限定三种，地址推屏不靠耳朵。</p><div class="chips"><span>≤25 字</span><span>三种回复</span></div></article>
-        <article class="idea"><div class="k">细分 · 停车</div><h4>用嘴改路线</h4><p>说「去最近的加油站」，确认后重规划，地址推 HUD。</p><div class="chips"><span>离线 6 指令</span><span>二次确认</span></div></article>
-        <article class="idea"><div class="k">能力 · 骨传导对齐</div><h4>用声带振动做干净参考</h4><p>双麦波束 + 骨传导辅路，96dB 下仍然可用。</p><div class="chips"><span>94% 字准</span><span>20ms</span></div></article>
-        <article class="idea"><div class="k">能力 · 手势唤醒</div><h4>点头 / 咬牙 / 捏把</h4><p>200KB 端侧模型，0.4 秒进入聆听，不靠喊。</p><div class="chips"><span>0.4s</span><span>200KB</span></div></article>
-        <article class="idea"><div class="k">能力 · HITL 确认</div><h4>写操作必须人工点头</h4><p>拟稿、改路线一律先确认，零幻觉，可审计。</p><div class="chips"><span>零幻觉</span><span>可审计</span></div></article>
+        <aside class="demo-story" aria-label="这个场景怎么运作">
+          <dl>
+            <div><dt>发生了什么</dt><dd>风声大，骑手戴着手套不便操作屏幕。</dd></div>
+            <div><dt>AI 怎么做</dt><dd>抑制风噪并转写语音，把意图整理为消息。</dd></div>
+            <div><dt>骑手看到什么</dt><dd>确认拟稿后发送并同步给队友。</dd></div>
+          </dl>
+        </aside>
       </div>
     </section>
 
-    <section class="sec" data-io>
-      <div class="grid-3">
-        <article class="note-card warn"><div class="k">边界与失败处理</div><p>唤醒失败用车把按键兜底；置信度低就复述确认；断网保留接听 / 挂断 / 收藏点导航；只传唤醒后 8 秒音频。</p></article>
-        <article class="note-card"><div class="k">验收指标</div><p>100km/h 唤醒 &gt;95%；误唤醒 &lt;1 次/小时；单条闭环 &lt;6s。</p></article>
-        <article class="note-card"><div class="k">明确不做</div><p>不做通用助手，不承诺所有 App，不做常开录音。</p></article>
+    <details class="scene-details">
+      <summary>方案细节与设计目标</summary>
+      <div class="scene-details-body">
+        <p class="note">以下为概念方案的设计目标，待实测验证。</p>
+        <div class="stats">
+          <div class="stat"><span class="n">&gt;95<em>%</em></span><small>100km/h 唤醒率</small></div>
+          <div class="stat"><span class="n">&lt;6<em>s</em></span><small>单条消息</small></div>
+          <div class="stat"><span class="n">0<em>次</em></span><small>摘手套</small></div>
+        </div>
+        <section class="scene-support">
+          <h3 class="section-title">延伸用法</h3>
+          <div class="ideas">
+            <article class="idea"><div class="k">细分 · 等红灯</div><h4>完整读、拟、改、发</h4><p>静止时允许多轮对话，确认只用点头或一句「发」。</p><div class="chips"><span>多轮</span><span>不摘手套</span></div></article>
+            <article class="idea"><div class="k">细分 · 高速</div><h4>只报「谁 + 一句话结论」</h4><p>100km/h 不做长播报，回复限定三种，地址推屏不靠耳朵。</p><div class="chips"><span>≤25 字</span><span>三种回复</span></div></article>
+            <article class="idea"><div class="k">细分 · 停车</div><h4>用嘴改路线</h4><p>说「去最近的加油站」，确认后重规划，地址推 HUD。</p><div class="chips"><span>离线 6 指令</span><span>二次确认</span></div></article>
+            <article class="idea"><div class="k">能力 · 骨传导对齐</div><h4>用声带振动做干净参考</h4><p>双麦波束 + 骨传导辅路，96dB 下仍然可用。</p><div class="chips"><span>94% 字准</span><span>20ms</span></div></article>
+            <article class="idea"><div class="k">能力 · 手势唤醒</div><h4>点头 / 咬牙 / 捏把</h4><p>200KB 端侧模型，0.4 秒进入聆听，不靠喊。</p><div class="chips"><span>0.4s</span><span>200KB</span></div></article>
+            <article class="idea"><div class="k">能力 · HITL 确认</div><h4>写操作必须人工点头</h4><p>拟稿、改路线一律先确认，零幻觉，可审计。</p><div class="chips"><span>零幻觉</span><span>可审计</span></div></article>
+          </div>
+        </section>
+
+        <section class="scene-support">
+          <div class="grid-3">
+            <article class="note-card warn"><div class="k">边界与失败处理</div><p>唤醒失败用车把按键兜底；置信度低就复述确认；断网保留接听 / 挂断 / 收藏点导航；只传唤醒后 8 秒音频。</p></article>
+            <article class="note-card"><div class="k">验收指标</div><p>100km/h 唤醒 &gt;95%；误唤醒 &lt;1 次/小时；单条闭环 &lt;6s。</p></article>
+            <article class="note-card"><div class="k">明确不做</div><p>不做通用助手，不承诺所有 App，不做常开录音。</p></article>
+          </div>
+        </section>
       </div>
-    </section>
+    </details>
 
     <nav class="pager" aria-label="场景翻页">
       <a href="#/s2"><svg class="i" aria-hidden="true"><use href="#i-prev"/></svg>上一场景 · 弯道视界</a>
@@ -536,88 +576,99 @@
 <!-- ============ 场景 04 · GUARD ============ -->
 <section class="view long" id="v-s4" aria-label="场景四 主动安全">
   <div class="wrap">
-    <header class="chapter-hero">
-      <div class="chapter-copy">
-        <p class="eyebrow">场景 04 / 06 · GUARD · 主动安全</p>
-        <h2>危险发生前，<br>1.5 秒。</h2>
-        <p class="lead">两轮车没有铁皮。GUARD 把雷达、视觉、胎温与横风合成一个风险分，<b>平时绝对安静，只在你能反应的那 1.5 秒出声</b>。</p>
-      </div>
-      <figure class="chapter-figure">
+    <header class="scene-hero">
+      <figure class="chapter-figure scene-hero-photo">
         <img src="assets/roadlink-guard.webp" srcset="assets/roadlink-guard-small.webp 720w, assets/roadlink-guard.webp 1280w"
-             sizes="(max-width: 740px) calc(100vw - 40px), 52vw" width="1280" height="720"
+             sizes="(max-width: 1330px) calc(100vw - 40px), 1240px" width="1280" height="720"
              loading="lazy" decoding="async" alt="暮色中，摩托车刹车灯亮起，前方车辆保持间距">
         <figcaption><strong>前向风险</strong><span>感知车距变化并分级提示</span></figcaption>
       </figure>
+      <div class="scene-brief">
+        <p class="eyebrow">主动安全 <span class="scene-progress">04 / 06</span></p>
+        <h2>前车突然急刹，<br>提醒分轻重。</h2>
+        <p class="lead">车距突然缩短时，系统结合前向感知和车辆状态判断风险，给出与紧迫程度相符的提醒。</p>
+        <div class="scene-hero-actions">
+          <button type="button" class="btn pri" data-scene-demo aria-controls="s4-demo">体验分级预警 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <a href="#/scenes" class="btn scene-back">返回场景总览</a>
+        </div>
+      </div>
     </header>
-    <div class="stats">
-      <div class="stat"><span class="n">&gt;1.5<em>s</em></span><small>前向 TTC 预警</small></div>
-      <div class="stat"><span class="n">&lt;5<em>%/h</em></span><small>误报率</small></div>
-      <div class="stat"><span class="n">15<em>min</em></span><small>胎温预测</small></div>
-    </div>
 
-    <div class="demo flip">
-      <div class="frame">
-        <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">GUARD · 风险视图</span><em><b></b>FUSION</em></div>
-        <div class="stage stage-guard" data-demo="guard">
-          <div class="scene">
-            <div class="gd-road"><div class="gd-lane"></div></div>
-            <div class="gd-bike"><svg class="i" aria-hidden="true"><use href="#i-bike"/></svg></div>
-            <div class="gd-range" id="gdRange"></div>
-            <span class="gd-dist" id="gdDist">60 m</span>
-            <div class="gd-car lead" id="gdCar"></div>
-          </div>
-          <div class="gd-overlay">
-            <div class="gd-top">
-              <span class="tag" id="gdMode">前向 · 60 GHz + 视觉</span>
-              <div class="gd-ttc"><b id="gdTTC">1.9</b><small id="gdUnit">TTC · 秒</small></div>
+    <section class="scene-demo" id="s4-demo" aria-labelledby="s4-demo-title">
+      <header class="scene-demo-heading">
+        <h3 class="section-title" id="s4-demo-title" tabindex="-1">同一趟路，三种风险怎么提示？</h3>
+        <p>切换「前车急刹」「盲弯对向车」或「胎温异常」，观察风险提示。</p>
+      </header>
+      <div class="demo">
+        <div class="frame">
+          <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">主动安全 · 界面模拟</span></div>
+          <div class="ctrl-row">
+            <div class="chips" role="group" aria-label="切换风险场景">
+              <button class="chip on" data-guard="brake" aria-pressed="true">前车急刹</button>
+              <button class="chip" data-guard="blind" aria-pressed="false">盲弯对向车</button>
+              <button class="chip" data-guard="tyre" aria-pressed="false">胎温异常</button>
             </div>
-            <div class="gd-bottom">
-              <div class="gd-meter"><i id="gdBar"></i></div>
-              <div class="gd-msg" id="gdMsg"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg><span>前车制动 · 距离 24 m</span></div>
+          </div>
+          <div class="stage stage-guard" data-demo="guard">
+            <div class="scene">
+              <div class="gd-road"><div class="gd-lane"></div></div>
+              <div class="gd-bike"><svg class="i" aria-hidden="true"><use href="#i-bike"/></svg></div>
+              <div class="gd-range" id="gdRange"></div>
+              <span class="gd-dist" id="gdDist">60 m</span>
+              <div class="gd-car lead" id="gdCar"></div>
+            </div>
+            <div class="gd-overlay">
+              <div class="gd-top">
+                <span class="tag" id="gdMode">前向 · 60 GHz + 视觉</span>
+                <div class="gd-ttc"><b id="gdTTC">1.9</b><small id="gdUnit">TTC · 秒</small></div>
+              </div>
+              <div class="gd-bottom">
+                <div class="gd-meter"><i id="gdBar"></i></div>
+                <div class="gd-msg" id="gdMsg"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg><span>前车制动 · 距离 24 m</span></div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="ctrl-row">
-          <div class="chips" role="group" aria-label="切换风险场景">
-            <button class="chip on" data-guard="brake" aria-pressed="true">前车急刹</button>
-            <button class="chip" data-guard="blind" aria-pressed="false">盲弯对向车</button>
-            <button class="chip" data-guard="tyre" aria-pressed="false">胎温异常</button>
-          </div>
-          <span class="hint">切换风险 · 看告警怎么分级</span>
+        <aside class="demo-story" aria-label="这个场景怎么运作">
+          <dl>
+            <div><dt>发生了什么</dt><dd>前车减速、盲弯会车或胎温异常，处理方式各不相同。</dd></div>
+            <div><dt>AI 怎么做</dt><dd>结合距离、车辆状态等信号判断风险。</dd></div>
+            <div><dt>骑手看到什么</dt><dd>显示风险原因和简短提示，驾驶操作由骑手掌握。</dd></div>
+          </dl>
+        </aside>
+      </div>
+    </section>
+
+    <details class="scene-details">
+      <summary>方案细节与设计目标</summary>
+      <div class="scene-details-body">
+        <p class="note">以下为概念方案的设计目标，待实测验证。</p>
+        <div class="stats">
+          <div class="stat"><span class="n">&gt;1.5<em>s</em></span><small>前向 TTC 预警</small></div>
+          <div class="stat"><span class="n">&lt;5<em>%/h</em></span><small>误报率</small></div>
+          <div class="stat"><span class="n">15<em>min</em></span><small>胎温预测</small></div>
         </div>
-      </div>
-      <aside class="cap">
-        <p class="kicker">三档输出，不做警报轰炸</p>
-        <h3>先说结论，再决定要不要干预</h3>
-        <p>所有传感器合成一个 0–100 的风险分，对应三档输出：提示、警告、干预。能行动时才响，响就一定能做点什么。</p>
-        <ul>
-          <li><b>提示</b>：HUD 一行字，不响</li>
-          <li><b>警告</b>：骨传导短音 + 边缘闪红</li>
-          <li><b>干预</b>：刹车灯提前亮，队内广播</li>
-        </ul>
-        <p class="carrier"><span>载体</span>头盔前向模组 · 惯性刹车灯 · TPMS</p>
-      </aside>
-    </div>
+        <section class="scene-support">
+          <h3 class="section-title">延伸用法</h3>
+          <div class="ideas">
+            <article class="idea"><div class="k">细分 · 城市</div><h4>前车急刹与排队</h4><p>毫米波 + 刹车灯视觉双校验，蠕行与停车不计 TTC。</p><div class="chips"><span>TTC 1.8s</span><span>不误报</span></div></article>
+            <article class="idea"><div class="k">细分 · 山路</div><h4>盲弯对向车</h4><p>没有前车时改用对向推断，提前减速并靠右。</p><div class="chips"><span>60m 推断</span><span>不报数值</span></div></article>
+            <article class="idea"><div class="k">细分 · 高速</div><h4>横风与大车尾流</h4><p>IMU 侧向加速度识别乱流，提示拉开距离。</p><div class="chips"><span>6 级</span><span>刹车灯早亮</span></div></article>
+            <article class="idea"><div class="k">能力 · 32ms 融合</div><h4>六类信号同一时间轴</h4><p>200Hz 采样，INT8 端侧推理，不等网络。</p><div class="chips"><span>32ms</span><span>200Hz</span></div></article>
+            <article class="idea"><div class="k">能力 · 三级输出</div><h4>光 → 短音 → 刹车灯</h4><p>一级静音，二级短音，三级联动后车。</p><div class="chips"><span>静音优先</span><span>100ms</span></div></article>
+            <article class="idea"><div class="k">能力 · 8 秒锁存</div><h4>只留险情片段</h4><p>不做全时录像，停车后只回放触发前后。</p><div class="chips"><span>8 秒</span><span>可追溯</span></div></article>
+          </div>
+        </section>
 
-    <section class="sec" data-io>
-      <h3 class="section-title">六个小想法 · 细分与能力</h3>
-      <div class="ideas">
-        <article class="idea"><div class="k">细分 · 城市</div><h4>前车急刹与排队</h4><p>毫米波 + 刹车灯视觉双校验，蠕行与停车不计 TTC。</p><div class="chips"><span>TTC 1.8s</span><span>不误报</span></div></article>
-        <article class="idea"><div class="k">细分 · 山路</div><h4>盲弯对向车</h4><p>没有前车时改用对向推断，提前减速并靠右。</p><div class="chips"><span>60m 推断</span><span>不报数值</span></div></article>
-        <article class="idea"><div class="k">细分 · 高速</div><h4>横风与大车尾流</h4><p>IMU 侧向加速度识别乱流，提示拉开距离。</p><div class="chips"><span>6 级</span><span>刹车灯早亮</span></div></article>
-        <article class="idea"><div class="k">能力 · 32ms 融合</div><h4>六类信号同一时间轴</h4><p>200Hz 采样，INT8 端侧推理，不等网络。</p><div class="chips"><span>32ms</span><span>200Hz</span></div></article>
-        <article class="idea"><div class="k">能力 · 三级输出</div><h4>光 → 短音 → 刹车灯</h4><p>一级静音，二级短音，三级联动后车。</p><div class="chips"><span>静音优先</span><span>100ms</span></div></article>
-        <article class="idea"><div class="k">能力 · 8 秒锁存</div><h4>只留险情片段</h4><p>不做全时录像，停车后只回放触发前后。</p><div class="chips"><span>8 秒</span><span>可追溯</span></div></article>
+        <section class="scene-support">
+          <div class="grid-3">
+            <article class="note-card warn"><div class="k">边界与失败处理</div><p>雨雾与隧道只信毫米波；停车场与收费站抑制告警；可关二级但会在复盘里记账；只提示，不接管刹车与转向。</p></article>
+            <article class="note-card"><div class="k">验收指标</div><p>TTC 提前 &gt;1.5s；误报 &lt;5%/小时；三级响应 &lt;100ms。</p></article>
+            <article class="note-card"><div class="k">明确不做</div><p>不做后视摄像头，不做全盔摄像头，不替代 ABS/TCS。</p></article>
+          </div>
+        </section>
       </div>
-    </section>
-
-    <section class="sec" data-io>
-      <div class="grid-3">
-        <article class="note-card warn"><div class="k">边界与失败处理</div><p>雨雾与隧道只信毫米波；停车场与收费站抑制告警；可关二级但会在复盘里记账；只提示，不接管刹车与转向。</p></article>
-        <article class="note-card"><div class="k">验收指标</div><p>TTC 提前 &gt;1.5s；误报 &lt;5%/小时；三级响应 &lt;100ms。</p></article>
-        <article class="note-card"><div class="k">明确不做</div><p>不做后视摄像头，不做全盔摄像头，不替代 ABS/TCS。</p></article>
-      </div>
-    </section>
+    </details>
 
     <nav class="pager" aria-label="场景翻页">
       <a href="#/s3"><svg class="i" aria-hidden="true"><use href="#i-prev"/></svg>上一场景 · 免手交互</a>
@@ -630,78 +681,89 @@
 <!-- ============ 场景 05 · REPLAY ============ -->
 <section class="view long" id="v-s5" aria-label="场景五 骑行记忆">
   <div class="wrap">
-    <header class="chapter-hero">
-      <div class="chapter-copy">
-        <p class="eyebrow">场景 05 / 06 · REPLAY · 骑行记忆</p>
-        <h2>十五分钟，<br>值得被复盘。</h2>
-        <p class="lead">赛道日最贵的不是场地费，是跑完什么都没留下。REPLAY 回 Pit 90 秒给一页复盘，<b>只让你改一个弯</b>。</p>
-      </div>
-      <figure class="chapter-figure">
+    <header class="scene-hero">
+      <figure class="chapter-figure scene-hero-photo">
         <img src="assets/roadlink-replay.webp" srcset="assets/roadlink-replay-small.webp 720w, assets/roadlink-replay.webp 1280w"
-             sizes="(max-width: 740px) calc(100vw - 40px), 52vw" width="1280" height="720"
+             sizes="(max-width: 1330px) calc(100vw - 40px), 1240px" width="1280" height="720"
              loading="lazy" decoding="async" alt="骑手在赛道边查看平板上的圈线和视频时间轴">
         <figcaption><strong>赛道日复盘</strong><span>沿轨迹与时间线回看关键事件</span></figcaption>
       </figure>
+      <div class="scene-brief">
+        <p class="eyebrow">骑行记忆 <span class="scene-progress">05 / 06</span></p>
+        <h2>跑完一圈，<br>关键几秒找得回。</h2>
+        <p class="lead">进站后想知道哪里刹早了、哪里节奏最稳。系统把值得回看的动作和片段整理成一条时间线。</p>
+        <div class="scene-hero-actions">
+          <button type="button" class="btn pri" data-scene-demo aria-controls="s5-demo">体验片段复盘 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <a href="#/scenes" class="btn scene-back">返回场景总览</a>
+        </div>
+      </div>
     </header>
-    <div class="stats">
-      <div class="stat"><span class="n">5<em>min</em></span><small>复盘（原来 90）</small></div>
-      <div class="stat"><span class="n">−80<em>%</em></span><small>素材存储</small></div>
-      <div class="stat"><span class="n">1<em>条</em></span><small>每弯一条建议</small></div>
-    </div>
 
-    <div class="demo">
-      <div class="frame">
-        <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">REPLAY · 赛道复盘 · 第 3 节</span><em><b></b>IMU 200Hz</em></div>
-        <div class="stage stage-rep" data-demo="rep">
-          <div class="rep-top">
-            <span class="tag" id="repMode">赛道 · 15 分钟</span>
-            <span class="tag amber" id="repLap">最佳 1:42.8</span>
+    <section class="scene-demo" id="s5-demo" aria-labelledby="s5-demo-title">
+      <header class="scene-demo-heading">
+        <h3 class="section-title" id="s5-demo-title" tabindex="-1">复盘从关键片段开始</h3>
+        <p>切换「赛道」「跑山」或「通勤」，看每种骑行如何选出不同复盘重点。</p>
+      </header>
+      <div class="demo">
+        <div class="frame">
+          <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">骑行记忆 · 界面模拟</span></div>
+          <div class="ctrl-row">
+            <div class="chips" role="group" aria-label="切换场景">
+              <button class="chip on" data-rep="track" aria-pressed="true">赛道</button>
+              <button class="chip" data-rep="mountain" aria-pressed="false">跑山</button>
+              <button class="chip" data-rep="commute" aria-pressed="false">通勤</button>
+            </div>
           </div>
-          <div class="rep-tl" id="repTL" aria-hidden="true"></div>
-          <div class="rep-cards" id="repCards"></div>
-          <div class="rep-bars" id="repBars"></div>
-        </div>
-        <div class="ctrl-row">
-          <div class="chips" role="group" aria-label="切换场景">
-            <button class="chip on" data-rep="track" aria-pressed="true">赛道</button>
-            <button class="chip" data-rep="mountain" aria-pressed="false">跑山</button>
-            <button class="chip" data-rep="commute" aria-pressed="false">通勤</button>
+          <div class="stage stage-rep" data-demo="rep">
+            <div class="rep-top">
+              <span class="tag" id="repMode">赛道 · 15 分钟</span>
+              <span class="tag amber" id="repLap">最佳 1:42.8</span>
+            </div>
+            <div class="rep-tl" id="repTL" aria-hidden="true"></div>
+            <div class="rep-cards" id="repCards"></div>
+            <div class="rep-bars" id="repBars"></div>
           </div>
-          <span class="hint">同一套数据，三种复盘口径</span>
         </div>
-      </div>
-      <aside class="cap">
-        <p class="kicker">事件驱动，只留值得看的 8 秒</p>
-        <h3>不是记录，是教练</h3>
-        <p>上面是这一节的 21 个事件：急刹、压弯、超车、腾空。系统只留前后各 8 秒，回 pit 时成片已经剪好。</p>
-        <ul>
-          <li>时间差拆到<b>每个弯</b></li>
-          <li>对比的是你的最佳圈，不是别人</li>
-          <li>跑山模式只做安全复盘，不给圈速</li>
-        </ul>
-        <p class="carrier"><span>载体</span>车把终端（IMU + 录制）· 手机（成片）</p>
-      </aside>
-    </div>
-
-    <section class="sec" data-io>
-      <h3 class="section-title">六个小想法 · 细分与能力</h3>
-      <div class="ideas">
-        <article class="idea"><div class="k">细分 · 赛道</div><h4>逐弯归因，只给一条建议</h4><p>制动点、弯心、开油点对齐最佳圈，附 60 秒成片。</p><div class="chips"><span>最佳圈</span><span>60s</span></div></article>
-        <article class="idea"><div class="k">细分 · 跑山</div><h4>关了圈速，只看合规</h4><p>盲弯减速合规率、越线次数，不给排名。</p><div class="chips"><span>合规</span><span>越线</span></div></article>
-        <article class="idea"><div class="k">细分 · 通勤</div><h4>急刹加塞自动锁存</h4><p>前后各 8 秒，可剪高光，也可作事故证据。</p><div class="chips"><span>8 秒</span><span>可取证</span></div></article>
-        <article class="idea"><div class="k">能力 · 事件驱动</div><h4>只录事件前后 8 秒</h4><p>12KB 模型常驻监听，其余不落盘。</p><div class="chips"><span>存储 −80%</span><span>12KB</span></div></article>
-        <article class="idea"><div class="k">能力 · 逐弯对齐</div><h4>把 0.35 秒拆到每个弯</h4><p>只对比你自己的最佳圈，而不是别人的排名。</p><div class="chips"><span>三要素</span><span>可执行</span></div></article>
-        <article class="idea"><div class="k">能力 · 自动成片</div><h4>回 Pit 已剪好</h4><p>字幕、配乐、遥测水印一次生成，手机直接发。</p><div class="chips"><span>3 种比例</span><span>一键分享</span></div></article>
+        <aside class="demo-story" aria-label="这个场景怎么运作">
+          <dl>
+            <div><dt>发生了什么</dt><dd>骑完只记得大概感受，找不到那次急刹的位置。</dd></div>
+            <div><dt>AI 怎么做</dt><dd>识别关键骑行动作，把它们记到轨迹与时间线上。</dd></div>
+            <div><dt>骑手看到什么</dt><dd>按场景看到值得回看的片段和复盘要点。</dd></div>
+          </dl>
+        </aside>
       </div>
     </section>
 
-    <section class="sec" data-io>
-      <div class="grid-3">
-        <article class="note-card warn"><div class="k">边界与失败处理</div><p>存储满只覆盖非事件段；GPS 丢失用 IMU 推算；多人同场用设备绑定区分；路人面部自动打码。</p></article>
-        <article class="note-card"><div class="k">验收指标</div><p>回 Pit 90 秒出报告；存储 −80%；建议可执行 &gt;80%。</p></article>
-        <article class="note-card"><div class="k">明确不做</div><p>不做运动相机（GoPro/Insta360 已强），不做重型云剪辑，不做只排名不归因。</p></article>
+    <details class="scene-details">
+      <summary>方案细节与设计目标</summary>
+      <div class="scene-details-body">
+        <p class="note">以下为概念方案的设计目标，待实测验证。</p>
+        <div class="stats">
+          <div class="stat"><span class="n">5<em>min</em></span><small>复盘（原来 90）</small></div>
+          <div class="stat"><span class="n">−80<em>%</em></span><small>素材存储</small></div>
+          <div class="stat"><span class="n">1<em>条</em></span><small>每弯一条建议</small></div>
+        </div>
+        <section class="scene-support">
+          <h3 class="section-title">延伸用法</h3>
+          <div class="ideas">
+            <article class="idea"><div class="k">细分 · 赛道</div><h4>逐弯归因，只给一条建议</h4><p>制动点、弯心、开油点对齐最佳圈，附 60 秒成片。</p><div class="chips"><span>最佳圈</span><span>60s</span></div></article>
+            <article class="idea"><div class="k">细分 · 跑山</div><h4>关了圈速，只看合规</h4><p>盲弯减速合规率、越线次数，不给排名。</p><div class="chips"><span>合规</span><span>越线</span></div></article>
+            <article class="idea"><div class="k">细分 · 通勤</div><h4>急刹加塞自动锁存</h4><p>前后各 8 秒，可剪高光，也可作事故证据。</p><div class="chips"><span>8 秒</span><span>可取证</span></div></article>
+            <article class="idea"><div class="k">能力 · 事件驱动</div><h4>只录事件前后 8 秒</h4><p>12KB 模型常驻监听，其余不落盘。</p><div class="chips"><span>存储 −80%</span><span>12KB</span></div></article>
+            <article class="idea"><div class="k">能力 · 逐弯对齐</div><h4>把 0.35 秒拆到每个弯</h4><p>只对比你自己的最佳圈，而不是别人的排名。</p><div class="chips"><span>三要素</span><span>可执行</span></div></article>
+            <article class="idea"><div class="k">能力 · 自动成片</div><h4>回 Pit 已剪好</h4><p>字幕、配乐、遥测水印一次生成，手机直接发。</p><div class="chips"><span>3 种比例</span><span>一键分享</span></div></article>
+          </div>
+        </section>
+
+        <section class="scene-support">
+          <div class="grid-3">
+            <article class="note-card warn"><div class="k">边界与失败处理</div><p>存储满只覆盖非事件段；GPS 丢失用 IMU 推算；多人同场用设备绑定区分；路人面部自动打码。</p></article>
+            <article class="note-card"><div class="k">验收指标</div><p>回 Pit 90 秒出报告；存储 −80%；建议可执行 &gt;80%。</p></article>
+            <article class="note-card"><div class="k">明确不做</div><p>不做运动相机（GoPro/Insta360 已强），不做重型云剪辑，不做只排名不归因。</p></article>
+          </div>
+        </section>
       </div>
-    </section>
+    </details>
 
     <nav class="pager" aria-label="场景翻页">
       <a href="#/s4"><svg class="i" aria-hidden="true"><use href="#i-prev"/></svg>上一场景 · 主动安全</a>
@@ -714,97 +776,109 @@
 <!-- ============ 场景 06 · VITALS ============ -->
 <section class="view long" id="v-s6" aria-label="场景六 车况救援">
   <div class="wrap">
-    <header class="chapter-hero">
-      <div class="chapter-copy">
-        <p class="eyebrow">场景 06 / 06 · VITALS · 车况救援</p>
-        <h2>车会说话，<br>你听得懂。</h2>
-        <p class="lead">抛锚最难受的不是坏在半路，是说不清哪里坏了。VITALS 用声音与工况，<b>生成技师 10 秒看懂的一页纸</b>。</p>
-      </div>
-      <figure class="chapter-figure">
+    <header class="scene-hero">
+      <figure class="chapter-figure scene-hero-photo">
         <img src="assets/roadlink-rescue.webp" srcset="assets/roadlink-rescue-small.webp 720w, assets/roadlink-rescue.webp 1280w"
-             sizes="(max-width: 740px) calc(100vw - 40px), 52vw" width="1280" height="720"
+             sizes="(max-width: 1330px) calc(100vw - 40px), 1240px" width="1280" height="720"
              loading="lazy" decoding="async" alt="骑手将摩托车停在山路观景区，站在车旁查看手机">
         <figcaption><strong>路边车况诊断</strong><span>整理故障摘要与救援信息</span></figcaption>
       </figure>
+      <div class="scene-brief">
+        <p class="eyebrow">车况救援 <span class="scene-progress">06 / 06</span></p>
+        <h2>半路抛锚，<br>把情况一次说清。</h2>
+        <p class="lead">骑手安全停车后，系统把车辆状态、异常线索和位置整理成一份摘要，方便技师快速理解情况。</p>
+        <div class="scene-hero-actions">
+          <button type="button" class="btn pri" data-scene-demo aria-controls="s6-demo">体验模拟救援 <svg class="i" aria-hidden="true"><use href="#i-next"/></svg></button>
+          <a href="#/scenes" class="btn scene-back">返回场景总览</a>
+        </div>
+      </div>
     </header>
-    <div class="stats">
-      <div class="stat"><span class="n">&gt;90<em>%</em></span><small>故障一次说清</small></div>
-      <div class="stat"><span class="n">±300<em>km</em></span><small>保养预测误差</small></div>
-      <div class="stat"><span class="n">30<em>s</em></span><small>SOS 建单</small></div>
-    </div>
 
-    <div class="demo flip">
-      <div class="frame">
-        <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">VITALS · 车况与救援</span><em><b></b>CAN · ACOUSTIC</em></div>
-        <div class="stage stage-vit" data-demo="vit">
-          <div class="gauge">
-            <svg viewBox="0 0 104 104" aria-hidden="true">
-              <circle class="bg" cx="52" cy="52" r="42"/>
-              <circle class="fg" id="vitArc" cx="52" cy="52" r="42"/>
-            </svg>
-            <div class="num"><b id="vitScore">0</b><small>车况评分</small></div>
+    <section class="scene-demo" id="s6-demo" aria-labelledby="s6-demo-title">
+      <header class="scene-demo-heading">
+        <h3 class="section-title" id="s6-demo-title" tabindex="-1">一键生成的救援包里有什么？</h3>
+        <p>点「模拟一键救援」，查看位置、故障摘要和轨迹如何一起发出。</p>
+      </header>
+      <div class="demo">
+        <div class="frame">
+          <div class="bar"><span class="frame-kind">概念演示</span><span class="frame-title">车况救援 · 界面模拟</span></div>
+          <div class="stage stage-vit" data-demo="vit">
+            <div class="gauge">
+              <svg viewBox="0 0 104 104" aria-hidden="true">
+                <circle class="bg" cx="52" cy="52" r="42"/>
+                <circle class="fg" id="vitArc" cx="52" cy="52" r="42"/>
+              </svg>
+              <div class="num"><b id="vitScore">0</b><small>车况评分</small></div>
+            </div>
+            <div class="vit-col">
+              <div class="vit-row"><span>里程 / 距下次保养</span><b>12,480 km · 剩 520</b></div>
+              <div class="vit-row"><span>胎压 前 / 后</span><b class="ok">2.3 / 2.5 bar</b></div>
+              <div class="vit-row"><span>后胎温度</span><b class="warn">58 ℃</b></div>
+              <div class="vit-row"><span>链条张力</span><b>偏松 12%</b></div>
+            </div>
+            <div class="diag" id="vitDiag">
+              <div class="hd"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>声学诊断 · 已定位</div>
+              <div class="ln" data-l>症状：<b>加速时 3.2 kHz 金属摩擦</b></div>
+              <div class="ln" data-l>可能：<b>链条润滑不足 68%</b> · 前链轮磨损 21%</div>
+              <div class="ln" data-l>建议：<b>下个服务点调整张力并润滑</b></div>
+              <div class="conf"><span>置信度</span><i style="--p:68%"></i><span>68%</span></div>
+            </div>
+            <div class="vit-forecast">
+              <div><small>机油寿命</small><b>62%</b><span class="bar"><em style="--p:62%"></em></span></div>
+              <div><small>距下次保养</small><b>1,280 km</b><span class="bar"><em style="--p:38%"></em></span></div>
+              <div><small>近 90 天故障</small><b>2 次</b><span class="bar"><em style="--p:18%"></em></span></div>
+            </div>
+            <div class="vit-foot">
+              <button class="sos" id="vitSos"><svg class="i" aria-hidden="true"><use href="#i-sos"/></svg>模拟一键救援</button>
+              <span class="note">救援包含：车型 / 里程 / 故障码 / 位置 / 最后 30 秒轨迹</span>
+              <span class="vit-sent" id="vitSent" role="status"></span>
+            </div>
           </div>
-          <div class="vit-col">
-            <div class="vit-row"><span>里程 / 距下次保养</span><b>12,480 km · 剩 520</b></div>
-            <div class="vit-row"><span>胎压 前 / 后</span><b class="ok">2.3 / 2.5 bar</b></div>
-            <div class="vit-row"><span>后胎温度</span><b class="warn">58 ℃</b></div>
-            <div class="vit-row"><span>链条张力</span><b>偏松 12%</b></div>
-          </div>
-          <div class="diag" id="vitDiag">
-            <div class="hd"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>声学诊断 · 已定位</div>
-            <div class="ln" data-l>症状：<b>加速时 3.2 kHz 金属摩擦</b></div>
-            <div class="ln" data-l>可能：<b>链条润滑不足 68%</b> · 前链轮磨损 21%</div>
-            <div class="ln" data-l>建议：<b>下个服务点调整张力并润滑</b></div>
-            <div class="conf"><span>置信度</span><i style="--p:68%"></i><span>68%</span></div>
-          </div>
-          <div class="vit-forecast">
-            <div><small>机油寿命</small><b>62%</b><span class="bar"><em style="--p:62%"></em></span></div>
-            <div><small>距下次保养</small><b>1,280 km</b><span class="bar"><em style="--p:38%"></em></span></div>
-            <div><small>近 90 天故障</small><b>2 次</b><span class="bar"><em style="--p:18%"></em></span></div>
-          </div>
-          <div class="vit-foot">
-            <button class="sos" id="vitSos"><svg class="i" aria-hidden="true"><use href="#i-sos"/></svg>模拟一键救援</button>
-            <span class="note">救援包含：车型 / 里程 / 故障码 / 位置 / 最后 30 秒轨迹</span>
-            <span class="vit-sent" id="vitSent" role="status"></span>
+          <div class="ctrl-row">
+            <span class="tag">离线可用</span><span class="tag">短信兜底</span><span class="tag">加油站也能读</span>
+            <span class="hint">点击「模拟一键救援」查看发送结果</span>
           </div>
         </div>
-        <div class="ctrl-row">
-          <span class="tag">离线可用</span><span class="tag">短信兜底</span><span class="tag">加油站也能读</span>
-          <span class="hint">点击「模拟一键救援」查看发送结果</span>
-        </div>
-      </div>
-      <aside class="cap">
-        <p class="kicker">把「坏了」变成「这一页」</p>
-        <h3>技师看十秒，就知道从哪下手</h3>
-        <p>声音、CAN、里程、骑行习惯合在一页：症状、可能原因与置信度、建议配件、这次要不要停车。</p>
-        <ul>
-          <li>没有信号也能生成，短信兜底</li>
-          <li>倒车检测自动呼叫队友</li>
-          <li>救援自动带位置与最后轨迹</li>
-        </ul>
-        <p class="carrier"><span>载体</span>车把终端 · OBD / TPMS · 手机与云端</p>
-      </aside>
-    </div>
-
-    <section class="sec" data-io>
-      <h3 class="section-title">六个小想法 · 细分与能力</h3>
-      <div class="ideas">
-        <article class="idea"><div class="k">细分 · 抛锚</div><h4>离线诊断 + 短信 SOS</h4><p>车型、故障码、声学摘要、位置与最后 30 秒轨迹一起发出。</p><div class="chips"><span>30s</span><span>含轨迹</span></div></article>
-        <article class="idea"><div class="k">细分 · 日常</div><h4>每周一次声学体检</h4><p>三类高频异响，低置信只提示「去检查」，不吓唬人。</p><div class="chips"><span>三类</span><span>周检</span></div></article>
-        <article class="idea"><div class="k">细分 · 长期</div><h4>按工况折算保养</h4><p>高转占比、涉水、重载都算进去，维修档案可导出。</p><div class="chips"><span>±300km</span><span>档案</span></div></article>
-        <article class="idea"><div class="k">能力 · 声学指纹</div><h4>梅尔频谱 + 转速同步</h4><p>1MB 模型跑在端侧，离线也能给结论。</p><div class="chips"><span>1MB</span><span>92%</span></div></article>
-        <article class="idea"><div class="k">能力 · 知识图谱</div><h4>症状 × 车型 × 历史工况</h4><p>给置信度与「是否停车」，不确定就说不确定。</p><div class="chips"><span>置信度</span><span>分级</span></div></article>
-        <article class="idea"><div class="k">能力 · 只读 OBD</div><h4>不向 CAN 写任何指令</h4><p>物理只读线束，责任边界清楚。</p><div class="chips"><span>只读</span><span>安全</span></div></article>
+        <aside class="demo-story" aria-label="这个场景怎么运作">
+          <dl>
+            <div><dt>发生了什么</dt><dd>车坏在半路，骑手只能凭声音和感觉形容故障。</dd></div>
+            <div><dt>AI 怎么做</dt><dd>整合异常线索、车况与最后一段轨迹。</dd></div>
+            <div><dt>骑手看到什么</dt><dd>可查看车况摘要，并模拟发送带位置的救援包。</dd></div>
+          </dl>
+        </aside>
       </div>
     </section>
 
-    <section class="sec" data-io>
-      <div class="grid-3">
-        <article class="note-card warn"><div class="k">边界与失败处理</div><p>OBD 不兼容时退化为声学 + IMU；置信度 &lt;60% 只提示检查；无网救援包离线生成；原始音频不上传。</p></article>
-        <article class="note-card"><div class="k">验收指标</div><p>一次说清 &gt;90%；SOS &lt;30s；误诊 &lt;10%。</p></article>
-        <article class="note-card"><div class="k">明确不做</div><p>不做通用诊断仪，不碰 ECU 控制，不做万能修车。</p></article>
+    <details class="scene-details">
+      <summary>方案细节与设计目标</summary>
+      <div class="scene-details-body">
+        <p class="note">以下为概念方案的设计目标，待实测验证。</p>
+        <div class="stats">
+          <div class="stat"><span class="n">&gt;90<em>%</em></span><small>故障一次说清</small></div>
+          <div class="stat"><span class="n">±300<em>km</em></span><small>保养预测误差</small></div>
+          <div class="stat"><span class="n">30<em>s</em></span><small>SOS 建单</small></div>
+        </div>
+        <section class="scene-support">
+          <h3 class="section-title">延伸用法</h3>
+          <div class="ideas">
+            <article class="idea"><div class="k">细分 · 抛锚</div><h4>离线诊断 + 短信 SOS</h4><p>车型、故障码、声学摘要、位置与最后 30 秒轨迹一起发出。</p><div class="chips"><span>30s</span><span>含轨迹</span></div></article>
+            <article class="idea"><div class="k">细分 · 日常</div><h4>每周一次声学体检</h4><p>三类高频异响，低置信只提示「去检查」，不吓唬人。</p><div class="chips"><span>三类</span><span>周检</span></div></article>
+            <article class="idea"><div class="k">细分 · 长期</div><h4>按工况折算保养</h4><p>高转占比、涉水、重载都算进去，维修档案可导出。</p><div class="chips"><span>±300km</span><span>档案</span></div></article>
+            <article class="idea"><div class="k">能力 · 声学指纹</div><h4>梅尔频谱 + 转速同步</h4><p>1MB 模型跑在端侧，离线也能给结论。</p><div class="chips"><span>1MB</span><span>92%</span></div></article>
+            <article class="idea"><div class="k">能力 · 知识图谱</div><h4>症状 × 车型 × 历史工况</h4><p>给置信度与「是否停车」，不确定就说不确定。</p><div class="chips"><span>置信度</span><span>分级</span></div></article>
+            <article class="idea"><div class="k">能力 · 只读 OBD</div><h4>不向 CAN 写任何指令</h4><p>物理只读线束，责任边界清楚。</p><div class="chips"><span>只读</span><span>安全</span></div></article>
+          </div>
+        </section>
+
+        <section class="scene-support">
+          <div class="grid-3">
+            <article class="note-card warn"><div class="k">边界与失败处理</div><p>OBD 不兼容时退化为声学 + IMU；置信度 &lt;60% 只提示检查；无网救援包离线生成；原始音频不上传。</p></article>
+            <article class="note-card"><div class="k">验收指标</div><p>一次说清 &gt;90%；SOS &lt;30s；误诊 &lt;10%。</p></article>
+            <article class="note-card"><div class="k">明确不做</div><p>不做通用诊断仪，不碰 ECU 控制，不做万能修车。</p></article>
+          </div>
+        </section>
       </div>
-    </section>
+    </details>
 
     <nav class="pager" aria-label="场景翻页">
       <a href="#/s5"><svg class="i" aria-hidden="true"><use href="#i-prev"/></svg>上一场景 · 骑行记忆</a>

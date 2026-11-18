@@ -530,6 +530,15 @@
     focusHeading(view);
   });
 
+  $$('[data-scene-demo]').forEach(function (button) {
+    var section = document.getElementById(button.getAttribute('aria-controls'));
+    var heading = $('h3', section);
+    button.addEventListener('click', function () {
+      heading.focus({ preventScroll: true });
+      section.scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' });
+    });
+  });
+
   /* 键盘 ← → 翻页 */
   document.addEventListener('keydown', function (e) {
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
