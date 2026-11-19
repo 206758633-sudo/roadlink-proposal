@@ -323,24 +323,8 @@
       hero: ['convoy', '车队骑行场景示意'],
       features: [
         {
-          name: '快速组队与位置共享',
-          desc: '在手机上邀请附近车友。对方接受邀请并同意共享位置后，队友才出现在车队地图上。',
-          action: '模拟队友接受并共享位置',
-          render: function (active) {
-            return '<div class="pair-stage"><article class="pair-phone" aria-label="手机车队 App">' +
-              '<header><small>车队 App</small><strong>松林骑队</strong></header><ul>' +
-              '<li><i>陈</i><span>陈默</span><small>领队</small></li>' +
-              '<li><i>岳</i><span>阿岳</span><small>' + (active ? '已共享' : '待接受') + '</small></li>' +
-              '<li><i>周</i><span>老周</span><small>' + (active ? '已共享' : '待接受') + '</small></li></ul>' +
-              '<p>' + (active ? '3 人已加入 · 位置共享中' : '邀请已发出 · 1 人已加入') + '</p></article>' +
-              '<div class="pair-map"><span>车队位置 · 示意地图</span>' +
-              '<canvas class="sim-canvas" id="s1-pair-canvas" width="800" height="250" role="img" aria-label="' +
-              (active ? '车队路线和三位成员的示意位置' : '车队路线和领队的示意位置') +
-              '"></canvas></div></div>';
-          },
-          mount: function (active) {
-            mountMapCanvas(document.getElementById('s1-pair-canvas'), 'pair', active);
-          }
+          id: 'team-journey',
+          name: '完整组队流程'
         },
         {
           name: '可编程外挂号牌',
@@ -820,10 +804,15 @@
   var root = document.getElementById('main-content');
   var navLinks = Array.from(document.querySelectorAll('#scene-nav a'));
   var autoBtn = document.getElementById('btn-auto-scene');
+  var teamPlayback = null;
   var state = { sceneIdx: 0, featIdx: 0, active: false, captureArmed: false, timer: null };
 
   function stopAuto() {
-    if (state.timer) { clearInterval(state.timer); state.timer = null; }
+    if (state.timer) {
+      clearInterval(state.timer);
+      state.timer = null;
+      if (teamPlayback) { teamPlayback.stop(); state.active = false; }
+    }
     if (autoBtn) { autoBtn.classList.remove('active'); autoBtn.textContent = '自动轮播'; autoBtn.setAttribute('aria-pressed','false'); }
   }
 
@@ -834,9 +823,11 @@
     autoBtn.setAttribute('aria-pressed','true');
     state.timer = setInterval(function () {
       var sc = SCENES[state.sceneIdx];
+      if (teamPlayback && teamPlayback.isPlaying()) return;
       if (!state.active) {
         state.active = true;
-        render();
+        if (teamPlayback) teamPlayback.play();
+        else render();
       } else {
         state.active = false;
         state.featIdx = (state.featIdx + 1) % sc.features.length;
@@ -844,11 +835,12 @@
         render();
       }
     }, 3200);
+    if (teamPlayback) { state.active = true; teamPlayback.play(); }
   }
 
   function toggleActive() {
     var button = document.getElementById('btn-action');
-    if (button.getAttribute('aria-disabled') === 'true') return;
+    if (!button || button.getAttribute('aria-disabled') === 'true') return;
     stopAuto();
     var restoreFocus = document.activeElement === button;
     var capture = SCENES[state.sceneIdx].features[state.featIdx].id === 'capture';
@@ -873,11 +865,13 @@
 
   function render() {
     flushCleanups();
+    teamPlayback = null;
     var sc = SCENES[state.sceneIdx];
     var feat = sc.features[state.featIdx];
     var capture = feat.id === 'capture';
+    var team = feat.id === 'team-journey';
     var armed = state.captureArmed || state.active;
-    var action = state.active ? '重新体验' : feat.action.replace(/^点击模拟[：:]\s*/, '');
+    var action = state.active ? '重新体验' : (feat.action || '').replace(/^点击模拟[：:]\s*/, '');
     if (capture && !armed) action = '模拟双方同意';
 
     document.title = sc.name + ' · ROADLINK';
@@ -900,6 +894,7 @@
             return '<button type="button" class="feat-tab" data-idx="' + i + '" aria-pressed="' + isCur + '">' + f.name + '</button>';
           }).join('') +
         '</div>' +
+        (team ? '<article class="team-walkthrough" aria-labelledby="team-title"></article>' :
         '<article class="visual-card' + (capture ? ' capture-card' : '') + '" aria-labelledby="feature-title">' +
           '<div class="visual-viewport' + (feat.bleed ? ' bleed' : '') + '">' + feat.render(state.active) + '</div>' +
           '<div class="visual-notes"><span class="visual-mode">交互模拟 · 示例数据</span>' +
@@ -908,7 +903,7 @@
             (capture ? captureDetails(armed) : '') +
             '<button type="button" class="action-btn" id="btn-action"><span>' + action + '</span></button>' +
           '</div>' +
-        '</article>' +
+        '</article>') +
       '</section>';
 
     Array.from(root.querySelectorAll('.feat-tab')).forEach(function (btn) {
@@ -916,8 +911,13 @@
         if (Number(btn.dataset.idx) !== state.featIdx) selectFeature(Number(btn.dataset.idx),true);
       });
     });
-    document.getElementById('btn-action').addEventListener('click', toggleActive);
-    if (feat.mount) feat.mount(state.active, toggleActive);
+    if (team) {
+      teamPlayback = window.mountRoadlinkTeam(root.querySelector('.team-walkthrough'), stopAuto);
+      onCleanup(teamPlayback.stop);
+    } else {
+      document.getElementById('btn-action').addEventListener('click', toggleActive);
+      if (feat.mount) feat.mount(state.active, toggleActive);
+    }
   }
 
   function onRoute() {
@@ -963,7 +963,7 @@
     if (e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
     if (e.target && e.target.closest('input, textarea, select, button, a, [contenteditable]')) return;
     var sc = SCENES[state.sceneIdx];
-    if (e.code === 'Space') {
+    if (e.code === 'Space' && !teamPlayback) {
       e.preventDefault();
       toggleActive();
     } else if (e.code === 'ArrowRight' && state.sceneIdx < SCENES.length - 1) {

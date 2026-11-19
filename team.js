@@ -2,34 +2,36 @@
   'use strict';
 
   var destinations = [
-    { name: '松林观景台', meters: 8400, route: [[44,152],[100,129],[160,135],[210,102],[253,116],[290,76],[348,63],[395,34]] },
-    { name: '山脚补给站', meters: 4200, route: [[44,152],[105,147],[138,95],[193,101],[227,67],[280,89],[334,73],[395,108]] }
+    { name: '松林观景台', meters: 8400, route: [[44, 152], [100, 129], [160, 135], [210, 102], [253, 116], [290, 76], [348, 63], [395, 34]] },
+    { name: '山脚补给站', meters: 4200, route: [[44, 152], [105, 147], [138, 95], [193, 101], [227, 67], [280, 89], [334, 73], [395, 108]] }
   ];
+
   var stages = [
-    { label: '见面组队', title: '见面就能组队', copy: '已登录的骑手找到附近车友，发出邀请。对方接受后，两人出现在同一个车队。' },
-    { label: '定目的地', title: '在群里选一个终点', copy: '在手机上选一个终点。APP 用定位和网络生成一条大家都能看到的路线。' },
-    { label: '共享位置', title: '从地图上看到队友', copy: '车友开启车队位置共享后，手机地图同时显示自己、队友和正在走的路线。' },
-    { label: '同步车载屏', title: '抬眼就能看转向', copy: '手机把导航和队友位置发给 ESP32，圆屏显示转向与队友距离。请点「模拟蓝牙同步」。' },
-    { label: '下发电子号牌', title: '把名字、号码或队徽亮出来', copy: '在 APP 填写号码和姓名并下发，也可单独发送队徽。ESP32 将内容转发到电子墨水屏。' },
-    { label: '骑完看里程', title: '骑完回群里看里程', copy: '手机记录这一趟的 GPS 里程。骑行结束后，群内排行榜按累计里程更新。' }
+    { label: '见面组队', title: '邀请附近车友', copy: '在手机 App 里发邀请。阿岳接受后，车队成员表才出现他的名字。' },
+    { label: '设目的地', title: '把同一条路线发给全队', copy: '在手机里选目的地并生成路线，所有成员都能看到车队要去哪里。' },
+    { label: '共享位置', title: '地图显示两位骑手', copy: '开启共享后，地图出现阿岳的标记。模拟向前骑行，看两位骑手沿路线移动。' },
+    { label: '同步圆屏', title: '把下一次转向发到车把', copy: '点手机里的「模拟蓝牙同步」。圆屏会显示与手机一致的转向、距离和队友方位。' },
+    { label: '下发号牌', title: '在车外挂上自己的队号', copy: '填写号码和姓名后下发。队徽可以单独发送，右边的电子墨水牌会显示收到的内容。' },
+    { label: '结算里程', title: '骑完看累计排名', copy: '模拟抵达后，本次路线的里程计入车队榜。已经结算的里程只记一次。' }
   ];
+
   var initial = { stage: 0, completed: 0, destination: 0, progress: 0, invited: false, number: '07', rider: '陈默', plateWritten: false, hasLogo: false };
   var riderMileage = 412000;
   var teammateMileage = 416000;
-  var teammateLead = 180;
-  var simulationStep = 400;
+  var teammateLead = 260;
+  var simulationStep = 1400;
 
   destinations.forEach(function (destination) {
     var pixels = 0;
     var offsets = destination.route.map(function (vertex, i, points) {
-      if (i) pixels += Math.hypot(vertex[0] - points[i - 1][0],vertex[1] - points[i - 1][1]);
+      if (i) pixels += Math.hypot(vertex[0] - points[i - 1][0], vertex[1] - points[i - 1][1]);
       return pixels;
     });
     destination.offsets = offsets.map(function (offset) { return Math.round(offset / pixels * destination.meters); });
   });
 
   function km(meters) {
-    return (meters / 1000).toLocaleString('en-US',{ maximumFractionDigits:1, useGrouping:false });
+    return (meters / 1000).toLocaleString('en-US', { maximumFractionDigits: 1, useGrouping: false });
   }
 
   function formatDistance(meters) {
@@ -41,33 +43,42 @@
   }
 
   function positionAt(destination, progress) {
-    var next = nextVertex(destination,progress);
+    var next = nextVertex(destination, progress);
     var route = destination.route;
     if (next === -1) return route[route.length - 1];
     var start = route[next - 1], end = route[next];
     var interval = destination.offsets[next] - destination.offsets[next - 1];
     var portion = (progress - destination.offsets[next - 1]) / interval;
-    return [start[0] + (end[0] - start[0]) * portion,start[1] + (end[1] - start[1]) * portion];
+    return [start[0] + (end[0] - start[0]) * portion, start[1] + (end[1] - start[1]) * portion];
   }
 
   function guidance(destination, progress) {
-    var next = nextVertex(destination,progress);
-    if (next === -1) return { label:'已到达', distance:'' };
+    var next = nextVertex(destination, progress);
+    if (next === -1) return { label: '已到达终点', distance: '', dir: 'done' };
     var distance = formatDistance(destination.offsets[next] - progress);
-    if (next === destination.route.length - 1) return { label:'直行到终点', distance:distance };
+    if (next === destination.route.length - 1) return { label: '直行抵达', distance: distance, dir: 'up' };
     var before = destination.route[next - 1], turn = destination.route[next], after = destination.route[next + 1];
     var cross = (turn[0] - before[0]) * (after[1] - turn[1]) - (turn[1] - before[1]) * (after[0] - turn[0]);
-    return { label:cross > 0 ? '右转' : '左转', distance:distance };
+    return { label: cross > 0 ? '前方右转' : '前方左转', distance: distance, dir: cross > 0 ? 'right' : 'left' };
+  }
+
+  function turnArrowSvg(dir) {
+    if (dir === 'right') {
+      return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19v-7a3 3 0 0 1 3-3h7"/><path d="M15 5l4 4-4 4"/></svg>';
+    }
+    if (dir === 'left') {
+      return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19v-7a3 3 0 0 0-3-3H5"/><path d="M9 5L5 9l4 4"/></svg>';
+    }
+    if (dir === 'done') {
+      return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2ee59d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+    }
+    return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M7 10l5-5 5 5"/></svg>';
   }
 
   function escapeText(value) {
-    return String(value).replace(/[&<>"']/g,function (character) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+    return String(value).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
-  }
-
-  function mapMarkup() {
-    return '<canvas class="team-map" width="860" height="520" role="img" aria-label="示意路线、起点或骑手位置与终点"></canvas>';
   }
 
   function draw(canvas, state, from) {
@@ -100,7 +111,7 @@
       context.strokeStyle = '#fff';
       context.stroke();
       context.fillStyle = '#233c34';
-      context.font = '700 16px -apple-system, sans-serif';
+      context.font = '700 19px -apple-system, sans-serif';
       context.lineWidth = 4;
       context.textAlign = x >= 355 ? 'right' : 'left';
       var labelX = x + (x >= 355 ? -11 : 11);
@@ -166,262 +177,335 @@
 
   function members() {
     return '<ul class="team-members">' +
-      '<li><i>陈</i><span><strong>陈默 · 我</strong><small>队长 · 车友 ID 007</small></span></li>' +
-      '<li><i>岳</i><span><strong>阿岳</strong><small>队友 · 车友 ID 018</small></span></li></ul>';
+      '<li><i>陈</i><span><strong>陈默 · 我</strong><small>队长 · 在线</small></span></li>' +
+      '<li><i>岳</i><span><strong>阿岳</strong><small>队友 · 已配对车载屏</small></span></li></ul>';
   }
 
   function phone(state) {
     var connected = state.completed >= 1;
     var hasRoute = state.completed >= 2;
     var dest = destinations[state.destination];
-    var appName = state.stage === 0 ? '附近的车友' :
-      (state.stage === 4 ? '电子号牌' : (state.stage === 5 ? '车队里程榜' : '松林骑队'));
-    var header = '<div class="team-device-header"><strong>' + appName + '</strong><span>陈默</span></div>';
+    var appName = state.stage === 0 ? '附近车友' :
+      (state.stage === 4 ? '电子号牌设置' : (state.stage === 5 ? '车队里程榜' : '松林骑队'));
+    var header = '<div class="team-device-header"><strong>' + appName + '</strong><span>示例账号</span></div>';
+
     if (state.stage === 0) {
-      return header + '<div class="team-device-body team-lobby"><div class="team-lobby-cover"><span>松林骑队</span><b>' +
-        (connected ? '组队成功' : (state.invited ? '邀请已发出' : '一起出发')) + '</b></div>' +
+      return header + '<div class="team-device-body"><div class="team-lobby-cover"><span>ROADLINK 车队大厅</span><b>' +
+        (connected ? '组队成功' : (state.invited ? '邀请已发出…' : '发现附近车友')) + '</b></div>' +
         (connected ? members() : '<p class="team-device-note">' +
-          (state.invited ? '等待阿岳接受' : '发现 1 位附近车友 · 示例账号') + '</p>' +
-          '<ul class="team-members"><li><i>岳</i><span><strong>阿岳</strong><small>同款车载设备</small></span></li></ul>') + '</div>';
+          (state.invited ? '等待阿岳点击同意' : '发现 1 位附近车友') + '</p>' +
+          '<ul class="team-members"><li><i>岳</i><span><strong>阿岳</strong><small>可邀请入队</small></span></li></ul>') + '</div>';
     }
-    if (!connected && state.stage !== 0) {
-      return header + '<div class="team-device-body"><div class="team-route-empty"><p>加入车队后可操作此页面</p></div></div>';
+    if (!connected) {
+      return header + '<div class="team-device-body"><div class="team-route-empty"><p>请先完成第 1 步「见面组队」</p></div></div>';
     }
     if (state.stage === 4) {
       return header + '<div class="team-device-body"><div class="team-plate-preview"><span>' +
-        (state.plateWritten ? '已写入号牌' : '预设信息 · 待写入') + '</span><b>' +
+        (state.plateWritten ? '已通过蓝牙写入电子墨水牌 ✓' : '号牌预览 · 等待下发') + '</span><b>' +
         escapeText(state.number) + '</b><strong>' + escapeText(state.rider) + '</strong></div></div>';
     }
     if (state.stage === 5) {
       var finished = state.completed === 6;
       var myTotal = riderMileage + (finished ? dest.meters : 0);
-      var mine = '<li class="mine"><span>陈默 · 我</span><b>' + km(myTotal) + ' km</b></li>';
-      var teammate = '<li><span>阿岳</span><b>' + km(teammateMileage) + ' km</b></li>';
+      var mine = '<li class="mine"><span># ' + (myTotal > teammateMileage ? '1' : '2') + ' 陈默 · 我</span><b>' + km(myTotal) + ' km</b></li>';
+      var mate = '<li><span># ' + (myTotal > teammateMileage ? '2' : '1') + ' 阿岳</span><b>' + km(teammateMileage) + ' km</b></li>';
       return header + '<div class="team-device-body"><div class="team-mileage"><span>' +
-        (finished ? '本次骑行' : '计划路线') + '</span><b>' + (hasRoute ? km(dest.meters) : '—') + ' <small>km</small></b>' +
-        '<small>' + (finished ? '已计入示例累计里程' : '模拟抵达后计入里程') + '</small></div>' +
-        '<ol class="team-rank">' + (myTotal > teammateMileage ? mine + teammate : teammate + mine) + '</ol></div>';
+        (finished ? '本次骑行已计入' : '待结算路线') + '</span><b>' + (hasRoute ? km(dest.meters) : '—') + ' <small>km</small></b>' +
+        '<small>' + (finished ? '排名已自动跃升！' : '点击下方模拟抵达并结算') + '</small></div>' +
+        '<ol class="team-rank">' + (myTotal > teammateMileage ? mine + mate : mate + mine) + '</ol></div>';
     }
-    return header + '<div class="team-device-body"><div class="team-map-summary"><div><small>车队目的地</small><b>' +
-      (hasRoute ? dest.name : '还未设置') + '</b></div>' + (hasRoute ? '<strong>' + km(dest.meters) + ' km' + '</strong>' : '') + '</div>' +
-      (hasRoute ? '<div class="team-map-frame">' + mapMarkup() +
-        '<span class="team-map-context">示意地图</span><span class="team-map-mode">' + (state.progress >= dest.meters ? '已抵达终点' : (state.completed >= 3 ? '正在共享位置' : '路线已生成')) + '</span></div>' :
-        '<div class="team-route-empty"><span aria-hidden="true"></span><p>选好目的地，路线会显示在这里</p></div>') +
-      (state.stage === 1 ? members() : '') +
-      (state.completed >= 2 ? nextTurn(dest,state.progress) : '') + '</div>';
-  }
 
-  function nextTurn(destination, progress) {
-    var turn = guidance(destination,progress);
-    return '<div class="team-next-turn"><span>导航提示</span><b>' + turn.label +
-      (turn.distance ? ' · ' + turn.distance : '') + '</b></div>';
+    var turn = guidance(dest, state.progress);
+    return header + '<div class="team-device-body"><div class="team-map-summary"><div><small>车队目的地</small><b>' +
+      (hasRoute ? dest.name : '未设置') + '</b></div>' + (hasRoute ? '<strong>' + km(dest.meters) + ' km</strong>' : '') + '</div>' +
+      (hasRoute ? '<div class="team-map-frame"><canvas class="team-map" width="860" height="520" role="img" aria-label="车队位置示意地图"></canvas>' +
+        '<span class="team-map-mode">' + (state.progress >= dest.meters ? '已抵达终点' : (state.completed >= 3 ? '位置共享中' : '路线已生成')) + '</span></div>' :
+        '<div class="team-route-empty"><p>选好目的地，路线将立即同步全队</p></div>') +
+      (state.completed >= 2 ? '<div class="team-next-turn"><span>下一导航点</span><b>' + turn.label + (turn.distance ? ' · ' + turn.distance : '') + '</b></div>' : '') + '</div>';
   }
 
   function esp(state) {
     var ready = state.completed >= 4;
-    var destination = destinations[state.destination];
-    var turn = guidance(destination,state.progress);
-    var gap = Math.min(teammateLead,destination.meters - state.progress);
-    var distance = turn.distance.split(' ');
+    var dest = destinations[state.destination];
+    var turn = guidance(dest, state.progress);
+    var gap = Math.max(0, Math.min(teammateLead, dest.meters - state.progress));
+    var distParts = turn.distance ? turn.distance.split(' ') : [];
+
     return '<div class="team-esp-case"><div class="team-esp-screen">' +
-      (ready ? '<span class="team-round-arrow" data-turn="' + turn.label + '" aria-hidden="true"></span>' +
-        (turn.distance ? '<b class="team-round-distance">' + distance[0] + ' <small>' + distance[1] + '</small></b>' : '') +
-        '<b>' + turn.label + '</b><small class="team-round-gap">' +
-        (gap ? '阿岳在前方 ' + formatDistance(gap) : '队友已抵达') + '</small>' :
-        '<div class="team-standby"><span class="team-round-signal" aria-hidden="true"></span><b>等待手机同步</b><small>转向与队友位置</small></div>') +
-      '</div></div><div class="team-device-label"><strong>车把导航圆屏</strong><span>' +
-      (ready ? '模拟蓝牙同步' : '待同步') + '</span></div>';
+      (ready ? '<div class="team-round-arrow">' + turnArrowSvg(turn.dir) + '</div>' +
+        (distParts.length ? '<b class="team-round-distance">' + distParts[0] + ' <small>' + distParts[1] + '</small></b>' : '') +
+        '<div class="team-round-turn-text">' + turn.label + '</div>' +
+        '<span class="team-round-gap">' + (gap ? '阿岳在前方 ' + formatDistance(gap) : '全队已汇合') + '</span>' :
+        '<div class="team-standby"><b>待机中</b><small>等待手机蓝牙同步</small></div>') +
+      '</div></div><div class="team-device-label"><strong>车把 ESP32 圆屏</strong><span>' +
+      (ready ? '模拟同步' : '待同步') + '</span></div>';
   }
 
-  function plate(state) {
+  function plate(state, flash) {
     var synced = state.plateWritten || state.hasLogo;
-    return '<div class="team-ink-case"><div class="team-ink-screen">' +
-      (!synced ? '<div class="team-standby"><b>等待写入</b><small>队号、姓名和车队 Logo</small></div>' :
-        '<div class="team-ink-content">' + (state.hasLogo ? '<div class="team-ink-logo" aria-label="松林骑队队徽" role="img"></div>' : '') +
+    return '<div class="team-ink-case"><div class="team-ink-screen' + (flash ? ' eink-flash' : '') + '">' +
+      (!synced ? '<div class="team-standby"><b>等待下发号牌</b><small>等待手机发送</small></div>' :
+        '<div class="team-ink-content">' +
+        (state.hasLogo ? '<div class="team-ink-logo" aria-label="松林骑队队徽"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L4 19h16L12 2z"/><path d="M12 10v9"/></svg></div>' : '') +
         (state.plateWritten ? '<strong class="team-plate-number">' + escapeText(state.number) + '</strong>' : '') +
-        '<span>' + (state.plateWritten ? '<strong>' + escapeText(state.rider) + '</strong>' : '') +
-        (state.hasLogo ? '<small>松林骑队</small>' : '') + '</span></div>') + '</div></div>' +
-      '<div class="team-device-label"><strong>电子墨水牌</strong><span>' + (synced ? '模拟写入完成' : '待写入') + '</span></div>';
+        '<div class="team-ink-meta">' + (state.plateWritten ? '<strong>' + escapeText(state.rider) + '</strong>' : '') +
+        (state.hasLogo ? '<small>松林骑队</small>' : '<small>ROADLINK</small>') + '</div></div>') +
+      '</div></div><div class="team-device-label"><strong>电子墨水号牌</strong><span>' + (synced ? '模拟写入完成' : '待写入') + '</span></div>';
   }
 
-  function mount(root) {
-    var state = Object.assign({},initial);
-    root.innerHTML =
-      '<div class="team-intro"><h2 id="team-title" tabindex="-1">组队互动演示</h2><span>交互模拟 · 示例数据</span></div>' +
-      '<div class="team-steps" role="group" aria-label="组队流程步骤">' +
-      stages.map(function (stage,index) {
-        return '<button type="button" class="team-step"><span aria-hidden="true">0' + (index + 1) + '</span>' + stage.label + '</button>';
-      }).join('') + '</div>' +
-      '<div class="team-stage"><aside class="team-action"><p id="team-stage-count" class="team-stage-count"></p><h3 id="team-stage-title"></h3><p id="team-stage-copy"></p>' +
-      '<p class="team-result" role="status"></p><div class="team-actions">' +
-      '<button type="button" class="secondary" id="team-next" hidden>下一步 →</button>' +
-      '<button type="button" class="team-reset" id="team-reset">重置演示</button></div></aside>' +
-      '<div class="team-devices"><div class="team-handset"><article class="team-phone"><div class="team-phone-bezel">' +
-      '<div class="team-phone-status" aria-hidden="true"><span>9:41</span><i></i><span>5G ▮</span></div><div class="team-phone-content"></div>' +
-      '<form class="team-form" id="team-form"><div class="team-fields"></div><div class="team-actions">' +
-      '<button type="submit" class="primary" id="team-do"></button>' +
-      '<button type="button" class="secondary" id="team-logo" hidden>下发车队 Logo</button></div></form><div class="team-home-bar" aria-hidden="true"></div></div></article>' +
-      '<div class="team-device-label"><strong>手机 APP</strong><span>联网 · GPS · 蓝牙</span></div></div>' +
-      '<div class="team-outputs"><article class="team-esp"></article><article class="team-plate"></article></div></div></div>';
+  function mount(root, onManual) {
+    var state = Object.assign({}, initial);
+    var autoTimer = null;
 
-    var find = function (selector) { return root.querySelector(selector); };
+    root.innerHTML =
+      '<div class="team-intro"><div><h2 id="team-title" tabindex="-1">组队全流程演示</h2>' +
+        '<span>交互模拟 · 示例数据</span></div>' +
+        '<div class="team-intro-tools"><button type="button" class="secondary" id="team-autoplay" aria-pressed="false">自动演示</button>' +
+        '<button type="button" class="team-reset" id="team-reset">重置</button></div></div>' +
+      '<div class="team-steps" role="group" aria-label="组队流程步骤">' +
+        stages.map(function (s, i) {
+          return '<button type="button" class="team-step"><span aria-hidden="true">0' + (i + 1) + '</span>' + s.label + '</button>';
+        }).join('') + '</div>' +
+      '<div class="team-stage">' +
+        '<aside class="team-action"><p id="team-stage-count" class="team-stage-count"></p>' +
+          '<h3 id="team-stage-title"></h3><p id="team-stage-copy"></p><p class="team-result" role="status"></p></aside>' +
+        '<div class="team-devices" data-focus="phone">' +
+          '<div class="team-handset"><article class="team-phone"><div class="team-phone-bezel">' +
+            '<div class="team-phone-status" aria-hidden="true"><span>9:41</span><i></i><span>5G</span></div>' +
+            '<div class="team-phone-content"></div>' +
+            '<form class="team-form" id="team-form"><div class="team-fields"></div><div class="team-actions">' +
+              '<button type="submit" class="primary" id="team-do"></button>' +
+              '<button type="button" class="secondary" id="team-logo" hidden>下发车队队徽</button>' +
+              '<button type="button" class="secondary" id="team-next" hidden>下一步</button>' +
+            '</div></form><div class="team-home-bar" aria-hidden="true"></div>' +
+          '</div></article><div class="team-device-label"><strong>手机 App</strong><span>组队 · 定位 · 联网</span></div></div>' +
+          '<div class="signal-bridge" aria-hidden="true">' +
+            '<div class="signal-link" id="sig-esp"><div class="signal-line"></div><span class="signal-tag">导航同步</span></div>' +
+            '<div class="signal-link" id="sig-ink"><div class="signal-line"></div><span class="signal-tag">号牌写入</span></div>' +
+          '</div>' +
+          '<div class="team-outputs"><article class="team-esp"></article><article class="team-plate"></article></div>' +
+        '</div>' +
+      '</div>';
+
+    var find = function (sel) { return root.querySelector(sel); };
     var steps = Array.from(root.querySelectorAll('.team-step'));
     var fields = find('.team-fields'), primary = find('#team-do');
     var next = find('#team-next'), logo = find('#team-logo'), result = find('.team-result');
+    var autoBtn = find('#team-autoplay');
 
-    function renderPanels(from) {
+    function stopAuto() {
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      autoBtn.textContent = '自动演示';
+      autoBtn.setAttribute('aria-pressed', 'false');
+    }
+
+    function manual() {
+      stopAuto();
+      if (onManual) onManual();
+    }
+
+    function renderPanels(from, flashPlate) {
       find('.team-phone-content').innerHTML = phone(state);
       find('.team-esp').innerHTML = esp(state);
-      find('.team-plate').innerHTML = plate(state);
-      find('.team-devices').dataset.focus = state.stage === 4 && state.completed >= 5 ? 'plate' :
+      find('.team-plate').innerHTML = plate(state, flashPlate);
+      find('#sig-esp').classList.toggle('active', state.completed >= 4);
+      find('#sig-ink').classList.toggle('active', state.plateWritten || state.hasLogo);
+      find('.team-devices').dataset.focus = state.stage === 4 && (state.plateWritten || state.hasLogo) ? 'plate' :
         (state.stage === 3 && state.completed >= 4 ? 'esp' : 'phone');
-      root.querySelectorAll('.team-map').forEach(function (canvas) { draw(canvas,state,from); });
+      root.querySelectorAll('.team-map').forEach(function (c) { draw(c, state, from); });
     }
 
     function renderControls() {
       var blocked = state.stage > state.completed;
       var travelling = state.progress < destinations[state.destination].meters;
-      var simulateRide = travelling ? '模拟向前骑行' : '已到达终点';
       var labels = [
-        state.completed ? '已完成组队' : (state.invited ? '模拟阿岳接受邀请' : '邀请阿岳入队'),
-        state.completed === 6 ? '本次骑行已结算' : '生成群导航路线',
-        state.completed >= 3 ? simulateRide : '开启车队位置共享',
-        state.completed >= 4 ? simulateRide : '模拟蓝牙同步',
-        '下发号码和姓名',
-        state.completed === 6 ? '已计入里程榜' : '模拟抵达并结算'
+        state.completed ? '已完成组队' : (state.invited ? '模拟阿岳接受邀请' : '邀请阿岳加入车队'),
+        state.completed === 6 ? '本次骑行已结算' : '生成全队共享路线',
+        state.completed >= 3 ? (travelling ? '模拟向前骑行' : '已抵达终点') : '开启车队位置共享',
+        state.completed >= 4 ? (travelling ? '模拟向前骑行' : '已抵达终点') : '模拟蓝牙同步',
+        '下发队号和姓名到墨水牌',
+        state.completed === 6 ? '已计入车队排行' : '模拟抵达并结算里程'
       ];
       primary.textContent = labels[state.stage];
       primary.disabled = blocked || (state.stage === 0 && state.completed >= 1) ||
-        ((state.stage === 2 || state.stage === 3) && state.completed > state.stage && !travelling) || ((state.stage === 1 || state.stage === 5) && state.completed === 6);
+        ((state.stage === 2 || state.stage === 3) && state.completed > state.stage && !travelling) ||
+        ((state.stage === 1 || state.stage === 5) && state.completed === 6);
+
       next.hidden = !blocked && (state.completed <= state.stage || state.stage === stages.length - 1);
-      if (!next.hidden) next.textContent = blocked ? '去完成 · ' + stages[state.completed].label :
-        '下一步 · ' + stages[state.stage + 1].label + ' →';
+      if (!next.hidden) {
+        next.textContent = blocked ? '先去完成：' + stages[state.completed].label : '下一步：' + stages[state.stage + 1].label + ' →';
+      }
       logo.hidden = state.stage !== 4;
       logo.disabled = blocked;
-      fields.querySelectorAll('input,select').forEach(function (field) { field.disabled = blocked || (state.stage === 1 && state.completed === 6); });
+      fields.querySelectorAll('input,select').forEach(function (f) {
+        f.disabled = blocked || (state.stage === 1 && state.completed === 6);
+      });
     }
 
     function renderStep() {
       var stage = stages[state.stage];
-      steps.forEach(function (button,i) { button.setAttribute('aria-pressed',String(i === state.stage)); });
+      steps.forEach(function (btn, i) {
+        btn.setAttribute('aria-pressed', String(i === state.stage));
+        btn.classList.toggle('is-done', i < state.completed);
+      });
       find('#team-stage-count').textContent = '第 ' + (state.stage + 1) + ' 步 / 共 ' + stages.length + ' 步';
       find('#team-stage-title').textContent = stage.title;
       find('#team-stage-copy').textContent = stage.copy;
       fields.innerHTML = '';
       if (state.stage === 1) {
-        fields.innerHTML = '<label>车队目的地<select id="team-destination">' +
-          destinations.map(function (dest,i) { return '<option value="' + i + '"' + (i === state.destination?' selected':'') + '>' + dest.name + '</option>'; }).join('') +
+        fields.innerHTML = '<label>选择车队目的地<select id="team-destination">' +
+          destinations.map(function (d, i) { return '<option value="' + i + '"' + (i === state.destination ? ' selected' : '') + '>' + d.name + ' (' + km(d.meters) + ' km)</option>'; }).join('') +
           '</select></label>';
       } else if (state.stage === 4) {
         fields.innerHTML = '<label>编队号码<input type="text" inputmode="numeric" id="team-number" maxlength="3" required value="' + escapeText(state.number) + '"></label>' +
-          '<label>骑手姓名<input type="text" id="team-rider" maxlength="10" required value="' + escapeText(state.rider) + '"></label>';
+          '<label>骑手昵称<input type="text" id="team-rider" maxlength="10" required value="' + escapeText(state.rider) + '"></label>';
         fields.querySelectorAll('input').forEach(function (input) {
-          input.addEventListener('input',function () { input.setCustomValidity(''); });
+          input.addEventListener('input', function () { input.setCustomValidity(''); });
         });
       }
-      result.textContent = state.stage > state.completed ?
-        '先完成「' + stages[state.completed].label + '」，再继续此步。' : '';
+      result.textContent = state.stage > state.completed ? '提示：请先完成「' + stages[state.completed].label + '」步骤。' : '';
       renderControls();
       renderPanels();
     }
 
-    function showStage(index) {
-      state.stage = index;
-      renderStep();
-    }
-
-    function finish(message, from) {
-      var moveFocus = document.activeElement === primary;
-      state.completed = Math.max(state.completed,state.stage + 1);
+    function finish(message, from, flashPlate) {
+      var restoreFocus = document.activeElement === primary;
+      state.completed = Math.max(state.completed, state.stage + 1);
+      steps.forEach(function (btn, i) { btn.classList.toggle('is-done', i < state.completed); });
       renderControls();
-      renderPanels(from);
+      renderPanels(from, flashPlate);
       result.textContent = message;
-      if (moveFocus && primary.disabled) {
-        (next.hidden ? find('#team-reset') : next).focus({ preventScroll:true });
-      }
+      if (restoreFocus && primary.disabled && !next.hidden) next.focus({preventScroll:true});
     }
 
-    steps.forEach(function (button,index) { button.addEventListener('click',function () { showStage(index); }); });
-    next.addEventListener('click',function () {
-      showStage(state.stage > state.completed ? state.completed : state.stage + 1);
-      steps[state.stage].focus({ preventScroll:true });
-    });
-    find('#team-reset').addEventListener('click',function () {
-      state = Object.assign({},initial);
-      renderStep();
-      steps[0].focus({ preventScroll:true });
-    });
-    logo.addEventListener('click',function () {
-      if (logo.disabled) return;
-      state.hasLogo = true;
-      finish('墨水牌已收到松林骑队队徽。号码和姓名由独立操作下发。');
+    steps.forEach(function (btn, i) {
+      btn.addEventListener('click', function () { manual(); state.stage = i; renderStep(); });
     });
 
-    find('#team-form').addEventListener('submit',function (event) {
-      event.preventDefault();
+    next.addEventListener('click', function () {
+      manual();
+      state.stage = state.stage > state.completed ? state.completed : state.stage + 1;
+      renderStep();
+      var field = fields.querySelector('input,select');
+      (field && !field.disabled ? field : primary).focus({preventScroll:true});
+    });
+
+    find('#team-reset').addEventListener('click', function () {
+      manual();
+      state = Object.assign({}, initial);
+      renderStep();
+    });
+
+    logo.addEventListener('click', function () {
+      if (logo.disabled) return;
+      manual();
+      state.hasLogo = true;
+      finish('墨水牌已刷新显示「松林骑队」队徽！', undefined, true);
+    });
+
+    find('#team-form').addEventListener('submit', function (e) {
+      e.preventDefault();
       if (primary.disabled) return;
+      manual();
       switch (state.stage) {
         case 0:
           if (state.invited) {
-            finish('阿岳已接受邀请，松林骑队现在有两位车友。');
+            finish('阿岳已入队！手机大厅实时显示两位车友。');
           } else {
             state.invited = true;
-            renderControls();
-            renderPanels();
-            result.textContent = '邀请已发出，等待阿岳接受。';
+            renderControls(); renderPanels();
+            result.textContent = '已向阿岳发出组队邀请，点击下方按钮模拟对方同意。';
           }
           break;
         case 1: {
           var choice = Number(find('#team-destination').value);
-          var replanned = state.completed >= 2 && choice !== state.destination;
-          if (replanned) {
-            state.completed = 1;
-            state.progress = 0;
+          if (state.completed >= 2 && choice !== state.destination) {
+            state.completed = 1; state.progress = 0;
           }
           state.destination = choice;
-          var destination = destinations[choice];
-          finish('前往「' + destination.name + '」的示例路线已生成，共 ' + km(destination.meters) + ' 公里。' +
-            (replanned ? '请重新共享位置并同步圆屏。' : ''));
+          var d = destinations[choice];
+          finish('前往「' + d.name + '」的 ' + km(d.meters) + ' km 共享路线已生成！');
           break;
         }
         case 2:
         case 3:
           if (state.completed > state.stage) {
-            var previous = state.progress;
+            var prev = state.progress;
             var total = destinations[state.destination].meters;
-            state.progress = Math.min(total,previous + simulationStep);
-            finish(state.progress === total ? '两位骑手已抵达示例路线终点。' :
-              (state.completed >= 4 ? '示例位置已更新，手机与圆屏显示同一条路线的导航提示。' : '手机地图已更新示例位置。'),previous);
+            state.progress = Math.min(total, prev + simulationStep);
+            finish(state.progress === total ? '全队已抵达终点！可以去结算里程了。' :
+              (state.completed >= 4 ? '已向前骑行：手机地图与车把圆屏转向提示实时同步更新！' : '地图上自己与队友位置同步前进。'), prev);
           } else {
-            finish(state.stage === 2 ? '车队位置共享已开启，地图上能看到我和队友。' :
-              '模拟同步完成，圆屏显示下一次转向和队友相对距离。');
+            finish(state.stage === 2 ? '位置共享已开启，地图上同时看到我和阿岳！' : '蓝牙同步成功！右侧车把圆屏已亮起转向箭头与队友距离。');
           }
           break;
         case 4: {
-          var number = find('#team-number'), rider = find('#team-rider');
-          if (!/^\d{1,3}$/.test(number.value) || Number(number.value) < 1) {
-            number.setCustomValidity('请输入 1 至 999 之间的编队号码。');
-            number.reportValidity();
+          var numEl = find('#team-number'), nameEl = find('#team-rider');
+          var numVal = numEl.value.trim(), nameVal = nameEl.value.trim();
+          if (!/^\d{1,3}$/.test(numVal) || Number(numVal) < 1) {
+            numEl.setCustomValidity('请输入 1 到 999 的队号。');
+            numEl.reportValidity();
             return;
           }
-          if (!rider.value.trim()) {
-            rider.setCustomValidity('请输入示例骑手姓名。');
-            rider.reportValidity();
+          if (!nameVal) {
+            nameEl.setCustomValidity('请输入骑手姓名。');
+            nameEl.reportValidity();
             return;
           }
-          state.number = number.value;
-          state.rider = rider.value.trim();
+          state.number = numVal;
+          state.rider = nameVal;
           state.plateWritten = true;
-          finish('模拟写入完成，墨水牌已显示队号和骑手姓名。');
+          finish('蓝牙写入完成！右侧电子墨水牌已刷新为「' + numVal + ' · ' + nameVal + '」。', undefined, true);
           break;
         }
         case 5:
           state.progress = destinations[state.destination].meters;
-          finish('本次 ' + km(state.progress) + ' 公里计入示例里程榜，累计 ' + km(riderMileage + state.progress) + ' 公里。');
+          finish('本次 ' + km(state.progress) + ' km 已计入总里程，陈默升至车队第 1 名！');
           break;
       }
     });
+
+    // One-click roadshow autoplay script
+    function play() {
+      stopAuto();
+      state = Object.assign({}, initial);
+      renderStep();
+      autoBtn.textContent = '停止演示';
+      autoBtn.setAttribute('aria-pressed', 'true');
+
+      var script = [
+        function () { state.invited = true; renderControls(); renderPanels(); result.textContent = '自动演示：向附近车友阿岳发出邀请…'; },
+        function () { finish('自动演示：阿岳已入队！'); },
+        function () { state.stage = 1; renderStep(); },
+        function () { finish('自动演示：选定「松林观景台」8.4 km 路线！'); },
+        function () { state.stage = 2; renderStep(); },
+        function () { finish('自动演示：开启车队实时位置共享！'); },
+        function () { state.stage = 3; renderStep(); },
+        function () { finish('自动演示：蓝牙同步到车把圆屏！'); },
+        function () { var p = state.progress; state.progress = 2600; finish('自动演示：骑行中，手机与车把圆屏实时联动…', p); },
+        function () { state.stage = 4; renderStep(); },
+        function () { state.plateWritten = true; state.hasLogo = true; finish('自动演示：电子墨水牌刷新队号、姓名与队徽！', undefined, true); },
+        function () { state.stage = 5; renderStep(); },
+        function () { state.progress = destinations[state.destination].meters; finish('自动演示完成：里程结算，陈默跃升车队第 1 名！'); stopAuto(); }
+      ];
+
+      var idx = 0;
+      function runNext() {
+        if (!root.isConnected) { stopAuto(); return; }
+        script[idx++]();
+        if (idx < script.length) autoTimer = setTimeout(runNext, 1650);
+      }
+      autoTimer = setTimeout(runNext, 450);
+    }
+
+    autoBtn.addEventListener('click', function () {
+      var wasPlaying = Boolean(autoTimer);
+      manual();
+      if (!wasPlaying) play();
+    });
+
     renderStep();
+    return {play:play, stop:stopAuto, isPlaying:function () { return Boolean(autoTimer); }};
   }
 
   window.mountRoadlinkTeam = mount;
