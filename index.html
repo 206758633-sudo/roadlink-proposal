@@ -3,32 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0a0e11">
-  <meta name="description" content="从约骑到分享，通过五个可操作的场景了解 ROADLINK 骑行方案。">
-  <title>ROADLINK · 五个骑行场景</title>
+  <meta name="theme-color" content="#05070b">
+  <meta name="description" content="ROADLINK 智能骑行方案路演：五大场景、二十项核心功能全可视化交互演示。">
+  <title>ROADLINK · 五大骑行场景可视化路演</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20261119-capture">
+  <link rel="stylesheet" href="styles.css?v=20261119-showcase">
 </head>
 <body>
-  <a class="skip-link" href="#main-content">跳至场景</a>
   <header class="header">
     <div class="header-inner">
-      <a class="brand" href="#/s1" aria-label="ROADLINK 第一个场景">
-        <img src="favicon.svg" width="28" height="28" alt="">
-        <span>ROADLINK</span>
+      <a class="brand" href="#/s1">
+        <img src="favicon.svg" width="26" height="26" alt="">
+        <div class="brand-title">
+          <span>ROADLINK</span>
+          <small>智能骑行方案 · 可视化路演</small>
+        </div>
       </a>
-      <nav id="scene-nav" class="scene-nav" aria-label="五个场景">
-        <a href="#/s1">组队社交</a>
-        <a href="#/s2">显示导航</a>
-        <a href="#/s3">AI 操控</a>
-        <a href="#/s4">主动安全</a>
+
+      <nav id="scene-nav" class="scene-nav" aria-label="五大场景">
+        <a href="#/s1">组队与社交</a>
+        <a href="#/s2">显示与导航</a>
+        <a href="#/s3">AI 操控手机</a>
+        <a href="#/s4">安全主动预警</a>
         <a href="#/s5">骑行社区</a>
       </nav>
+
+      <div class="header-right">
+        <button type="button" class="tool-btn" id="btn-auto-scene">自动轮播</button>
+        <button type="button" class="tool-btn" id="btn-fullscreen">全屏</button>
+      </div>
     </div>
   </header>
-  <main id="main-content" class="wrap" tabindex="-1"></main>
-  <noscript><p class="wrap">请启用 JavaScript 查看五个互动场景。</p></noscript>
-  <script src="team.js?v=20261119-capture"></script>
-  <script src="app.js?v=20261119-capture"></script>
+
+  <main id="main-content" class="wrap"></main>
+
+  <noscript><p class="wrap">请启用 JavaScript 查看 ROADLINK 可视化方案路演。</p></noscript>
+  <script src="app.js?v=20261119-showcase"></script>
 </body>
 </html>
