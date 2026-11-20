@@ -1,48 +1,237 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#05070b">
-  <meta name="description" content="ROADLINK 智能骑行方案路演：五大场景、二十项核心功能全可视化交互演示。">
-  <title>ROADLINK · 五大骑行场景可视化路演</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20261119-team">
-  <link rel="stylesheet" href="home-hardware-preview.css?v=rider-home-1">
-  <link rel="stylesheet" href="home-gallery.css?v=brp-film-3">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#efeae2">
+<meta name="description" content="路联 ROADLINK：镜片投影贴片、车把防水条屏和手机 App。看路，手留在车把上。">
+<title>路联 ROADLINK</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root{--night:#101418;--night-2:#1b232b;--paper:#efeae2;--paper-2:#e3dcd1;--ink:#1c1915;--muted:#6f675e;--fog:#c9c2b6;--signal:#1fa89a;--signal-ink:#08332e;--hud:#8dffe9;--alert:#e23b3b;--ease:cubic-bezier(.22,1,.36,1)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI","PingFang SC","Noto Sans SC",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,a{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0}a{text-decoration:none}
+button{transition:scale .15s ease,background-color .15s ease,color .15s ease}button:active{scale:.96}
+img{max-width:100%;display:block;outline:1px solid color-mix(in srgb,var(--ink) 12%,transparent);outline-offset:-1px}
+h1,h2{text-wrap:balance;margin:0;font-weight:600;letter-spacing:-.02em}p{text-wrap:pretty;margin:0}
+.bar{position:sticky;top:0;z-index:5;display:flex;gap:16px;align-items:center;height:64px;padding:0 16px;background:var(--paper);border-bottom:1px solid color-mix(in srgb,var(--ink) 10%,transparent)}
+.brand{display:flex;gap:8px;align-items:center;font-weight:700}.mark{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--signal);color:var(--signal-ink)}
+.brand small{display:block;font-weight:500;color:var(--muted)}
+nav{display:flex;gap:14px;flex:1;overflow:auto;color:var(--muted);font-size:14px}
+.tool{min-height:44px;border:1px solid color-mix(in srgb,var(--ink) 15%,transparent);border-radius:8px;padding:0 12px;color:var(--muted);font-weight:700}
+.tool.on{border-color:var(--signal);color:var(--signal)}
+.pill{position:relative;display:flex;border:1px solid color-mix(in srgb,var(--ink) 15%,transparent);border-radius:8px;padding:4px}
+.pill i{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:4px;background:var(--signal);transition:transform .25s var(--ease)}
+.pill[data-on="en"] i{transform:translateX(100%)}
+.pill button{position:relative;z-index:1;width:44px;min-height:36px;font-size:12px;font-weight:700;color:var(--muted)}
+.pill[data-on="zh"] button:first-of-type,.pill[data-on="en"] button:last-of-type{color:var(--signal-ink)}
+.wrap{width:min(1120px,calc(100% - 32px));margin:0 auto}
+.hero{background:var(--night);color:var(--paper);padding:48px 0}.grid{display:grid;gap:32px;align-items:center}
+@media(min-width:900px){.hero .grid,.split{grid-template-columns:1fr 1.1fr}.kit3{grid-template-columns:repeat(3,1fr)}.parts{grid-template-columns:1fr 220px}}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--signal)}
+.lede{margin-top:16px;max-width:36rem;color:var(--fog)}
+.line{margin-top:24px;color:var(--hud);font-size:14px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.primary{min-height:44px;padding:0 16px;border-radius:8px;background:var(--signal);color:var(--signal-ink);font-weight:700}
+.ghost{min-height:44px;padding:0 16px;border-radius:8px;border:1px solid color-mix(in srgb,var(--fog) 30%,transparent);display:inline-flex;align-items:center;font-weight:700}
+.stage{position:relative;border-radius:24px;overflow:hidden}.stage img{width:100%;height:320px;object-fit:cover}
+@media(min-width:900px){.stage img{height:460px}}
+.hud,.barhud{position:absolute;border-radius:16px;background:color-mix(in srgb,var(--night) 88%,transparent);padding:16px}
+.hud{top:20px;right:20px;width:160px;color:var(--hud);border:1px solid color-mix(in srgb,var(--hud) 40%,transparent)}
+.barhud{left:20px;bottom:20px;color:var(--paper)}
+.num{font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
+.digit{display:inline-block;animation:pop .15s var(--ease) both}
+.digit:nth-child(2){animation-delay:40ms}.digit:nth-child(3){animation-delay:80ms}.digit:nth-child(4){animation-delay:120ms}
+@keyframes pop{from{opacity:0;transform:translateY(4px);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+.line-swap{animation:swap .15s var(--ease)}
+@keyframes swap{from{opacity:0;transform:translateY(6px);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+section{padding:64px 0}.paper2{background:var(--paper-2)}
+.kit3,.parts{display:grid;gap:16px;margin-top:24px}
+.card{overflow:hidden;border-radius:24px;background:var(--paper-2);box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 8%,transparent);transition:transform .15s ease}
+.card:hover{transform:translateY(-2px)}.card img{height:192px;width:100%;object-fit:cover}.card div{padding:16px}
+.night{background:var(--night);color:var(--paper);border-radius:24px;padding:20px}
+.row{width:100%;min-height:44px;display:flex;justify-content:space-between;align-items:center;text-align:left;border-radius:12px;padding:8px 12px;background:var(--night-2)}
+.row.on{background:var(--signal);color:var(--signal-ink)}
+.total{display:grid;place-items:center;border-radius:16px;background:var(--night-2);text-align:center;padding:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{min-height:44px;border-radius:999px;padding:0 14px;background:var(--paper);font-weight:700}
+.chip.on{background:var(--signal);color:var(--signal-ink)}
+.steps{display:grid;gap:8px;margin-top:20px}
+.step{min-height:44px;width:100%;text-align:left;border-radius:12px;padding:0 12px;background:var(--paper);color:var(--muted)}
+.step.on{background:var(--night);color:var(--paper)}
+.phone{width:min(360px,100%);margin:0 auto;background:var(--night);color:var(--paper);border-radius:24px;padding:8px}
+.screen{min-height:384px;display:flex;flex-direction:column;background:var(--night-2);border-radius:16px;padding:16px}
+.msg{margin-top:16px;border:1px solid color-mix(in srgb,var(--fog) 20%,transparent);border-radius:12px;padding:16px}
+.meter{height:6px;border-radius:999px;background:var(--signal);margin-top:auto;transition:width .25s var(--ease)}
+.meet{position:relative;border-radius:24px;overflow:hidden;background:var(--night);color:var(--paper)}
+.meet img{width:100%;height:360px;object-fit:cover;opacity:.85}
+.caption{position:absolute;left:16px;right:16px;bottom:16px;background:var(--night);border-radius:16px;padding:16px}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.people li{list-style:none;background:var(--paper-2);border-radius:16px;padding:12px}
+ul{margin:0;padding:0}
+.lamp{position:absolute;top:24px;left:50%;width:144px;height:32px;border-radius:999px;transform:translateX(-50%);background:var(--night-2)}
+.lamp.on{background:var(--alert);box-shadow:0 0 40px var(--alert)}
+.track{height:8px;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden;margin-top:16px}
+.ask{width:100%;text-align:left;border-radius:16px;padding:12px 16px;background:var(--night-2)}
+.ask.on{background:var(--signal);color:var(--signal-ink)}
+.layout{border-radius:24px;padding:24px;background:var(--night-2)}.layout.bad{background:var(--alert)}
+.big{font-size:60px;font-weight:600;font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.form{display:flex;gap:8px;margin-top:12px}
+input{min-height:44px;flex:1;border:0;border-radius:12px;background:var(--night-2);color:var(--paper);padding:0 12px}
+input:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.shake{animation:shake .24s linear}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+footer{background:var(--night);color:var(--paper);padding:40px 0}
+footer .wrap{border-top:1px solid color-mix(in srgb,var(--fog) 20%,transparent);padding-top:32px}
+.rise>*{animation:rise .4s var(--ease) both}.rise>*:nth-child(2){animation-delay:80ms}.rise>*:nth-child(3){animation-delay:160ms}.rise>*:nth-child(4){animation-delay:240ms}
+@keyframes rise{from{opacity:0;transform:translateY(12px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-  <header class="header">
-    <div class="header-inner">
-      <a class="brand" href="#/home">
-        <img src="favicon.svg" width="26" height="26" alt="">
-        <div class="brand-title">
-          <span>ROADLINK</span>
-          <small>智能骑行方案 · 可视化路演</small>
-        </div>
-      </a>
-
-      <nav id="scene-nav" class="scene-nav" aria-label="首页与五大场景">
-        <a id="home-link" href="#/home">首页</a>
-        <a href="#/s1">组队与社交</a>
-        <a href="#/s2">显示与导航</a>
-        <a href="#/s3">AI 操控手机</a>
-        <a href="#/s4">安全主动预警</a>
-        <a href="#/s5">骑行社区</a>
-      </nav>
-
-      <div class="header-right">
-        <button type="button" class="tool-btn" id="btn-auto-scene">自动轮播</button>
-        <button type="button" class="home-window" id="btn-window">窗口</button>
-        <button type="button" class="tool-btn" id="btn-fullscreen">全屏</button>
-      </div>
-    </div>
-  </header>
-
-  <main id="main-content" class="wrap"></main>
-
-  <noscript><p class="wrap">请启用 JavaScript 查看 ROADLINK 可视化方案路演。</p></noscript>
-  <script src="team.js?v=20261119-team"></script>
-  <script src="app.js?v=brp-film-3"></script>
-</body>
-</html>
+<header class="bar">
+  <a class="brand" href="#hero"><span class="mark">路</span><span>路联<small>ROADLINK</small></span></a>
+  <nav>
+    <a href="#hero" data-zh="首页" data-en="Home">首页</a>
+    <a href="#kit" data-zh="套件" data-en="Kit">套件</a>
+    <a href="#ai" data-zh="语音" data-en="Voice">语音</a>
+    <a href="#crew" data-zh="组队" data-en="Crew">组队</a>
+    <a href="#safety" data-zh="安全" data-en="Safety">安全</a>
+    <a href="#social" data-zh="社区" data-en="Social">社区</a>
+  </nav>
+  <button class="tool" id="sound" type="button">配音关</button>
+  <div class="pill" id="lang" data-on="zh"><i></i><button type="button" data-l="zh">中</button><button type="button" data-l="en">EN</button></div>
+</header>
+<section class="hero" id="hero"><div class="wrap grid">
+  <div class="rise">
+    <p class="kicker">ROADLINK</p>
+    <h1 id="title" style="font-size:clamp(2rem,4vw,3rem);margin-top:12px">信息贴在眼前，手不用离开车把。</h1>
+    <p class="lede" id="sub">不是圆屏仪表。镜片上的投影贴片、握把旁的防水条屏，加上手机里的路联。</p>
+    <p class="line" id="line"></p>
+    <div class="actions"><button class="primary" id="hear" type="button">听这一段</button><a class="ghost" href="#kit" id="see">看套件</a></div>
+  </div>
+  <div class="stage">
+    <img id="road" alt="头盔里看出去的山路">
+    <div class="hud"><div style="font-size:12px;letter-spacing:.12em">FILM</div><div class="num" id="dist"></div><div id="turn" style="color:var(--paper)"></div></div>
+    <div class="barhud"><div style="font-size:12px;color:var(--fog)" id="barlab">车把条屏</div><div class="num"><span id="speed"></span> <span style="font-size:14px;color:var(--hud)">km/h</span></div></div>
+  </div>
+</div></section>
+<section id="kit"><div class="wrap">
+  <p class="kicker" data-zh="套件" data-en="Kit">套件</p>
+  <h2 style="font-size:2rem;margin-top:8px" id="kit-h">两件小硬件，加你已经有的手机。</h2>
+  <div class="kit3" id="kits"></div>
+  <div class="night parts"><ol id="parts" style="display:grid;gap:8px;margin:0;padding:0;list-style:none"></ol><div class="total"><div style="font-size:12px;color:var(--fog)" id="sumlab">贴片合计</div><div style="font-size:40px;color:var(--hud)">¥228</div><div style="color:var(--fog);margin-top:8px" id="plus">加条屏 ¥128</div><div style="font-size:12px;color:var(--fog);margin-top:16px" id="all">整套约 ¥356，不含手机</div></div></div>
+</div></section>
+<section class="paper2" id="ai"><div class="wrap grid split">
+  <div>
+    <p class="kicker" data-zh="语音控手机" data-en="Voice to phone">语音控手机</p>
+    <h2 style="font-size:2rem;margin-top:8px" id="ai-h">手套不用摘，一句话交给手机。</h2>
+    <div class="chips" id="tasks"></div>
+    <div class="steps" id="phonesteps"></div>
+  </div>
+  <div class="phone"><div class="screen"><div style="display:flex;justify-content:space-between;color:var(--fog);font-size:12px"><span>09:41</span><span>路联</span></div><p class="kicker" id="job" style="margin-top:24px"></p><div class="msg" id="card"></div><div class="meter" id="meter"></div></div></div>
+</div></section>
+<section id="crew"><div class="wrap grid split">
+  <div class="meet"><img id="meet" alt="山脚加油站"><div class="caption"><div class="kicker" id="samelab">镜片 · 条屏同一条</div><div class="num" id="hud" style="font-size:24px"></div><p id="crewline" style="color:var(--fog)"></p></div></div>
+  <div>
+    <p class="kicker" data-zh="组队" data-en="Crew">组队</p>
+    <h2 style="font-size:2rem;margin-top:8px" id="crew-h">碰面输个口令，几秒成队。</h2>
+    <p style="margin-top:12px;color:var(--muted)" id="crew-p">城郊到松林观景台。领队阿宁，我是陈默。</p>
+    <div class="chips" id="crewchips"></div>
+    <ul class="people" id="people"></ul>
+  </div>
+</div></section>
+<section class="paper2" id="safety"><div class="wrap grid split">
+  <div class="stage"><img id="helmet" alt="头盔后部" style="opacity:.7"><div class="lamp" id="lamp"></div></div>
+  <div>
+    <p class="kicker" data-zh="主动预警" data-en="Warnings">主动预警</p>
+    <h2 style="font-size:2rem;margin-top:8px" id="safe-h">减速灯自己亮，车距太近会变红。</h2>
+    <p style="font-size:48px;font-weight:600;margin-top:16px" id="spd">65 <span style="font-size:18px;color:var(--muted)">km/h</span></p>
+    <p id="gap" style="margin-top:12px;font-weight:700;color:var(--muted)"></p>
+    <div class="track"><div class="meter" id="gapbar" style="margin:0;height:8px"></div></div>
+  </div>
+</div></section>
+<section id="social" style="background:var(--night);color:var(--paper)"><div class="wrap grid split">
+  <div>
+    <p class="kicker" data-zh="路联顾问" data-en="ROADLINK guide">路联顾问</p>
+    <h2 style="font-size:2rem;margin-top:8px" id="soc-h">先问一句，再把条屏样式发下去。</h2>
+    <div class="steps" id="qs"></div>
+  </div>
+  <div>
+    <div class="layout" id="preview"><div id="lname" style="font-size:12px;letter-spacing:.12em;opacity:.7"></div><div class="big" id="lbig"></div><p id="lhint" style="opacity:.8"></p></div>
+    <div class="grid2" id="layouts"></div>
+    <form class="form" id="gen"><input id="prompt" placeholder="说一句想要的条屏"><button class="primary" type="submit" id="make">生成</button></form>
+    <p id="made" style="color:var(--hud);margin-top:8px"></p>
+  </div>
+</div></section>
+<footer><div class="wrap"><p style="font-size:24px;font-weight:600" id="foot">看路。手留在车把上。</p><p style="color:var(--fog);margin-top:8px">ROADLINK</p></div></footer>
+<script>
+const ZH=0,EN=1;
+const cue=[
+ ["300 m","连续右弯","Right bends","前方三百米，连续右弯，请留意路况。","Right bends in three hundred meters. Watch the surface.","64"],
+ ["120 m","收油进弯","Ease off","一百二十米，收一点油再进弯。","One hundred twenty meters. Roll off before the bend.","58"],
+ ["40 m","弯心","Apex","贴片把弯心留在视线右侧。","The film keeps the apex on the right of your sight.","42"],
+ ["通过","回到车速","Back to speed","弯过了，条屏回到车速。","Bend is done. The bar returns to speed.","64"]
+];
+const parts=[["光学贴膜","Optic film","¥68","贴在现有镜片内侧","Sticks inside the visor you own"],["微型投影","Micro projector","¥96","头盔通电后才亮","Lights only when the helmet is on"],["取电模块","Power tap","¥28","不改盔体线路","No rewiring the shell"],["磁吸框","Magnetic frame","¥36","停车可揭下来","Lifts off when you stop"]];
+const jobs=[
+ {m:"讯",t:["回阿宁","Reply Anning"],s:[["来消息","Message"],["语音回复","Say it"],["打开对话","Open chat"],["写入内容","Type"],["口头确认","Confirm"],["已发出","Sent"]],c:[[[“阿宁","Anning"],["到路口了吗？","At the junction yet?"]],[["你说","You"],["还有八分钟。","Eight minutes."]],[["路联","ROADLINK"],["正在打开和阿宁的对话","Opening the chat with Anning"]],[["草稿","Draft"],["还有八分钟","Eight minutes"]],[["确认","Confirm"],["发给阿宁？","Send to Anning?"]],[["已发出","Sent"],["阿宁已读","Anning read it"]]]},
+ {m:"咖",t:["驿站一杯","A stop coffee"],s:[["你说一句","You say it"],["匹配驿站","Match a stop"],["确认饮品","Confirm"],["取餐码","Pickup"]],c:[[[“你说","You"],["前方驿站来杯热美式","Hot americano at the next stop"]],[["松林驿站","Pine stop"],["顺路 2.4 km","2.4 km ahead"]],[["热美式","Americano"],["¥18 · 说「下单」","¥18 · say order"]],[["取餐码 R14","Code R14"],["到店不用掏手机","No phone at the counter"]]]},
+ {m:"享",t:["分享路线","Share the route"],s:[["你说一句","You say it"],["生成路线卡","Make the card"],["发到车队","Send"],["有人回了","Reply in"]],c:[[[“你说","You"],["把今天分享给车队","Share today with the crew"]],[["今日路线","Today"],["城郊 → 松林观景台 · 42 km","Edge to pine lookout · 42 km"]],[["山路车队","Hill crew"],["等待发出","Ready to send"]],[["苏晚","Su Wan"],["这条弯我熟。","I know these bends."]]]}
+];
+const crew=[["碰面","Meet","面对面，口令四零七一。","Face to face. Code four zero seven one.","口令 4071","Code 4071"],["建队","Form","四个人输入同一组数字。","Four riders enter the same digits.","1 / 4","1 / 4"],["人齐","Full","阿宁、苏晚、老周都到了。","Anning, Su Wan and Zhou are in.","4 人","4 riders"],["出发","Roll","去松林观景台，四十二公里。","Pine lookout, forty-two kilometers.","42 km","42 km"],["前车标记","Lead mark","阿宁标了前方落叶，三百米。","Anning marked leaves, three hundred meters.","落叶 300 m","Leaves 300 m"],["有人落后","Gap","老周落后一点一公里，已提醒领队。","Zhou is 1.1 km back. The lead is told.","老周 1.1 km","Zhou 1.1 km"],["约集合","Meet point","山脚加油站已同步给全队。","The foothill station is on every screen.","山脚加油站","Foothill stop"],["到了","There","观景台打卡，四十二公里记进路书。","Lookout checked in. Forty-two kilometers logged.","已到达","Arrived"]];
+const lays=[{id:"turn",n:["转向大字","Turn type"],b:"300",u:"m",h:["只留下一处弯","Only the next bend"]},{id:"grade",n:["坡度条","Grade bar"],b:"6.2",u:"%",h:["爬坡时字号加大","Type grows on the climb"]},{id:"crew",n:["队距点","Crew gap"],b:"90",u:"m",h:["只显示前车和后车","Rider ahead and behind"]},{id:"clock",n:["集合倒计时","Meet clock"],b:"08",u:"min",h:["全队看到同一个时间","One clock for the crew"]},{id:"gap",n:["车距预警","Following gap"],b:"6",u:"m",h:["太近时条屏变红","Bar turns red when close"]},{id:"alt",n:["海拔细线","Altitude line"],b:"640",u:"m",h:["一条细线，不挡视线","A thin line, not a dial"]}];
+const qs=[["手套按键没反应？","Glove button dead?","先看条屏有没有亮。短按是唤醒，长按两秒才重连手机。","Check the bar is lit. A short press wakes it. Hold two seconds to reconnect the phone."],["夜里贴片太晃？","Film too bright at night?","说「贴片调暗」。它会收到边缘一条，不再铺满镜片。","Say dim the film. It shrinks to one edge cue instead of the whole visor."]];
+const copy={title:["信息贴在眼前，手不用离开车把。","The cue stays in sight. Hands stay on the bars."],sub:["不是圆屏仪表。镜片上的投影贴片、握把旁的防水条屏，加上手机里的路联。","Not a round dash. A visor film, a waterproof bar by the grip, and ROADLINK on the phone."],hear:["听这一段","Play this"],see:["看套件","See the kit"],bar:["车把条屏","Bar"],kit:["两件小硬件，加你已经有的手机。","Two small pieces, plus the phone you already carry."],sum:["贴片合计","Film total"],plus:["加条屏 ¥128","Plus bar ¥128"],all:["整套约 ¥356，不含手机","About ¥356, phone not included"],ai:["手套不用摘，一句话交给手机。","Gloves stay on. One line goes to the phone."],same:["镜片 · 条屏同一条","Film and bar, same cue"],crewh:["碰面输个口令，几秒成队。","A short code, and the crew is formed."],crewp:["城郊到松林观景台。领队阿宁，我是陈默。","Edge road to the pine lookout. Anning leads. I am Chen Mo."],safe:["减速灯自己亮，车距太近会变红。","The brake lamp lights itself. A short gap turns red."],near:["前车 6 米 · 请拉开","6 m ahead · open the gap"],far:["前车 28 米 · 车距正常","28 m ahead · gap is fine"],soc:["先问一句，再把条屏样式发下去。","Ask once, then push a bar layout."],ph:["说一句想要的条屏","Say the bar you want"],make:["生成","Make"],foot:["看路。手留在车把上。","Watch the road. Leave your hands on the bars."],voice:["配音开","Voice on","配音关","Voice off"]};
+let lang=ZH,sound=false,hi=0,part=0,task=0,ps=0,ci=0,ask=0,brake=false,lay=lays[0];
+const $=id=>document.getElementById(id);
+function t(a){return a[lang]}
+function digits(el,text){el.textContent="";for(const ch of text){const s=document.createElement("span");s.className="digit";s.textContent=ch===" "?"\u00a0":ch;el.appendChild(s)}}
+function say(text){if(!sound||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang?"en-US":"zh-CN";speechSynthesis.speak(u)}
+function paint(){
+  $("title").textContent=t(copy.title);$("sub").textContent=t(copy.sub);$("hear").textContent=t(copy.hear);$("see").textContent=t(copy.see);$("barlab").textContent=t(copy.bar);
+  $("kit-h").textContent=t(copy.kit);$("sumlab").textContent=t(copy.sum);$("plus").textContent=t(copy.plus);$("all").textContent=t(copy.all);$("ai-h").textContent=t(copy.ai);
+  $("samelab").textContent=t(copy.same);$("crew-h").textContent=t(copy.crewh);$("crew-p").textContent=t(copy.crewp);$("safe-h").textContent=t(copy.safe);$("soc-h").textContent=t(copy.soc);
+  $("prompt").placeholder=t(copy.ph);$("make").textContent=t(copy.make);$("foot").textContent=t(copy.foot);
+  $("sound").textContent=sound?t([copy.voice[0],copy.voice[1]]):t([copy.voice[2],copy.voice[3]]);
+  $("sound").classList.toggle("on",sound);
+  document.querySelectorAll("[data-zh]").forEach(n=>{if(n.dataset.zh)n.textContent=lang?n.dataset.en:n.dataset.zh});
+  hero(); phone(); crewView(); safety(); social(); partsView(); kitsView();
+}
+function hero(){const c=cue[hi];$("line").textContent=t([c[3],c[4]]);$("line").classList.remove("line-swap");void $("line").offsetWidth;$("line").classList.add("line-swap");digits($("dist"),c[0]);$("turn").textContent=t([c[1],c[2]]);digits($("speed"),c[5])}
+function partsView(){const box=$("parts");box.innerHTML="";parts.forEach((p,i)=>{const li=document.createElement("li");const b=document.createElement("button");b.className="row"+(i===part?" on":"");b.innerHTML=`<span><b>${t([p[0],p[1]])}</b><small style="display:block;opacity:.8">${t([p[3],p[4]])}</small></span><span>${p[2]}</span>`;b.onclick=()=>part=i,partsView();li.appendChild(b);box.appendChild(li)})}
+function phone(){const j=jobs[task];$("job").textContent=t(j.t);const box=$("tasks");box.innerHTML="";jobs.forEach((item,i)=>{const b=document.createElement("button");b.className="chip"+(i===task?" on":"");b.textContent=item.m+" "+t(item.t);b.onclick=()=>{task=i;ps=0;say(t(item.t));phone()};box.appendChild(b)});
+  const steps=$("phonesteps");steps.innerHTML="";j.s.forEach((s,i)=>{const b=document.createElement("button");b.className="step"+(i===ps?" on":"");b.textContent=(i+1)+". "+t(s);b.onclick=()=>{ps=i;phone()};steps.appendChild(b)});
+  const card=j.c[ps];$("card").innerHTML=`<span style="color:var(--fog);font-size:12px">${t(card[0])}</span><div style="font-size:18px;font-weight:600">${t(card[1])}</div>`;
+  $("meter").style.width=((ps+1)/j.s.length*100)+"%"}
+function crewView(){const c=crew[ci];digits($("hud"),t([c[4],c[5]]));$("crewline").textContent=t([c[2],c[3]]);
+  const box=$("crewchips");box.innerHTML="";crew.forEach((item,i)=>{const b=document.createElement("button");b.className="chip"+(i===ci?" on":"");b.style.background=i===ci?"var(--night)":"var(--paper-2)";b.style.color=i===ci?"var(--paper)":"inherit";b.textContent=t([item[0],item[1]]);b.onclick=()=>{ci=i;say(t([item[2],item[3]]));crewView()};box.appendChild(b)});
+  $("people").innerHTML=[["阿宁",["领队","Lead"]],["陈默",["我","Me"]],["苏晚",["同路","With"]],["老周",["同路","With"]]].map(([n,r])=>`<li><b>${n}</b><span style="display:block;color:var(--muted);font-size:12px">${t(r)}</span></li>`).join("")}
+function safety(){$("lamp").classList.toggle("on",brake);$("spd").innerHTML=(brake?"18":"65")+` <span style="font-size:18px;color:var(--muted)">km/h</span>`;$("gap").textContent=brake?t(copy.near):t(copy.far);$("gap").style.color=brake?"var(--alert)":"var(--muted)";const bar=$("gapbar");bar.style.width=brake?"22%":"80%";bar.style.background=brake?"var(--alert)":"var(--signal)"}
+function social(){const qbox=$("qs");qbox.innerHTML="";qs.forEach((q,i)=>{const b=document.createElement("button");b.className="ask"+(i===ask?" on":"");b.innerHTML=`<b>${t([q[0],q[1]])}</b>`+(i===ask?`<span style="display:block;margin-top:8px">${t([q[2],q[3]])}</span>`:"");b.onclick=()=>{ask=i;say(t([q[2],q[3]]));social()};qbox.appendChild(b)});
+  const p=$("preview");p.classList.toggle("bad",lay.id==="gap");$("lname").textContent=t(lay.n);$("lbig").innerHTML="";const wrap=document.createElement("span");digits(wrap,lay.b);$("lbig").appendChild(wrap);const u=document.createElement("span");u.style.fontSize="18px";u.style.marginLeft="8px";u.textContent=lay.u;$("lbig").appendChild(u);$("lhint").textContent=t(lay.h);
+  const grid=$("layouts");grid.innerHTML="";lays.forEach(item=>{const b=document.createElement("button");b.className="ask"+(item.id===lay.id?" on":"");b.textContent=t(item.n);b.onclick=()=>{lay=item;$("made").textContent="";social()};grid.appendChild(b)})}
+$("sound").onclick=()=>{sound=!sound;if(!sound)speechSynthesis&&speechSynthesis.cancel();else say($("line").textContent);paint()};
+$("hear").onclick=()=>{sound=true;say($("line").textContent);paint()};
+document.querySelectorAll("#lang button").forEach(b=>b.onclick=()=>{$("lang").dataset.on=b.dataset.l;lang=b.dataset.l==="en"?EN:ZH;paint()});
+$("gen").onsubmit=e=>{e.preventDefault();const text=$("prompt").value.trim();if(!text){const el=$("prompt");el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");return}const night=/夜|青|霓虹|night/i.test(text),bend=/弯|转向|bend/i.test(text);lay=bend?lays[0]:night?{...lays[1],b:"72",u:"km/h",n:["夜骑青光","Night bar"],h:[text,text]}:{...lays[5],h:[text,text]};$("made").textContent=lang?`On the bar · ${text}`:`已投到条屏 · ${text}`;say(lang?"The new layout is on the bar.":"新样式已经投到车把条屏。");social()};
+const map={"#/home":"#hero","#/s1":"#crew","#/s2":"#hero","#/s3":"#ai","#/s4":"#safety","#/s5":"#social"};
+function route(){const id=map[location.hash];if(id)document.querySelector(id)?.scrollIntoView()}
+addEventListener("hashchange",route);
+$("road").src="assets/roadlink-home-hud-optics.webp";
+$("meet").src="assets/roadlink-convoy.webp";
+$("helmet").src="assets/roadlink-helmet.webp";
+const kits=[["assets/roadlink-hardware-visor.webp",["投影贴片","Visor film"],["¥228 预估","about ¥228"],["光学膜把转向投进现有镜片。","The film throws the turn onto the visor."]],["assets/roadlink-hardware-edge.webp",["车把条屏","Bar display"],["¥128 预估","about ¥128"],["握把内侧的防水长条，不是圆表。","A waterproof strip inboard of the grip. Not a round dial."]],["assets/roadlink-app-preview.webp",["路联 App","ROADLINK"],["手机已有","Your phone"],["路线、车队、把样式发到条屏。","Routes, crew, and layouts pushed to the bar."]]];
+function kitsView(){
+  $("kits").innerHTML=kits.map(([src,title,price,body])=>`<article class="card"><img alt="" src="${src}"><div><h3>${t(title)}</h3><p style="color:var(--signal);font-weight:700;margin-top:4px">${t(price)}</p><p style="color:var(--muted);margin-top:8px">${t(body)}</p></div></article>`).join("");
+}
+paint();
+setInterval(()=>{hi=(hi+1)%cue.length;hero()},2400);
+setInterval(()=>{part=(part+1)%parts.length;partsView()},1800);
+setInterval(()=>{ps=(ps+1)%jobs[task].s.length;phone()},1500);
+setInterval(()=>{ci=(ci+1)%crew.length;crewView()},2000);
+setInterval(()=>{brake=!brake;safety()},2200);
+route();
+</script>
+</body></html>
