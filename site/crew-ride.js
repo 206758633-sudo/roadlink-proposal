@@ -1,140 +1,206 @@
-/* One ride, shown on the group leader's phone and a rider's display. */
 window.mountCrewRide = function (root, asset, speak) {
   'use strict';
-  const stages = [
-    ['碰面', '在康定，遇见今天的骑友。', '大家已登录 App。先建一个车队，再共享位置。', '创建面对面车队', 'team'],
-    ['面对面建队', '告诉朋友这四个数字。', '同一集合点的骑友在各自手机上输入口令，加入同一支车队。', '演示朋友输入口令', 'team'],
-    ['朋友入队', '谁来了，手机上看得见。', '队员加入后才出现在名单里。五人到齐，就能共享目的地。', '设目的地并出发', 'team'],
-    ['一起出发', '五个人，沿同一条路出发。', '手机共享去新都桥的路线和队友位置，骑行显示器只呈现下一步提示。', '演示领队标记碎石', 'convoy'],
-    ['前车标危险', '老王先看到碎石，后车提前知道。', '领队标记路况，后方队友的显示器收到同一位置的提醒。', '查看队尾位置', 'convoy'],
-    ['有人掉队', '回头找人之前，先看队尾位置。', '老周落后 1.2 公里。App 提醒领队，队友仍在同一支车队里。', '约定镇口集合', 'convoy'],
-    ['约集合点', '在同一个加油站等。', '领队选定镇口加油站作为途中集合点，位置与距离同步给全队。', '查看终点记录', 'convoy'],
-    ['到了', '一起到新都桥，留下这段同行。', '途中会合后，五人抵达终点。这段 76 公里的路线保存在车队记录里。', '重新体验', 'riderclub']
+  const chapters = [
+    ['碰面','集合点','寻找附近骑友',5], ['面对面建队','四位组队口令','面对面建队',5],
+    ['朋友入队','车队集合','朋友输入口令',7], ['一起出发','队伍出发','全队导航',7],
+    ['前车标危险','前方有碎石','共享路况',6], ['有人掉队','队尾距离拉开','队尾提醒',6],
+    ['约集合点','镇口加油站','途中会合',8], ['抵达终点','抵达新都桥','行程记录',6]
   ];
-  const riders = ['我','老王','老周','阿哲','小林'];
-  const times = ['09:41','09:42','09:43','09:48','10:18','10:36','10:39','11:35'];
-  const colors = ['#27634e','#b97132','#355d90','#835882','#47775f'];
-  const device = [
-    ['◎','待命','已连接手机'], ['#','2618','面对面组队码'], ['●','','车队成员'],
-    ['↱','新都桥','老王在前方 300 m'], ['⚠','300 m','前方碎石 · 老王标记'],
-    ['↓','1.2 km','老周落后 · 已提醒领队'], ['⚑','4.5 km','镇口加油站集合'], ['✓','已到达','新都桥 · 同行 76 km']
-  ];
-  let stage = 0, joined = 0, screen = 'dial', timer, arrivals;
-  let playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  root.innerHTML = `
-    <section class="cr" aria-label="组队骑行演示">
-      <div class="cr-bar"><div><small>组队演示 · 示例数据</small><h2>康定 <span>→</span> 新都桥</h2></div>
-        <div class="cr-switch" role="group" aria-label="骑行提示显示设备">
-          <button data-screen="lens" aria-pressed="false">头盔镜片</button><button data-screen="dial" aria-pressed="true">车把圆屏</button>
-        </div>
+  const riders = ['我','老王','阿哲','小林','老周'];
+  const colors = ['#ffcf60','#8ce0cc','#9bc6fc','#ddabde','#ffad81'];
+  const seconds = chapters.map(c=>c[3]);
+  const starts = seconds.map((_,i)=>seconds.slice(0,i).reduce((a,b)=>a+b,0));
+  const total = seconds.reduce((a,b)=>a+b);
+  const route = 'M108 244 C132 252 150 260 169 238 S188 212 218 215 S255 222 268 193 S302 156 320 168 S348 191 367 168 S393 128 414 137 S452 154 467 128 S492 103 522 111 S550 121 568 96 S593 73 623 75';
+  const avatar = i=>`<i class="ride-avatar" style="--person:${colors[i]}">${riders[i].slice(-1)}</i>`;
+  const dot = (i)=>`<g class="ride-marker" data-person="${i}"><circle r="9" fill="#102422" stroke="${colors[i]}" stroke-width="1.7"/><circle r="4" fill="${colors[i]}"/></g>`;
+  const clamp = x=>Math.min(1,Math.max(0,x));
+  const time = n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(Math.floor(n%60)).padStart(2,'0');
+  root.innerHTML=`<section class="ride" aria-label="组队骑行互动演示">
+    <header class="ride-header"><div><small><b class="ride-playstate"></b> <i></i> 示例行程</small><h2>康定 <span>→</span> 新都桥</h2></div>
+      <div class="ride-route-meta">川西摩旅 <span>／</span> 76 km</div></header>
+    <div class="ride-body"><div class="ride-field">
+        <svg class="ride-map" viewBox="0 0 740 345" role="img" aria-label="车队路线与成员位置示意">
+          <g class="ride-camera" id="roadlink-crew-map-content"><image href="${asset('crew-relief')}" x="-390" y="-240" width="1520" height="850" preserveAspectRatio="none"/>
+          <g class="ride-geography"><path d="M-65 307Q79 268 148 276T276 227T411 170T540 142T805 40" fill="none" stroke="#6ba5a4" stroke-opacity=".34" stroke-width="3"/>
+          <text x="340" y="84">折 多 山</text><text x="466" y="260">横 断 山 区</text></g>
+          <path class="ride-road" d="${route}"/><path class="ride-active-route" d="${route}" pathLength="100"/>
+          <g class="ride-place" transform="translate(108 244)"><circle r="5"/><text x="-10" y="28">康定</text></g>
+          <g class="ride-place" transform="translate(623 75)"><circle r="5"/><text x="9" y="-9">新都桥</text></g>
+          <g class="ride-scan" transform="translate(108 244)"><circle r="20"/><circle r="36"/><circle r="54"/></g><g class="ride-markers">${riders.map((_,i)=>dot(i)).join('')}</g>
+          <g class="ride-pin"><path d="M0 12l-6 -8h12Z"/><circle r="10" cy="-5"/><text text-anchor="middle"></text></g>
+          <g class="ride-tracking"><path d="M0 0l10 -17h8" fill="none" stroke="#e3eade"/><rect x="18" y="-27" width="76" height="20" rx="4"/><text x="24" y="-13"></text></g>
+        </g></svg>
+        <div class="ride-maphead"><small>车队位置 · 路线示意</small><h3></h3></div>
+        <span class="ride-north" aria-hidden="true">↑ N</span>
+        <div class="ride-message" role="status"><i></i><strong></strong><span></span></div>
       </div>
-      <div class="cr-scene">
-        <img class="cr-photo" alt=""><div class="cr-shade"></div><div class="cr-tags" aria-hidden="true"><div class="cr-tagplane"></div></div>
-        <div class="cr-caption"><small></small><h3></h3></div>
-        <div class="cr-phone"><div class="cr-status"><b></b><i></i><span>5G ▰</span></div>
-          <div class="cr-app"></div><div class="cr-phonefoot">ROADLINK <strong>骑行 App</strong></div></div>
-        <div class="cr-hardware"><small class="cr-hwlabel"></small><div class="cr-housing"><div class="cr-readout"></div></div></div>
-      </div>
-      <div class="cr-story"><p aria-live="polite"></p><div><button data-cmd="play"></button><button data-cmd="replay" aria-label="从碰面开始重播">↻ 重播</button></div></div>
-      <div class="cr-steps" role="group" aria-label="八个骑行阶段">${stages.map((s,i)=>`<button data-step="${i}"><i></i>${s[0]}</button>`).join('')}</div>
-    </section>`;
-  const el = selector => root.querySelector(selector);
-  const avatar = i => `<i class="cr-avatar" style="--rider:${colors[i]}">${riders[i].slice(-1)}</i>`;
-  function map() {
-    const positions = stage === 7 ? [[169,42],[178,45],[161,47],[177,54],[166,56]] :
-      [[107,82],[135,61],[stage===5 ? 47 : 78,stage===5 ? 124 : 101],[123,75],[90,92]];
-    const pins = positions.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="5.5" stroke="white" stroke-width="2" fill="${colors[i]}"/>`).join('');
-    const labels = stage===7 ? '' : [0,1,2].map(i=>{
-      const [x,y]=positions[i];
-      return `<text x="${x-8}" y="${y-8}" text-anchor="end" font-size="10" fill="#183429" stroke="#edf1e4" stroke-width="2.6" paint-order="stroke">${riders[i]}</text>`;
-    }).join('');
-    const mark = stage===4 ? '<text x="143" y="47">⚠</text>' : stage===6 ? '<text x="143" y="47">⚑</text>' : '';
-    return `<svg class="cr-map" viewBox="0 0 220 150" role="img" aria-label="车队位置示意图，五位成员与当前路线">
-      <rect width="220" height="150" fill="#dce6d7"/><path d="M-12 64Q38 6 83 26T149 8L191 0M1 162Q60 91 98 116T231 89" fill="none" stroke="#bdcfba" stroke-width="19"/>
-      <path d="M-9 24Q52 65 77 42T134 58T230 38M29 152Q65 120 54 91T75 -4M135 154Q119 108 166 98T219 71" fill="none" stroke="#f8f6e9" stroke-width="5"/>
-      <path d="M24 134C57 117 63 104 78 101S96 86 107 82S127 78 135 61S161 63 176 41" fill="none" stroke="#217c70" stroke-width="4" stroke-linecap="round"/>${pins}${labels}${mark}
-      <g font-size="10" fill="#314b43"><text x="9" y="145">康定</text><text x="160" y="30">新都桥</text><text x="5" y="53">路线示意</text></g></svg>`;
+      <aside class="ride-side"><div class="ride-phone"><div class="ride-status"><b>09:41</b><i></i><span>5G ▰</span></div>
+        <div class="ride-app" aria-label="手机 App"></div><button class="ride-action"></button><div class="ride-homebar"></div></div></aside>
+    </div>
+    <div class="ride-instruments"><div class="ride-hwcontrols"><small>骑手视角</small><div class="ride-switch" role="group" aria-label="显示设备"><button data-mode="dial">车把圆屏</button><button data-mode="lens">头盔镜片</button></div></div>
+      <div class="ride-device" aria-label="硬件显示"><i></i><b></b><span></span></div></div>
+    <footer class="ride-player"><div class="ride-transport"><button data-play></button><span class="ride-time"></span><button data-replay aria-label="从头重播">↻ 重播</button></div>
+      <div class="ride-chapters" role="group" aria-label="选择演示阶段">${chapters.map((c,i)=>`<button data-chapter="${i}"><i></i>${c[0]}</button>`).join('')}</div></footer>
+  </section>`;
+  const $=s=>root.querySelector(s);
+  const all=s=>Array.from(root.querySelectorAll(s));
+  const section=$('.ride'), road=$('.ride-road'), length=road.getTotalLength();
+  const coord=f=>road.getPointAtLength(clamp(f)*length);
+  const markers=all('.ride-marker'), chapterButtons=all('[data-chapter]');
+  section.style.setProperty('--trip-photo',`url("${asset('convoy')}")`);
+  section.style.setProperty('--visor-photo',`url("${asset('hardware-visor')}")`);
+  function fitMap() {
+    const field=$('.ride-field'), aspect=field.clientWidth/field.clientHeight;
+    // Keep marker symbols circular and extend the relief to the edges on wide screens.
+    const width=Math.max(740,345*aspect), height=Math.max(345,740/aspect);
+    $('.ride-map').setAttribute('viewBox',[(740-width)/2,(345-height)/2,width,height].join(' '));
   }
-  function renderPhone() {
+  const observer=new ResizeObserver(fitMap);observer.observe($('.ride-field'));fitMap();
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  let elapsed=0, playing=true, mode='dial', frame, lastStamp=null, previousStage=-1, previousCue='', lastRender=-1;
+  let stage=0, local=0, cue, count, selectedRider=null;
+  function state() {
+    stage=starts.findLastIndex(t=>elapsed>=t); local=elapsed-starts[stage];
+    count=stage===0?0:stage===1?1:stage===2?Math.min(5,1+Math.floor(local/1.15)):5;
+    const progress=clamp(local/seconds[stage]);
+    switch(stage){
+      case 0: return local<1.1?['正在寻找附近骑友','集合点 · 康定','◎','已连接','手机蓝牙就绪']:['附近有 4 位骑友','可以面对面建队','◎','待组队','等待发起车队'];
+      case 1: return local<1.25?['我发起了车队','App 正在生成口令','#','建队中','等待组队口令']:['组队口令 2618','告诉身边的朋友','#','2618','面对面组队码'];
+      case 2: return [count===5?'五人已到齐':count===1?'等待朋友输入口令':riders[count-1]+' 加入车队','已加入 '+count+' / 5 人','●',count+' / 5',count===5?'准备出发':'车队成员'];
+      case 3: return local<1.4?['已选目的地 · 新都桥','App 正在共享路线','↗','同步中','接收车队路线']:['全队沿同一路线前进','老王领骑 · 老周收尾','↗','新都桥','全队导航中'];
+      case 4: return local<1.3?['老王发现前方碎石','领队准备标记路况','↗','新都桥','全队导航中']:local<2.5?['老王已标记碎石','位置正发送给后车','↗','新都桥','全队导航中']:['后车收到路况提醒','标记来自领队老王','⚠','前方碎石','注意路面'];
+      case 5: {const gap=Math.round(2+10*clamp(progress/.7))/10;
+        return local<4.2?['队尾距离正在拉开','老周仍在共享位置','↓',gap.toFixed(1)+' km','队尾距离']:['领队收到掉队提醒','老周落后 1.2 km','↓','1.2 km','队尾 · 老周'];}
+      case 6: return local<1.4?['老王选择镇口加油站','准备共享途中集合点','↓','1.2 km','等待集合点']:local<5.8?['集合点已共享','前车在镇口等队尾','⚑','镇口集合','镇口加油站']:['老周赶到，五人会合','继续前往新都桥','✓','5 / 5','已会合'];
+      default: return local<2?['车队驶入新都桥','等待最后一位骑友抵达','↗','新都桥','接近终点']:['五人全部抵达','本次同行 76 km','✓','已抵达','新都桥 · 76 km'];
+    }
+  }
+  function phone() {
     let body;
-    if (stage < 3) {
-      const count = stage===0 ? '尚未建队' : joined+' / 5 人已入队';
-      const radar = stage===0 ? '<b class="cr-start">面对面组队</b>' : '<b class="cr-code">2618</b>';
-      const list = riders.slice(0,joined).map((name,i)=>`<li>${avatar(i)}<b>${name}</b><small>${i===0 ? '发起人' : '已加入'}</small></li>`).join('');
-      body = `<div class="cr-apphead"><small>ROADLINK / 组队</small><strong>附近骑友</strong></div>
-        <div class="cr-radar"><small>康定 · 集合点</small>${radar}<span>${count}</span></div>
-        <div class="cr-members"><strong>我的车队</strong><ul>${list}</ul>${joined===0 ? '<p>建队后，分享四位口令邀请朋友。</p>' : joined<5 ? '<p>等待朋友输入口令…</p>' : ''}</div>`;
-    } else {
-      const detail = [
-        ['全队导航中','老王在前方 300 m，老周在后方 500 m。'],
-        ['前方碎石 · 300 m','领队老王刚刚标记了路上的碎石。'],
-        ['队尾提醒 · 老周','距离队伍 1.2 km，已通知领队。'],
-        ['途中集合 · 镇口加油站','距集合点 4.5 km，已共享给五人。'],
-        ['已到新都桥','五人到齐 · 本次同行 76 km']
-      ][stage-3];
-      body = `<div class="cr-apphead"><small>ROADLINK / 骑行路书</small><strong>${stage===7?'同行记录':'去新都桥'}</strong></div>${map()}
-        <div class="cr-lineup">${riders.map((_,i)=>avatar(i)).join('')}<small>5 人</small></div>
-        <div class="cr-event"><b>${detail[0]}</b><p>${detail[1]}</p></div>`;
+    if(stage<3) {
+      const waiting=stage===0;
+      const code=stage===1 && local<1.25?'····':'2618';
+      body=`<small>ROADLINK / 组队</small><h4>${waiting?'附近骑友':'我的车队'}</h4>
+        <div class="ride-radar"><i></i><small>康定集合点</small><b>${waiting?(local<1.1?'扫描中':'4 位骑友'):code}</b><em>${waiting?'蓝牙发现':'面对面组队码'}</em></div>
+        <div class="ride-listhead">${waiting?'待加入车队':'队员'}<span>${count} / 5</span></div>
+        ${waiting?'<p>建队后，把四位口令告诉身边的朋友。</p>':`<ul>${riders.slice(0,count).map((n,i)=>`<li>${avatar(i)}<b>${n}</b><span>${i===0?'发起人':'已加入'}</span></li>`).join('')}</ul>`}`;
+    }else{
+      const arrived=stage===7 && local>=2;
+      body=`<small>ROADLINK / 车队</small><h4>${arrived?'同行记录':'车队行程'}</h4>
+        ${arrived?`<div class="ride-cover" style="background-image:linear-gradient(0deg,#091a18ee,transparent),url('${asset('riderclub')}')"><small>同行记录</small><b>76 km</b></div>`:'<svg class="ride-pocket-map" viewBox="50 30 620 265" role="img" aria-label="手机上同步的车队地图"><use href="#roadlink-crew-map-content"/></svg>'}
+        <div class="ride-listhead">同行骑友<span>5 人</span></div><div class="ride-avatars">${riders.map((name,i)=>`<button data-focus="${i}" aria-label="在地图查看${name}" aria-pressed="${selectedRider===i}">${avatar(i)}</button>`).join('')}</div>
+        <div class="ride-notice"><strong>${cue[0]}</strong><p>${cue[1]}</p></div>`;
     }
-    el('.cr-app').innerHTML = body;
-    el('.cr-next').textContent=stage===2 && joined<5 ? '让下一位朋友入队' : stages[stage][3];
+    $('.ride-app').innerHTML=body;
+    const action=$('.ride-action');
+    action.textContent=['创建车队','查看队员',count<5?'等待朋友入队':'共享目的地','查看下一段路况','查看队尾','查看集合点','查看终点记录','从头重播'][stage];
+    action.disabled=stage===2 && count<5 && playing;
+    if(stage===2 && count<5 && !playing) action.textContent='演示下一位入队';
+    if(stage===1 && local<1.25) action.textContent='显示组队口令';
+    if(stage===4 && local<2.5) action.textContent=local<1.3?'查看老王的标记':'接收碎石提醒';
+    if(stage===5 && local<4.2) action.textContent='查看掉队提醒';
+    if(stage===6 && local<5.8) action.textContent=local<1.4?'共享集合点':'查看会合情况';
+    $('.ride-status b').textContent=['09:41','09:42','09:43','09:48','10:18','10:36','10:39','11:35'][stage];
   }
-  el('.cr-phonefoot').insertAdjacentHTML('beforebegin','<button class="cr-next" data-cmd="next"></button>');
-  function renderHardware() {
-    const d=device[stage];
-    el('.cr-hardware').dataset.mode=screen;
-    el('.cr-hwlabel').textContent=screen==='dial'?'骑手视角 · 车把防水圆屏':'骑手视角 · 镜片内侧 HUD';
-    el('.cr-readout').innerHTML=`<span>${d[0]}</span><b>${stage===2?joined+' / 5':d[1]}</b><small>${stage===2?riders[joined-1]+'已入队':d[2]}</small>`;
-    root.querySelectorAll('[data-screen]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.screen===screen)));
-  }
-  function controls() {
-    el('[data-cmd="play"]').textContent=playing?'Ⅱ 暂停':'▷ 播放';
-  }
-  function cancel() { clearTimeout(timer); clearInterval(arrivals); }
-  function addRider() {
-    joined=Math.min(5,joined+1); renderPhone(); renderHardware();
-    if(joined===5) clearInterval(arrivals);
-  }
-  function schedule() {
-    cancel(); controls();
-    if(!playing) return;
-    if(stage===2 && joined<5) arrivals=setInterval(addRider,900);
-    timer=setTimeout(()=>{ if(stage<7) show(stage+1); },stage===2?6500:5700);
-  }
-  function show(i) {
-    stage=i; joined=i===0?0:i===1?1:i===2?2:5;
-    if(i===7) playing=false;
-    const s=stages[i];
-    el('.cr-photo').src=asset(s[4]);
-    el('.cr-photo').alt={team:'停车集合的骑友',convoy:'三辆摩托车沿林间山路行进',riderclub:'骑友停车后一起回看路线'}[s[4]];
-    // Anchor labels to the photograph's crop, keeping them beside their subjects.
-    const tags = i>=3 && i<=6
-      ? [[73,37,'小林'],[61,49,'我'],[45,69,'老王 · 领队']]
-      : [];
-    el('.cr-tagplane').innerHTML = tags.map(([x,y,name]) =>
-      `<span style="left:${x}%;top:${y}%">${name}</span>`).join('');
-    el('.cr-status b').textContent=times[i];
-    el('.cr-caption small').textContent=String(i+1).padStart(2,'0')+' / 08　'+s[0];
-    el('.cr-caption h3').textContent=s[1]; el('.cr-story p').textContent=s[2];
-    root.querySelectorAll('[data-step]').forEach((b,j)=>{b.setAttribute('aria-current',j===i?'step':'false');b.classList.toggle('passed',j<i);});
-    renderPhone(); renderHardware(); schedule(); speak(s[2]);
-  }
-  function replay() { playing=true; show(0); }
-  function toggle() { if(stage===7) return replay(); playing=!playing; schedule(); }
-  function click(event) {
-    const b=event.target.closest('button');
-    if(!b) return;
-    if(b.dataset.screen) {screen=b.dataset.screen; renderHardware(); return;}
-    if(b.hasAttribute('data-step')) {playing=false; show(Number(b.dataset.step));return;}
-    if(b.dataset.cmd==='next') {
-      playing=false; cancel(); controls();
-      if(stage===2 && joined<5) addRider();
-      else if(stage===7) replay();
-      else show(stage+1);
+  function place(el,x,y){el.setAttribute('transform',`translate(${x.toFixed(2)} ${y.toFixed(2)})`);}
+  function locations() {
+    const t=clamp(local/seconds[stage]);
+    const zoom=stage<3?1:stage===3?1-clamp(local/1.8):0;
+    $('.ride-camera').setAttribute('transform',`translate(${zoom*148} ${-zoom*136}) translate(108 244) scale(${1+.48*zoom}) translate(-108 -244)`);
+    const travel=[0,0,0,0,.33,.50,.64,.78,1];
+    let f=travel[stage]+(travel[stage+1]-travel[stage])*t;
+    if(stage===3) f=.33*clamp((local-1.4)/5.6);
+    if(stage===6) f=.64+.14*clamp((local-1.4)/3.6);
+    if(stage===7) f=.78+.22*clamp(local/2);
+    const spread=stage===3?clamp(f/.09):stage===6?1-clamp((local-4)/1.8):stage===7?0:1;
+    const offsets=[-.028,0,-.048,-.066,-.085];
+    let label;
+    for(let i=0;i<5;i++){
+      const visible=i<Math.max(1,count);
+      markers[i].style.display=visible?'':'none';
+      if(!visible)continue;
+      let riderF=f+(stage>=3?offsets[i]*spread:0);
+      if(i===4 && stage===5) riderF-=.115*t;
+      if(i===4 && stage===6) riderF-=.115*(1-clamp(local/5.8));
+      let pt=coord(riderF);
+      const cluster=stage<3?1:1-spread;
+      let x=pt.x+Math.cos(i*1.26)*14*cluster,y=pt.y+Math.sin(i*1.26)*14*cluster;
+      if(stage===0){x=pt.x;y=pt.y;}
+      if(stage===2 && i>0){const entry=1-clamp((local-i*1.15)/.65); x+=entry*23;y-=entry*16;}
+      place(markers[i],x,y);
+      const tracked=selectedRider ?? (stage===2?count-1:stage===4?1:stage===5 || stage===6?4:0);
+      if(i===tracked) label={x,y,name:stage===0?'我的位置':riders[i]+(i===1?' · 领队':i===4?' · 队尾':'')};
     }
-    if(b.dataset.cmd==='play') toggle();
-    if(b.dataset.cmd==='replay') replay();
+    if(label){place($('.ride-tracking'),label.x,label.y);$('.ride-tracking text').textContent=label.name;}
+    const pin=$('.ride-pin'), hazard=stage===4 && local>=1.3, stop=stage===6 && local>=1.4;
+    pin.style.display=hazard||stop?'':'none';
+    if(hazard||stop){const pt=coord(hazard?.53:.78);place(pin,pt.x,pt.y-13);pin.querySelector('text').textContent=hazard?'!':'⚑';}
+    const drawn=stage<3?0:stage===3?100*clamp(local/1.4):100;
+    $('.ride-active-route').style.strokeDasharray=drawn+' 110';
   }
-  root.addEventListener('click',click); show(0);
-  return {replay,toggle,destroy(){cancel();root.removeEventListener('click',click);if('speechSynthesis' in window) window.speechSynthesis.cancel();}};
+  function controls(){
+    $('[data-play]').textContent=playing?'Ⅱ 暂停':'▶ 继续';
+    section.dataset.playing=playing;
+    $('.ride-playstate').textContent=playing?'自动演示中':'已暂停';
+    all('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+    $('.ride-instruments').dataset.mode=mode;
+  }
+  function render(force=false) {
+    cue=state();
+    if(stage!==previousStage || force){
+      if(stage!==previousStage) selectedRider=null;
+      $('.ride-maphead h3').textContent=chapters[stage][1];
+      section.dataset.stage=stage;
+      $('.ride-tracking rect').setAttribute('x',stage===4?-91:18);
+      $('.ride-tracking text').setAttribute('x',stage===4?-86:24);
+      section.style.setProperty('--trip-photo',`url("${asset(stage<3?'team':stage===7?'riderclub':'convoy')}")`);
+      chapterButtons.forEach((b,i)=>{b.setAttribute('aria-current',i===stage?'step':'false');b.classList.toggle('past',i<stage);});
+    }
+    const key=stage+'|'+cue.join('|')+'|'+playing;
+    if(previousCue!==key||force){
+      phone();
+      $('.ride-message strong').textContent=cue[0];$('.ride-message span').textContent=cue[1];
+      $('.ride-device i').textContent=cue[2];$('.ride-device b').textContent=cue[3];$('.ride-device span').textContent=cue[4];
+      if(previousStage!==stage || previousCue.split('|')[1]!==cue[0]) speak(cue[0]);
+      previousCue=key;
+    }
+    previousStage=stage; locations();
+    chapterButtons[stage].style.setProperty('--played',100*local/seconds[stage]+'%');
+    $('.ride-time').textContent=time(elapsed)+' / '+time(total);
+  }
+  function tick(stamp) {
+    if(playing && !document.hidden && lastStamp!==null) elapsed=(elapsed+(stamp-lastStamp)/1000)%total;
+    lastStamp=stamp;
+    if(playing && !document.hidden && stamp-lastRender>=(reduced.matches?200:40)){render();lastRender=stamp;}
+    frame=requestAnimationFrame(tick);
+  }
+  function seek(t){elapsed=t;lastStamp=null;render(true);controls();}
+  function replay(){playing=true;seek(0);}
+  function toggle(){playing=!playing;lastStamp=null;render(true);controls();}
+  function click(e){
+    const b=e.target.closest('button');if(!b)return;
+    if(b.hasAttribute('data-focus')){
+      const id=Number(b.dataset.focus); selectedRider=selectedRider===id?null:id;
+      all('[data-focus]').forEach(btn=>btn.setAttribute('aria-pressed',String(Number(btn.dataset.focus)===selectedRider)));
+      locations();return;
+    }
+    if(b.dataset.mode){mode=b.dataset.mode;controls();return;}
+    if(b.hasAttribute('data-chapter')){seek(starts[Number(b.dataset.chapter)]);return;}
+    if(b.hasAttribute('data-play')){toggle();return;}
+    if(b.hasAttribute('data-replay')){replay();return;}
+    if(b.classList.contains('ride-action')){
+      if(stage===7) replay();
+      else if(stage===2 && count<5)seek(starts[2]+count*1.15+.01);
+      else if(stage===1 && local<1.25) seek(starts[stage]+1.26);
+      else if(stage===4 && local<2.5) seek(starts[stage]+(local<1.3?1.31:2.51));
+      else if(stage===5 && local<4.2) seek(starts[stage]+4.21);
+      else if(stage===6 && local<5.8) seek(starts[stage]+(local<1.4?1.41:5.81));
+      else seek(starts[stage+1]);
+    }
+  }
+  function visibility(){lastStamp=null;}
+  root.addEventListener('click',click);document.addEventListener('visibilitychange',visibility);
+  controls();render();frame=requestAnimationFrame(tick);
+  return {replay,toggle,destroy(){observer.disconnect();cancelAnimationFrame(frame);document.removeEventListener('visibilitychange',visibility);root.removeEventListener('click',click);if('speechSynthesis' in window)window.speechSynthesis.cancel();}};
 };
