@@ -981,15 +981,30 @@
       ['optics','头盔 HUD 贴片','微型投影器把转向投到风镜内侧的透明贴片上。','home-hud-optics','查看贴片']
     ];
     const windowBar = label => `<div class="ip-window-bar"><i aria-hidden="true"></i><span>${label}</span></div>`;
+    function film(id, title) {
+      return `<div class="film" data-film="${id}" role="group" aria-label="${title}录屏">
+        ${windowBar('操作录屏 / 效果演示')}
+        <div class="film-screen">
+          <video muted playsinline preload="metadata" poster="${asset('demo-'+id)}" src="assets/roadlink-demo-${id}.mp4" aria-label="${title}的操作录屏"></video>
+          <button class="film-big" aria-label="播放${title}录屏"></button>
+        </div>
+        <div class="film-controls">
+          <button class="film-toggle" aria-label="播放"></button>
+          <input type="range" class="film-seek" aria-label="${title}播放进度" min="0" max="1" step="0.01" value="0">
+          <span class="film-clock">00:00 / 00:00</span>
+          <button class="film-expand" aria-label="全屏观看${title}录屏">⛶</button>
+        </div>
+      </div>`;
+    }
     root.innerHTML = `
       <section class="rl-gallery" aria-labelledby="rl-title">
         <header class="ip-intro">
           <p class="ip-kicker">01 · 骑行导航</p>
           <h1 id="rl-title">在手机上定路线，<br>在头盔里看转向。</h1>
-          <p class="ip-lead">手机 App 规划路线，车把防水屏和头盔 HUD 同步显示下一步转向。播放演示，看同一个路口怎样出现在三台设备上。</p>
+          <p class="ip-lead">骑手在手机 App 上设好目的地，车把防水屏就能显示下一次转向。戴上头盔，同一条提示也会投在透明贴片上。下面这段演示从出发前的座舱开始，带你看一遍三台设备如何配合。</p>
         </header>
         <article class="ip-feature">
-          <div class="ip-demo-window">${windowBar('骑手视角 / 交互演示')}
+          <div class="ip-demo-window">${film('overview','三端导航')}<div class="live-window" hidden>${windowBar('骑手视角 / 交互演示')}
             <div class="cockpit-hero">
           <div class="cockpit-frame" hidden>
             <div class="cockpit-image">
@@ -1005,19 +1020,16 @@
             <img src="${asset('hardware-visor')}" alt="从头盔内看向山路，导航投影位于视野右侧">
             <button class="rider-hud" data-open="ride" aria-label="查看头盔 HUD 投影"><span class="rider-arrow"></span><span><b class="rider-distance"></b><small class="rider-turn"></small></span></button>
           </div>
-              <button class="ip-play" data-action="play" aria-label="播放导航演示"></button>
-            </div>
-            <div class="ip-playback"><button class="ip-small-play" data-action="play" aria-label="播放导航演示"></button><span class="ip-progress"><i></i></span><small class="ip-counter"></small></div>
+            </div></div>
           </div>
           <div class="ip-feature-text">
             <h2>三端导航</h2>
             <p>手机负责定位，骑手在车把和头盔里看到同一条提示。</p>
-            <div class="ip-controls"><button class="cockpit-start" data-action="next">下一路口</button><button class="compare-view" data-action="switch-view">看设备外观</button></div>
+            <div class="ip-controls"><button class="demo-mode" data-action="mode">亲自操作</button><button data-open="app">App</button><button data-open="bar">车把屏</button><button data-open="ride">头盔 HUD</button><button class="cockpit-start" hidden data-action="next">下一路口</button><button class="compare-view" hidden data-action="switch-view">看设备外观</button></div>
           </div>
         </article>
         <div class="ip-devices cockpit-legend" aria-label="三个设备演示">${devices.map(([id,name,desc,img,action])=>`
-          <article class="ip-device">${windowBar('设备操作 / 效果演示')}
-            <button class="ip-thumb ip-thumb-${id}" data-open="${id}" aria-label="${action}"><img loading="lazy" src="${asset(img)}" alt="${name}"><i aria-hidden="true"></i></button>
+          <article class="ip-device">${film(id,name)}
             <div class="ip-card-copy"><h3>${name}</h3><p>${desc}</p><button class="ip-link" data-open="${id}">${action} ↗</button></div>
           </article>`).join('')}</div>
         <p class="ip-footnote">导航、连接状态和里程均为演示数据。</p>
@@ -1079,8 +1091,8 @@
         </dialog>
       </section>
       <section class="rl-scenes" aria-labelledby="rl-scenes-heading">
-        <p class="ip-kicker">02 · 骑行场景</p><h2 id="rl-scenes-heading">从出发到收车。</h2>
-        <div class="rl-links">${SCENES.map((s,i)=>`<a class="ip-story" href="#/s${i+1}"><img loading="lazy" src="${asset(s.hero[0]+'-small')}" alt="${s.hero[1]}"><div class="ip-card-copy"><h3>${s.name}</h3><p>${s.summary}</p></div></a>`).join('')}</div>
+        <p class="ip-kicker">02 · 骑行场景</p><h2 id="rl-scenes-heading">一起出发，<br>一起骑回家。</h2><p class="ip-lead">选一个场景亲自体验：集合时邀请队友，上路后查看提醒，收车后回看这一路。</p>
+        <div class="rl-links">${SCENES.map((s,i)=>`<a class="ip-story" href="#/s${i+1}"><img loading="lazy" src="${asset(s.hero[0]+'-small')}" alt="${s.hero[1]}"><div class="ip-card-copy"><h3>${s.name}</h3><p>${s.summary}</p></div></a>`).join('')}</div><a class="ip-next" href="#/s1">下一页 · 组队与车友社交 <span aria-hidden="true">→</span></a>
       </section>`;
     const gallery = root.querySelector('.rl-gallery');
     const get = selector => gallery.querySelector(selector);
@@ -1090,39 +1102,57 @@
     const primary = get('.rl-primary'), secondary = get('.rl-secondary');
 
     let riderView = true;
-    let playing = false;
-    let playbackTimer;
-    function stopPlayback() {
-      clearInterval(playbackTimer);
-      playing = false;
+    let live = false;
+    const overview = get('[data-film="overview"]');
+    function mountFilm(player) {
+      const video = player.querySelector('video');
+      const toggle = player.querySelector('.film-toggle');
+      const big = player.querySelector('.film-big');
+      const seek = player.querySelector('.film-seek');
+      const clock = player.querySelector('.film-clock');
+      const stamp = t => '00:'+String(Math.floor(t)).padStart(2,'0');
+      function sync() {
+        const duration = Number.isFinite(video.duration) ? video.duration : 0;
+        seek.max = duration || 1;
+        seek.value = video.currentTime;
+        seek.style.setProperty('--played',(duration ? 100*video.currentTime/duration : 0)+'%');
+        clock.textContent = stamp(video.currentTime)+' / '+stamp(duration);
+        player.dataset.playing = String(!video.paused);
+        big.hidden = !video.paused;
+        toggle.setAttribute('aria-label',video.paused ? '播放' : '暂停');
+      }
+      async function play() {
+        if (!video.paused) {video.pause();return;}
+        gallery.querySelectorAll('video').forEach(v=>{if (v !== video) v.pause();});
+        if (video.ended) video.currentTime = 0;
+        try {await video.play();} catch {video.controls = true;big.hidden=true;}
+      }
+      big.onclick = toggle.onclick = play;
+      video.onclick = play;
+      seek.oninput = ()=>{if(video.duration) video.currentTime = Number(seek.value);};
+      player.querySelector('.film-expand').onclick = async ()=>{
+        if(document.fullscreenElement) {await document.exitFullscreen();return;}
+        try {
+          if(player.requestFullscreen) await player.requestFullscreen();
+          else if(video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+        } catch { video.controls = true; }
+      };
+      ['timeupdate','loadedmetadata','play','pause','ended','seeked'].forEach(event=>video.addEventListener(event,sync));
+      onCleanup(()=>video.pause());
+      sync();
     }
-    onCleanup(stopPlayback);
-    function advance() { step = (step+1)%trip.length; }
-    function togglePlayback() {
-      if (playing) {stopPlayback(); return;}
-      if (!nav) {view='app';dialog.showModal();return;}
-      if (step === trip.length-1) step = 0;
-      playing = true;
-      playbackTimer = setInterval(()=>{
-        advance();
-        riderView = step !== 1;
-        if (step === trip.length-1) stopPlayback();
-        refresh();
-      },1600);
-    }
+    gallery.querySelectorAll('.film').forEach(mountFilm);
     const dialog = get('.cockpit-dialog');
     const titles = {app:'骑行 App',bar:'车把防水屏',optics:'风镜内侧的透明贴片',ride:'头盔内视角'};
     function refresh() {
       const turn = trip[step];
-      gallery.dataset.playing = String(playing);
-      get('.ip-demo-window .ip-window-bar span').textContent = riderView ? '骑手视角 / 交互演示' : '设备外观 / 交互演示';
-      const playLabel = playing ? '暂停导航演示' : nav ? '播放导航演示' : '去 App 开始导航';
-      gallery.querySelectorAll('[data-action="play"]').forEach(btn=>btn.setAttribute('aria-label',playLabel));
-      get('.ip-progress i').style.width = ((step+1)/trip.length*100)+'%';
-      get('.ip-counter').textContent = '路口 '+(step+1)+' / '+trip.length;
+      get('.live-window').hidden = !live;
+      overview.hidden = live;
+      get('.demo-mode').textContent = live ? '回到录屏' : '亲自操作';
+      get('.compare-view').hidden = get('.cockpit-start').hidden = !live;
+      get('.live-window .ip-window-bar span').textContent = riderView ? '骑手视角 / 交互演示' : '设备外观 / 交互演示';
       get('.cockpit-frame').hidden = riderView;
       get('.rider-frame').hidden = !riderView;
-      get('.ip-play').hidden = !riderView || playing;
       get('.compare-view').textContent = riderView ? '看设备外观' : '看骑手视角';
       get('.cockpit-start').dataset.action = nav ? 'next' : 'app';
       get('.cockpit-start').textContent = nav ? '下一路口' : '去 App 开始导航';
@@ -1174,12 +1204,13 @@
       if (!b) return;
       if (b.classList.contains('device-close')) {dialog.close();return;}
       const action = b.dataset.action || b.dataset.open;
-      if (action !== 'play') stopPlayback();
-      if (action === 'play') togglePlayback();
+      if (b.closest('.film')) return;
+      gallery.querySelectorAll('video').forEach(v=>v.pause());
+      if (action === 'mode') live = !live;
       else if (b.dataset.appPage) page = b.dataset.appPage;
       else if (b.id === 'home-app-navigation') {nav = !nav;step = 0;}
       else if (b.id === 'home-app-share') shared = !shared;
-      else if (action === 'next') advance();
+      else if (action === 'next') step = (step+1)%trip.length;
       else if (action === 'switch-view') riderView = !riderView;
       else if (action === 'power') power = !power;
       else if (action === 'ride' || b.id === 'home-app-hud-preview') {view='ride';power=true;}
@@ -1235,8 +1266,10 @@
   }
 
   var fsBtn = document.getElementById('btn-fullscreen');
+  document.getElementById('btn-window').onclick = function () { if (document.fullscreenElement) document.exitFullscreen(); };
   if (fsBtn) {
     fsBtn.addEventListener('click', function () {
+      if (document.fullscreenElement && document.body.classList.contains('home-page')) return;
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
       } else {
