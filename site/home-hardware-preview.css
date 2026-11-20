@@ -1,0 +1,71 @@
+.home-hw-phone{
+  width:min(194px,100%);min-height:345px;display:grid;align-content:stretch;
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+  padding:5px;border:4px solid #373e3a;border-radius:24px;
+  color:#142722;background:#f8faf8;box-shadow:0 10px 20px #0008;
+}
+.home-app-status{
+  display:flex;align-items:center;justify-content:space-between;min-height:23px;gap:5px;
+  padding:2px 7px 4px;position:relative;color:#273a32;font:800 11px/1 var(--num);
+}
+.home-app-status i{position:absolute;left:50%;transform:translateX(-50%);width:34px;height:9px;border-radius:12px;background:#273a32}
+.home-app-battery{width:13px;height:7px;border:1px solid #324a3e;border-radius:2px;background:linear-gradient(90deg,#324a3e 75%,transparent 75%)}
+.home-app-top{padding:4px 7px 7px;border-bottom:1px solid #dce8e1}
+.home-app-top span,.home-app-top strong{display:block}
+.home-app-top span{font:800 9px/1.35 var(--num);letter-spacing:.07em;color:#52675d}
+.home-app-top strong{margin-top:2px;font-size:15px;line-height:1.2}
+.home-app-panel{display:flex;flex-direction:column;gap:5px;min-width:0;padding:6px 5px}
+.home-app-map{position:relative;isolation:isolate;border:1px solid #d6e0d7;border-radius:8px;overflow:hidden}
+.home-app-map canvas{width:100%;height:auto;display:block;background:#edf1ea}
+.home-app-map-tag,.home-app-mate{
+  position:absolute;right:3px;bottom:3px;padding:1px 3px;border-radius:4px;background:#fffdf4;
+  color:#426353;font-size:9px;font-weight:700;
+}
+.home-app-mate{
+  display:flex;align-items:center;gap:3px;right:auto;bottom:auto;left:56%;top:49%;color:#125d75;
+}
+.home-app-mate::before{content:"";width:5px;height:5px;border-radius:50%;background:#238db1}
+.home-app-trip,.home-hw-phone-turn,.home-app-section-head{
+  display:grid;gap:2px;padding:5px 6px;border:1px solid #e1e8e2;border-radius:7px;background:#fff;
+}
+.home-app-trip strong,.home-app-section-head strong{font-size:13px;line-height:1.2}
+.home-app-trip span,.home-app-section-head small{font-size:10px;color:#4d685d}
+.home-app-primary{
+  min-height:44px;margin-top:auto;padding:5px 4px;border-radius:7px;
+  background:#175e9e;color:#fff;font-size:12px;font-weight:750;line-height:1.3;
+}
+.home-app-primary:hover,.home-app-primary[aria-pressed=true]{background:#144e80}
+.home-hw-phone-turn{
+  display:flex;gap:7px;align-items:center;background:#e9f1f8;border-color:#d3e0eb;color:#194563;
+}
+.home-hw-phone-turn b,.home-hw-phone-turn small{display:block;font-size:11px;line-height:1.2}
+.home-app-turn-icon{flex:none;color:#1b6098;font:800 19px/1 var(--num)}
+.home-app-list{padding:0;margin:0;list-style:none}
+.home-app-list li{display:flex;align-items:center;gap:6px;padding:6px 2px;border-bottom:1px solid #e0eae3}
+.home-app-list li>div{display:grid;gap:1px;min-width:0}
+.home-app-list strong{font-size:12px;line-height:1.25}
+.home-app-list small{color:#426456;font-size:10px;line-height:1.2}
+.home-app-avatar,.home-app-device-icon{
+  display:grid;place-items:center;flex:0 0 22px;height:22px;border-radius:50%;
+  background:#e3ede8;color:#325e4b;font-size:10px;font-weight:750;
+}
+.home-app-device-icon::before{content:"";width:11px;height:7px;border:1px solid #315e4b;border-radius:2px}
+.home-app-device-icon.hud::before{transform:skew(-12deg)}
+.home-app-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #dce8e1}
+.home-app-tabs button{
+  display:grid;justify-items:center;align-content:center;gap:2px;min-height:44px;padding:3px;
+  color:#4a655e;font-size:10px;line-height:1.25;border-radius:5px;
+}
+.home-app-tabs button[aria-pressed=true]{color:#155b96;background:#eaf2fa;font-weight:800}
+.home-app-tabs button i{display:block;width:10px;height:10px;border:1.5px solid currentColor;border-radius:3px}
+.home-app-tabs button[data-app-page=route] i{transform:rotate(45deg);border-radius:66% 65% 65% 2px}
+.home-app-tabs button[data-app-page=team] i{border-radius:50%}
+.home-app-tabs button[data-app-page=devices] i{width:13px;height:8px;border-radius:2px}
+.home-hw-phone :focus-visible{outline-color:#1664a4;outline-offset:-2px}
+
+.home-hw-kit-grid:has(.home-hw-phone)>.hw-card{margin:0;min-width:0}
+.hw-card-phone .home-hw-phone{margin:6px auto}
+.hw-card-phone:hover,.hw-card-phone:focus-within{transform:none}
+@media(min-width:1081px){
+  .home-hw-kit-grid:has(.home-hw-phone){grid-template-columns:minmax(158px,1fr) minmax(0,1.03fr) minmax(0,1.08fr)}
+}

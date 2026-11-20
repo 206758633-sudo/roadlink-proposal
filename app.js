@@ -1,3 +1,8 @@
+/**
+ * ROADLINK × 智能骑行方案路演 (高可视化 + 图片视频模拟演示版)
+ * 采用 Knight 左右分屏模拟器架构 + BRP 黑金轻奢质感
+ * 特性：高画质实景平移变焦 + 4K 60FPS 视频仪表与雷达图层 + 快门闪光大片弹窗 + 极简大字号遥测
+ */
 (function () {
   'use strict';
 
@@ -5,921 +10,912 @@
   function onCleanup(fn) { cleanups.push(fn); }
   function flushCleanups() {
     while (cleanups.length) {
-      try { cleanups.pop()(); } catch (e) {}
+      try { cleanups.pop()(); } catch (e) { console.error(e); }
     }
   }
+
   function asset(name) { return 'assets/roadlink-' + name + '.webp'; }
 
-  /* ==================== 动态 CANVAS 可视化引擎 ==================== */
+  // 语音播报模块
+  var audioEnabled = false;
+  var audioBtn = document.getElementById('btn-audio');
+  var audioLabel = document.getElementById('audio-label');
+  var replayBtn = document.getElementById('btn-replay');
 
-  // 1. 路线地图 / 位置共享 / 轨迹回放 Canvas
-  function mountMapCanvas(canvas, mode, active) {
-    if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-    var route = [[50, 195], [125, 160], [195, 172], [265, 138], [330, 86], [395, 68], [460, 108], [520, 152], [585, 136], [635, 88], [705, 66], [750, 44]];
-    var rafId, start = performance.now();
-
-    function draw(now) {
-      if (!canvas.isConnected) return;
-      var t = (now - start) / 1000;
-      ctx.setTransform(canvas.width / 800, 0, 0, canvas.height / 250, 0, 0);
-      ctx.fillStyle = '#07101a';
-      ctx.fillRect(0, 0, 800, 250);
-
-      // 科技网格与地形等高线
-      ctx.strokeStyle = 'rgba(56, 232, 255, 0.06)';
-      ctx.lineWidth = 1;
-      for (var x = 40; x < 800; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 250); ctx.stroke(); }
-      for (var y = 40; y < 250; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(800, y); ctx.stroke(); }
-
-      // 湖泊与山林色块
-      ctx.fillStyle = 'rgba(46, 229, 157, 0.06)';
-      ctx.beginPath(); ctx.ellipse(390, 40, 180, 36, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = 'rgba(56, 232, 255, 0.07)';
-      ctx.beginPath(); ctx.ellipse(620, 200, 120, 38, -0.1, 0, Math.PI * 2); ctx.fill();
-
-      // 完整底线
-      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-      ctx.beginPath();
-      route.forEach(function (p, i) { i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
-      ctx.strokeStyle = 'rgba(148, 179, 214, 0.25)';
-      ctx.lineWidth = 8;
-      ctx.stroke();
-
-      // 计算当前轨迹进度
-      var prog = 0;
-      if (mode === 'pair') {
-        prog = active ? Math.min(10.8, 2 + ((t * 1.4) % 8.8)) : 1;
-      } else if (mode === 'replay') {
-        prog = active ? Math.min(11, (t * 2.6) % 11.5) : 2.5;
-      } else if (mode === 'guide') {
-        prog = active ? 11 : 4;
-      }
-
-      var base = Math.floor(prog), frac = prog - base;
-      var p1 = route[base], p2 = route[Math.min(base + 1, route.length - 1)];
-      var cur = [p1[0] + (p2[0] - p1[0]) * frac, p1[1] + (p2[1] - p1[1]) * frac];
-
-      // 发光已行驶轨迹
-      ctx.beginPath();
-      route.slice(0, base + 1).forEach(function (p, i) { i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
-      ctx.lineTo(cur[0], cur[1]);
-      ctx.strokeStyle = 'rgba(56, 232, 255, 0.24)'; ctx.lineWidth = 16; ctx.stroke();
-      ctx.strokeStyle = '#38e8ff'; ctx.lineWidth = 5; ctx.stroke();
-
-      // 地标文字
-      ctx.font = '700 13px -apple-system, sans-serif';
-      ctx.fillStyle = '#9bb0c9';
-      ctx.fillText('📍 山脚集合点', 28, 226);
-      ctx.fillText('🌲 松林弯道 · 补给站', 345, 42);
-      ctx.fillText('🏁 观景台终点 (86km)', 615, 32);
-
-      // 骑手坐标点
-      function drawPin(pt, color, label, dy) {
-        var r = 14 + 5 * Math.sin(t * 5);
-        ctx.beginPath(); ctx.arc(pt[0], pt[1], r, 0, Math.PI * 2);
-        ctx.fillStyle = color === '#ffb42e' ? 'rgba(255,180,46,0.25)' : 'rgba(56,232,255,0.25)';
-        ctx.fill();
-        ctx.beginPath(); ctx.arc(pt[0], pt[1], 8, 0, Math.PI * 2);
-        ctx.fillStyle = color; ctx.fill();
-        ctx.lineWidth = 2.5; ctx.strokeStyle = '#07101a'; ctx.stroke();
-        ctx.font = '700 13px -apple-system, sans-serif';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(label, pt[0] + 12, pt[1] + dy);
-      }
-
-      drawPin(cur, '#ffb42e', '07 陈默(我)', -10);
-      if (mode === 'pair' && active) {
-        var mIdx = Math.min(route.length - 1, base + 2);
-        drawPin(route[mIdx], '#38e8ff', '18 阿岳', 18);
-        var mIdx2 = Math.max(0, base - 1);
-        drawPin(route[mIdx2], '#2ee59d', '05 老周', 18);
-      }
-
-      // 底部实时遥测条
-      ctx.fillStyle = 'rgba(6, 10, 16, 0.82)';
-      ctx.fillRect(0, 214, 800, 36);
-      ctx.font = '700 13px ui-monospace, monospace';
-      ctx.fillStyle = '#38e8ff';
-      var km = (prog / 11 * 86).toFixed(1);
-      ctx.fillText(
-        mode === 'pair'
-          ? (active ? '3 位队友正在共享示例位置' : '等待车友接受组队邀请')
-          : '● 轨迹进度：' + km + ' / 86.0 km  |  实时车速：' + (active ? Math.round(52 + 12 * Math.sin(t * 2)) : 0) + ' km/h  |  海拔：' + Math.round(320 + prog * 45) + ' m',
-        20, 237
-      );
-
-      rafId = requestAnimationFrame(draw);
-    }
-    rafId = requestAnimationFrame(draw);
-    onCleanup(function () { cancelAnimationFrame(rafId); });
+  function speakText(text) {
+    if (!audioEnabled || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var clean = text.replace(/^[🎙️🤖📡🛡️💬🛑📸✨\s]+/, '').replace(/[「」『』]/g, '');
+      var utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = 'zh-CN';
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {}
   }
 
-  function captureVisual() {
-    return '<div class="capture-story">' +
-      '<figure class="capture-frame">' +
-        '<img src="' + asset('ride-capture') + '" alt="前车的后向相机画面，阿岳正在同车道跟骑">' +
-        '<figcaption><span>陈默的后向相机</span><span>AI 生成示意</span></figcaption>' +
-        '<span class="capture-reticle" aria-hidden="true"></span>' +
-        '<div class="capture-camera-state"><span data-capture-frame>取景预览</span><strong data-capture-gap>48 m</strong><small>示例车距</small></div>' +
-      '</figure>' +
-      '<div class="capture-track" role="img" aria-label="两车同向骑行，陈默在前，阿岳在后">' +
-        '<span class="capture-track-direction" aria-hidden="true">同向骑行 →</span>' +
-        '<span class="capture-marker capture-follower" aria-hidden="true"><i></i>阿岳</span>' +
-        '<span class="capture-marker capture-lead" aria-hidden="true"><i></i>陈默</span>' +
-      '</div>' +
-    '</div>';
+  if (audioBtn) {
+    audioBtn.addEventListener('click', function () {
+      audioEnabled = !audioEnabled;
+      audioBtn.setAttribute('aria-pressed', String(audioEnabled));
+      if (audioLabel) audioLabel.textContent = audioEnabled ? '🔊 声音已开' : '🔇 声音已关';
+      if (audioEnabled) speakText('ROADLINK 智能骑行视效演示已就绪');
+      else if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    });
   }
 
-  function captureDetails(armed) {
-    return '<ol class="capture-steps" aria-label="抓拍进度">' +
-      '<li aria-current="step">' + (armed ? '双方已同意分享' : '出发前确认分享') + '</li>' +
-      '<li>队友从后方接近</li>' +
-      '<li>抓拍并发送给阿岳</li>' +
-    '</ol>' +
-    '<div class="capture-receipt" hidden>' +
-      '<img src="' + asset('ride-capture-small') + '" alt="阿岳在车队相册收到的抓拍示意图">' +
-      '<div><strong>阿岳收到 1 张照片</strong><small>车队相册 · 模拟分享</small></div>' +
-    '</div>' +
-    '<p class="capture-announce" role="status"></p>';
-  }
-
-  function mountCapture(active) {
-    if (!active) return;
-    var story = document.querySelector('.capture-story');
-    var button = document.getElementById('btn-action');
-    var steps = document.querySelectorAll('.capture-steps li');
-    var readout = story.querySelector('[data-capture-gap]');
-    var camera = story.querySelector('[data-capture-frame]');
-    var receipt = document.querySelector('.capture-receipt');
-    var status = document.querySelector('.capture-announce');
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var start = performance.now(), frameId;
-    button.setAttribute('aria-disabled','true');
-    button.firstElementChild.textContent = '队友正在接近';
-    steps[0].removeAttribute('aria-current');
-    steps[1].setAttribute('aria-current','step');
-    camera.textContent = '阿岳正在接近';
-
-    function draw(now) {
-      if (!story.isConnected) return;
-      var progress = reduce ? 1 : Math.min(1,(now - start) / 1850);
-      story.style.setProperty('--follower', (18 + 29 * progress) + '%');
-      story.style.setProperty('--leader', (70 + 4 * progress) + '%');
-      story.style.setProperty('--approach', String(progress));
-      readout.textContent = Math.round(48 - 24 * progress) + ' m';
-      if (progress < 1) {
-        frameId = requestAnimationFrame(draw);
-        return;
-      }
-      steps[1].removeAttribute('aria-current');
-      steps[2].setAttribute('aria-current','step');
-      story.classList.add('has-capture');
-      camera.textContent = '已定格';
-      receipt.hidden = false;
-      status.textContent = '抓拍完成。已模拟分享给阿岳。';
-      button.removeAttribute('aria-disabled');
-      button.firstElementChild.textContent = '重新演示';
-    }
-
-    frameId = requestAnimationFrame(draw);
-    onCleanup(function () { cancelAnimationFrame(frameId); });
-  }
-
-  // 3. 后视摄像头 / 安全车距预警 60fps 动态公路雷达 Canvas
-  function mountRoadRadarCanvas(canvas, mode, active) {
-    if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-    var rafId, start = performance.now();
-
-    function loop(now) {
-      if (!canvas.isConnected) return;
-      var t = (now - start) / 1000;
-      var approach = active ? Math.min(1, t / 1.7) : 0;
-
-      ctx.setTransform(canvas.width / 800, 0, 0, canvas.height / 320, 0, 0);
-      var sky = ctx.createLinearGradient(0, 0, 0, 125);
-      sky.addColorStop(0, '#070e17'); sky.addColorStop(1, '#142336');
-      ctx.fillStyle = sky; ctx.fillRect(0, 0, 800, 125);
-
-      // 透视路面
-      ctx.fillStyle = '#101822'; ctx.fillRect(0, 125, 800, 195);
-      ctx.fillStyle = '#182330';
-      ctx.beginPath(); ctx.moveTo(345, 125); ctx.lineTo(455, 125); ctx.lineTo(740, 320); ctx.lineTo(60, 320); ctx.closePath(); ctx.fill();
-
-      ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(345, 125); ctx.lineTo(60, 320); ctx.moveTo(455, 125); ctx.lineTo(740, 320); ctx.stroke();
-
-      // 动态透视车道虚线
-      for (var i = 0; i < 6; i++) {
-        var z = ((i / 6) + (t * 0.7)) % 1;
-        var y1 = 128 + z * z * 190;
-        var y2 = Math.min(320, y1 + 12 + z * 24);
-        ctx.strokeStyle = 'rgba(255, 180, 46, ' + (0.25 + z * 0.6) + ')';
-        ctx.lineWidth = 2 + z * 3;
-        ctx.beginPath(); ctx.moveTo(400, y1); ctx.lineTo(400, y2); ctx.stroke();
-      }
-
-      // 逼近车辆
-      var scale = active ? (0.45 + approach * 1.05) : 0.44;
-      var cx = 400, cy = 148 + scale * 72;
-      var w = 122 * scale, h = 64 * scale;
-
-      ctx.save(); ctx.translate(cx, cy);
-      // AI 识别框
-      var isClose = active && approach > 0.45;
-      ctx.strokeStyle = isClose ? '#ff4d4f' : '#38e8ff';
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(-w * 0.6, -h * 0.95, w * 1.2, h * 1.45);
-
-      ctx.fillStyle = '#29384a';
-      ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h * 0.72, 10 * scale); ctx.fill();
-      ctx.fillStyle = '#18222f';
-      ctx.beginPath(); ctx.roundRect(-w * 0.35, -h * 0.84, w * 0.7, h * 0.38, 7 * scale); ctx.fill();
-
-      // 车灯（后视摄像头看后车白色大灯，前车预警看前车红色刹车尾灯）
-      ctx.fillStyle = mode === 'rear' ? '#fff7d1' : '#ff2e2e';
-      ctx.shadowColor = mode === 'rear' ? '#fff3a8' : '#ff2e2e';
-      ctx.shadowBlur = 20;
-      ctx.fillRect(-w * 0.42, -h * 0.12, w * 0.2, h * 0.18);
-      ctx.fillRect(w * 0.22, -h * 0.12, w * 0.2, h * 0.18);
-      ctx.restore();
-
-      var dist = active ? Math.max(6, Math.round(32 - approach * 25)) : 32;
-      ctx.fillStyle = 'rgba(6, 10, 16, 0.84)';
-      ctx.beginPath(); ctx.roundRect(18, 16, 250, 46, 10); ctx.fill();
-      ctx.font = '800 15px ui-monospace, monospace';
-      ctx.fillStyle = dist <= 12 ? '#ff6b6b' : '#38e8ff';
-      ctx.fillText((mode === 'rear' ? '📷 超广角后视画面 · ' : '📡 前车实时车距 · ') + dist + ' m', 32, 44);
-
-      if (dist <= 12) {
-        var alpha = 0.35 + 0.45 * Math.abs(Math.sin(t * 8));
-        ctx.fillStyle = 'rgba(255, 64, 64, ' + alpha + ')';
-        ctx.fillRect(0, 0, 14, 320); ctx.fillRect(786, 0, 14, 320);
-
-        ctx.fillStyle = 'rgba(255, 64, 64, 0.92)';
-        ctx.beginPath(); ctx.roundRect(490, 16, 290, 46, 10); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.font = '800 15px -apple-system, sans-serif';
-        ctx.fillText(mode === 'rear' ? '⚠ 后方车辆高速逼近！勿变道' : '⚠ 跟车过近！请立即减速拉开车距', 508, 44);
-      }
-
-      rafId = requestAnimationFrame(loop);
-    }
-    rafId = requestAnimationFrame(loop);
-    onCleanup(function () { cancelAnimationFrame(rafId); });
-  }
-
-  // 4. 疲劳检测波形 Canvas
-  function mountFatigueCanvas(canvas, active) {
-    if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-    var rafId, start = performance.now();
-    function loop(now) {
-      if (!canvas.isConnected) return;
-      var t = (now - start) / 1000;
-      ctx.setTransform(canvas.width / 800, 0, 0, canvas.height / 260, 0, 0);
-      ctx.fillStyle = '#08101a'; ctx.fillRect(0, 0, 800, 260);
-
-      // 网格
-      ctx.strokeStyle = 'rgba(56,232,255,0.07)';
-      for (var x = 0; x < 800; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 260); ctx.stroke(); }
-
-      // 绘制车把微修正与注意力波形
-      ctx.beginPath();
-      for (var i = 0; i < 800; i += 4) {
-        var amp = active ? (38 + 26 * Math.sin(i * 0.03 + t * 3)) : 14;
-        var y = 135 + Math.sin(i * 0.04 + t * 5) * amp + (active ? Math.sin(i * 0.15 - t * 8) * 16 : 0);
-        i === 0 ? ctx.moveTo(i, y) : ctx.lineTo(i, y);
-      }
-      ctx.strokeStyle = active ? '#ffb42e' : '#2ee59d';
-      ctx.lineWidth = 3.5;
-      ctx.stroke();
-
-      ctx.fillStyle = 'rgba(6, 10, 16, 0.86)';
-      ctx.beginPath(); ctx.roundRect(20, 16, 340, 50, 10); ctx.fill();
-      ctx.font = '800 15px -apple-system, sans-serif';
-      ctx.fillStyle = active ? '#ffb42e' : '#2ee59d';
-      ctx.fillText(active ? '⚠ 连续骑行 2h 15m · 检出车把微姿态疲劳波动' : '● 骑行专注度良好 · 持续骑行 45 分钟', 36, 46);
-
-      if (active) {
-        ctx.fillStyle = 'rgba(255, 180, 46, 0.18)';
-        ctx.strokeStyle = '#ffb42e'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.roundRect(450, 16, 330, 50, 10); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#ffe299';
-        ctx.fillText('☕ 语音提醒：前方 1.5km 服务区请停车休息', 466, 46);
-      }
-      rafId = requestAnimationFrame(loop);
-    }
-    rafId = requestAnimationFrame(loop);
-    onCleanup(function () { cancelAnimationFrame(rafId); });
-  }
-
-  /* ==================== 五大场景 · 20 项核心功能定义 ==================== */
+  // ==================== 5 大场景与 20 项核心功能定义 (极简文字 · 突出高能视效) ====================
   var SCENES = [
     {
-      name: '组队与车友社交',
-      heading: '第一次见面，也能一起骑',
-      summary: '组队上路，途中看见彼此，骑完还能一起回看。',
-      hero: ['convoy', '车队骑行场景示意'],
+      id: 's1',
+      num: '01',
+      eyebrow: 'GROUP RIDE & SOCIAL',
+      title: '组队与车友社交',
+      tagline: '车队快速配对 · 电子外挂号牌 · F1式里程榜 · 3D轨迹回放 · 接近自动拍照',
       features: [
         {
-          id: 'team-journey',
-          name: '完整组队流程'
-        },
-        {
-          name: '可编程外挂号牌',
-          desc: '手机改队号和昵称，同步到车尾墨水号牌',
-          action: '点击模拟：把手机设置的队号同步刷新到电子号牌',
-          render: function (active) {
-            var num = active ? '12' : '07';
-            var rider = active ? '阿岳' : '陈默';
-            return '<div class="plate-workbench">' +
-              '<div class="mini-phone">' +
-                '<div class="mini-phone-head"><span>📱 手机 APP 号牌设置</span><span>BLE 5.3</span></div>' +
-                '<div class="plate-inputs">' +
-                  '<label>编队号码 (01~99)<input type="text" id="inp-plate-num" maxlength="2" value="' + num + '"></label>' +
-                  '<label>骑手昵称<input type="text" id="inp-plate-name" maxlength="6" value="' + rider + '"></label>' +
-                '</div>' +
-                '<div style="font-size:11.5px;color:var(--green)">✓ 支持自定义输入，实时同步右侧号牌</div>' +
-              '</div>' +
-              '<div class="ble-wave"><div class="ble-line"></div><span>蓝牙写入</span></div>' +
-              '<div class="eink-board">' +
-                '<div class="eink-paper' + (active ? ' flash' : '') + '" id="eink-paper">' +
-                  '<div class="eink-big-num" id="out-plate-num">' + num + '</div>' +
-                  '<div class="eink-right"><strong id="out-plate-name">' + rider + '</strong><span>ROADLINK 松林骑队</span></div>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          },
-          mount: function () {
-            var iNum = document.getElementById('inp-plate-num');
-            var iName = document.getElementById('inp-plate-name');
-            var oNum = document.getElementById('out-plate-num');
-            var oName = document.getElementById('out-plate-name');
-            var paper = document.getElementById('eink-paper');
-            function sync() {
-              if (oNum) oNum.textContent = iNum.value || '07';
-              if (oName) oName.textContent = iName.value || '陈默';
-              if (paper) { paper.classList.remove('flash'); void paper.offsetWidth; paper.classList.add('flash'); }
+          id: 'pair',
+          name: '车队快速配对/位置共享',
+          sub: 'UWB碰一碰秒级建队 · 动态网状雷达全域共享',
+          bg: 'convoy',
+          videoType: 'radar_convoy',
+          cam: [{ z: 1.04, ox: 0, oy: 0 }, { z: 1.16, ox: -15, oy: -10 }, { z: 1.08, ox: 8, oy: 5 }],
+          phases: [
+            {
+              step: '1 发生', title: '车友集合点碰一碰',
+              hud: { icon: '📡', title: '发现附近车友设备', desc: 'UWB 扫描到「05 老周」「18 阿岳」，相距 2.4m' },
+              voice: '检测到车队碰一碰，正在建立加密 MESH 自组网...',
+              vals: [{ k: '车队状态', v: '自组网建立中', cls: 'accent' }, { k: '对讲频段', v: '433.8 MHz' }, { k: '入网成员', v: '3 台机车' }],
+              punchline: '无需输群号，头盔/车把靠近 1 秒内无感完成自组网，无信号深山也能通对讲。'
+            },
+            {
+              step: '2 系统反应', title: '全队高精度雷达锁定',
+              hud: { icon: '⚡', title: '全员位置雷达锁定', desc: '10Hz 高频刷新，端到端延迟仅 18ms，掉队 500m 自动告警' },
+              voice: '车队雷达已锁定，阿岳领航 120m，老周伴随 45m。',
+              vals: [{ k: '网络延迟', v: '18 ms', cls: 'success' }, { k: '刷新频率', v: '10 Hz' }, { k: '掉队阈值', v: '500 m' }],
+              punchline: '仪表盘与 HUD 毫秒级同步全队每个人的方位和车速，车队再长也不会跟丢。'
+            },
+            {
+              step: '3 解决', title: '无缝编队巡航共享',
+              hud: { icon: '📍', title: '全队巡航阵型保持', desc: '全队平均时速 68km/h，间距 82m，失联概率 0.00%' },
+              voice: '全队位置共享生效中，前方 800m 进入山道。',
+              vals: [{ k: '平均时速', v: '68 km/h', cls: 'accent' }, { k: '队形间距', v: '82 m' }, { k: '失联概率', v: '0.00%', cls: 'success' }],
+              punchline: '小白秒懂：就像开着全天候车队雷达雷达屏，随时随地知道前后队友在哪。'
             }
-            if (iNum) iNum.addEventListener('input', sync);
-            if (iName) iName.addEventListener('input', sync);
-          }
+          ]
         },
         {
-          name: 'F1 式骑行总里程排名',
-          desc: '按累计总里程像 F1 车手榜一样实时排位',
-          action: '点击模拟：结算本次骑行 +42 km，看名次动态反超',
-          render: function (active) {
-            var list = active
-              ? [{ p: 1, n: '18 阿岳', km: 486, me: false }, { p: 2, n: '07 陈默 · 我 (刚结算 +42 km ▲1)', km: 454, me: true }, { p: 3, n: '23 小程', km: 438, me: false }]
-              : [{ p: 1, n: '18 阿岳', km: 486, me: false }, { p: 2, n: '23 小程', km: 438, me: false }, { p: 3, n: '07 陈默 · 我', km: 412, me: true }];
-            return '<div class="f1-tower">' + list.map(function (r) {
-              var pct = Math.round(r.km / 520 * 100);
-              return '<div class="f1-card' + (r.me ? ' me' : '') + '">' +
-                '<div class="f1-rank">P' + r.p + '</div>' +
-                '<div><div style="font-size:15px;font-weight:800">' + r.n + '</div>' +
-                '<div class="f1-progress-track"><div class="f1-progress-fill" style="width:' + pct + '%"></div></div></div>' +
-                '<div class="f1-val">' + r.km + ' km</div>' +
-              '</div>';
-            }).join('') + '</div>';
-          }
+          id: 'plate',
+          name: '可编程外挂号牌',
+          sub: '车尾超低功耗双色水墨屏 · 阳光直射清晰可见',
+          bg: 'hardware-edge',
+          videoType: 'eink_flash',
+          cam: [{ z: 1.06, ox: 5, oy: 10 }, { z: 1.25, ox: 15, oy: 6 }, { z: 1.12, ox: 0, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '手机一键下发号牌',
+              hud: { icon: '🏷️', title: '设定车手号牌', desc: '下发「07 陈默 / AB型血 / 浙A·MOTO」' },
+              voice: '已为您将车手号牌与急救血型下发至车尾墨水屏。',
+              vals: [{ k: '号牌模式', v: '车队赛道', cls: 'accent' }, { k: '显示介质', v: '电子墨水屏' }, { k: '续航周期', v: '180 天' }],
+              punchline: '车尾轻量化智能号牌，断电永久保持，强光直射依然清晰可见。'
+            },
+            {
+              step: '2 系统反应', title: '黑白反转刷写渲染',
+              hud: { icon: '🔄', title: '墨水屏刷新完成', desc: '黑白高对比反转刷写，夜骑微光导光环自适应点亮' },
+              voice: '号牌已同步更新，微光轮廓条已适配夜骑模式。',
+              vals: [{ k: '刷写耗时', v: '0.42 s', cls: 'success' }, { k: '背光亮度', v: '自适应 65%' }, { k: '防护等级', v: 'IP68 防暴' }],
+              punchline: '遇险碰撞时可瞬间切为「SOS 红色求救标牌」，抢夺黄金救援时间。'
+            },
+            {
+              step: '3 解决', title: '后车一秒精准识队',
+              hud: { icon: '🏁', title: '车队辨识率 100%', desc: '后方车友一眼即知前车身份与编号，杜绝陌生车队混入' },
+              voice: '号牌已就绪，进站打卡与检录秒级自动识别。',
+              vals: [{ k: '编队辨识率', v: '100%', cls: 'success' }, { k: '个性表达', v: '自由定制' }, { k: '急救血型', v: '常驻显现' }],
+              punchline: '小白秒懂：帅气拉风，后车一眼认出队长和同伴，不会跟错陌生车队。'
+            }
+          ]
         },
         {
-          name: '骑行轨迹回放',
-          desc: '沿时间轴动态回看整趟骑行路线、车速与海拔',
-          action: '点击模拟：高速回放整趟 86km 山路骑行轨迹',
-          render: function () {
-            return '<div class="sim-full"><canvas class="sim-canvas" id="s1-replay-canvas" width="800" height="250"></canvas></div>';
-          },
-          mount: function (active) {
-            mountMapCanvas(document.getElementById('s1-replay-canvas'), 'replay', active);
-          }
+          id: 'ranking',
+          name: 'F1式骑行总里程排名',
+          sub: '实时遥测积分抓取 · 车队天梯动态榜单',
+          bg: 'replay',
+          videoType: 'f1_rank',
+          cam: [{ z: 1.02, ox: 0, oy: 0 }, { z: 1.15, ox: -10, oy: -15 }, { z: 1.08, ox: 5, oy: 5 }],
+          phases: [
+            {
+              step: '1 发生', title: '车手冲刺累计里程',
+              hud: { icon: '🏎️', title: 'F1 遥测数据抓取', desc: '「07 陈默」本段冲刺 18.4km，总里程达 412.8km' },
+              voice: '里程数据实时写入账本，当前顺位 P2。',
+              vals: [{ k: '实时总里程', v: '412.8 km', cls: 'accent' }, { k: '即时顺位', v: 'P2' }, { k: '距榜首差距', v: '-3.2 km' }],
+              punchline: '参考 F1 动态遥测看板，把骑行变成趣味十足的车队天梯积分榜。'
+            },
+            {
+              step: '2 系统反应', title: '顺位上升动态跳动',
+              hud: { icon: '📈', title: '超越队友提示', desc: '超越「05 老周」升至总榜第 2 位，解锁山道先锋徽章' },
+              voice: '恭喜！您的排名升至第 2 位，距离榜首仅差 3.2 公里！',
+              vals: [{ k: '当前排名', v: 'P2 (▲1)', cls: 'success' }, { k: '累计爬升', v: '1,420 m' }, { k: '能效平顺分', v: '94 分' }],
+              punchline: '圆屏支持一键切屏查看车队积分榜，重点嘉奖连续骑行耐力与安全合规。'
+            },
+            {
+              step: '3 解决', title: '全队战报赛季结算',
+              hud: { icon: '🏆', title: '车队总里程突破', desc: '全队累计贡献 1,248km，解锁千岛湖黄金勋章' },
+              voice: '里程已同步至车友荣誉堂，全队公会排名前 5%。',
+              vals: [{ k: '车队总里程', v: '1,248 km', cls: 'accent' }, { k: '省公会排名', v: 'Top 5%', cls: 'success' }, { k: '社交点赞', v: '328 +' }],
+              punchline: '小白秒懂：每一公里都有团队积分和社交荣誉，骑完有得聊、有得炫。'
+            }
+          ]
+        },
+        {
+          id: 'trajectory',
+          name: '骑行轨迹高精回放',
+          sub: '六轴 IMU 厘米级姿态还原 · 3D 压弯大片复盘',
+          bg: 'corner',
+          videoType: 'lean_angle',
+          cam: [{ z: 1.05, ox: -10, oy: 10 }, { z: 1.22, ox: 8, oy: -10 }, { z: 1.08, ox: 0, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '连续攻弯数据记录',
+              hud: { icon: '📐', title: '六轴陀螺仪高频采样', desc: '连续 12 个发卡弯，最大压弯倾角 38.4°，弯心最低时速 46km/h' },
+              voice: '正在高频记录车身姿态、压弯倾角与刹车力度。',
+              vals: [{ k: '当前倾角', v: '38.4°', cls: 'accent' }, { k: '侧向 G 值', v: '1.24 G' }, { k: '过弯平顺度', v: '96 分' }],
+              punchline: '六轴 IMU 配合高精 GNSS，记录每一米行驶的倾角姿态与赛车走线。'
+            },
+            {
+              step: '2 系统反应', title: '3D 动态轨迹重建',
+              hud: { icon: '🎥', title: '3D 走线分析生成', desc: '对比「最佳赛车走线 vs 实际走线」，3号弯建议晚制动 0.2s' },
+              voice: '3D 轨迹渲染完成，过弯动作评级为 S 级。',
+              vals: [{ k: '轨迹偏差', v: '< 0.3 m', cls: 'success' }, { k: '制动点优化', v: '延后 0.2s' }, { k: '动作评级', v: 'S 级' }],
+              punchline: '无需繁琐导出视频，手机内即可 360° 旋转观看 3D 赛车级走线大片。'
+            },
+            {
+              step: '3 解决', title: '15秒炫酷大片秒传',
+              hud: { icon: '✨', title: '生成车载仪表短视频', desc: '带真实时速、倾角和转速表的 15 秒短视频，一键发朋友圈' },
+              voice: '大片级轨迹视频已导出，随时可一键分发社群。',
+              vals: [{ k: '视频画质', v: '4K / 60fps', cls: 'accent' }, { k: '生成耗时', v: '3 秒' }, { k: '社交热度', v: '爆款内容', cls: 'success' }],
+              punchline: '小白秒懂：不需要会剪辑，一键导出像职业博主一样的机车过弯大片。'
+            }
+          ]
         },
         {
           id: 'capture',
-          name: '骑行途中自动抓拍',
-          desc: '两车同向骑行，阿岳从后方接近。陈默车上的后向相机自动定格一张，发送给阿岳。',
-          action: '播放接近过程',
-          bleed: true,
-          render: captureVisual,
-          mount: mountCapture
+          name: '同伴接近自动拍照',
+          sub: '25m 测距雷达感知 · AI 双向抓拍并秒发群聊',
+          bg: 'ride-capture',
+          videoType: 'shutter_capture',
+          cam: [{ z: 1.04, ox: 0, oy: 0 }, { z: 1.28, ox: 22, oy: 8 }, { z: 1.12, ox: 10, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '车友并线加速接近',
+              hud: { icon: '🎯', title: '同伴接近感知 25m', desc: '后视镜头识别队友「18 阿岳」以 +15km/h 相对时速在右后侧接近' },
+              voice: '注意，车友阿岳正在右后方 14 米接近，抓拍引擎已预热。',
+              vals: [{ k: '同伴目标', v: '18 阿岳', cls: 'accent' }, { k: '相对距离', v: '14.2 m' }, { k: '相对时速', v: '+15 km/h' }],
+              punchline: '以往拍照必须冒险单手掏手机，现在前后 4K 摄像头通过视觉测距自动戒备。'
+            },
+            {
+              step: '2 系统反应', title: 'AI 双向连拍触发',
+              hud: { icon: '📸', title: '黄金机位抓拍！', desc: '双方进入并骑黄金机位，两车互拍 3 张 HDR 运动连拍，AI 实时超清防抖' },
+              voice: '咔嚓！已为您抓拍并骑过弯瞬间，AI 增强处理中。',
+              vals: [{ k: '快门速度', v: '1/2000 s', cls: 'success' }, { k: '防抖算法', v: 'EIS 运动防抖' }, { k: '连拍张数', v: '3 张' }],
+              punchline: '两台车局域无线握手，实现「你拍我、我拍你」的默契双机位互拍。'
+            },
+            {
+              step: '3 解决', title: '秒推微信车友相册',
+              hud: { icon: '🎉', title: '照片已自动共享', desc: '4K 并骑大片推送至车队相册，阿岳的车机和手机已同步收到' },
+              voice: '照片已同步推送至车队微信群，双手全程紧握车把。',
+              vals: [{ k: '传输时延', v: '1.2 秒', cls: 'success' }, { k: '成片画质', v: '4K UltraHD' }, { k: '脱把概率', v: '0% 安全', cls: 'accent' }],
+              punchline: '小白秒懂：双手不离开车把，骑完全程就能收获上百张自己骑车时的超帅动态大片！'
+            }
+          ]
         }
       ]
     },
-
     {
-      name: '骑行显示与导航',
-      heading: '下一步，抬眼就知道',
-      summary: '路线在车把屏，下一步转向在视线里。',
-      hero: ['hardware-visor', '头盔内导航场景示意'],
+      id: 's2',
+      num: '02',
+      eyebrow: 'DISPLAY & NAVIGATION',
+      title: '骑行显示与导航',
+      tagline: '头盔内导航贴片 · Glimpse圆屏二次开发 · 物理按键盲操 · CarPlay/HUD多屏协同',
       features: [
         {
+          id: 'visor',
           name: '头盔内导航贴片',
-          desc: '在头盔视野一侧悬浮显示下一次转向与距离',
-          action: '点击模拟：接近路口（300m → 60m 高亮转向提醒）',
-          bleed: true,
-          render: function (active) {
-            var d = active ? 60 : 280;
-            return '<div class="visor-full">' +
-              '<img src="' + asset('hardware-visor') + '" alt="头盔内导航贴片视角">' +
-              '<div class="ar-patch-box' + (d <= 100 ? ' urgent' : '') + '" id="ar-box">' +
-                '<div style="font-size:10px;opacity:.8;margin-bottom:6px;display:flex;justify-content:space-between"><span>HELMET AR PATCH</span><span>● 抬眼即见</span></div>' +
-                '<div style="display:flex;align-items:center;gap:12px">' +
-                  '<span style="font-size:34px;line-height:1">↱</span>' +
-                  '<div><div style="font-size:30px;font-weight:900;line-height:1" id="ar-dist">' + d + ' m</div><div style="font-size:13px;font-weight:700;margin-top:3px">前方路口右转 · 盘山道</div></div>' +
-                '</div>' +
-                '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.18);display:flex;align-items:center;gap:8px;font-size:11px">' +
-                  '<span>拖动距离：</span><input type="range" id="ar-slider" min="30" max="300" step="10" value="' + d + '" style="flex:1;accent-color:var(--hud)">' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          },
-          mount: function () {
-            var s = document.getElementById('ar-slider');
-            var txt = document.getElementById('ar-dist');
-            var box = document.getElementById('ar-box');
-            if (s) s.addEventListener('input', function () {
-              txt.textContent = s.value + ' m';
-              box.classList.toggle('urgent', Number(s.value) <= 100);
-            });
-          }
+          sub: '光波导超微透镜 · 视线前方 3 米虚像浮空指引',
+          bg: 'hardware-visor',
+          videoType: 'hud_visor',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: -16, oy: -10 }, { z: 1.10, ox: -5, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '复杂路口视线盲区',
+              hud: { icon: '👁️', title: '视线不离前方道路', desc: '前方 150 米为五岔路口，低头看手机支架会导致 2.5 秒视线盲区' },
+              voice: '前方复杂路口，头盔贴片 HUD 进入引导模式。',
+              vals: [{ k: '虚像距离', v: '前方 3 米', cls: 'accent' }, { k: '镜片厚度', v: '1.8 mm' }, { k: '透过率', v: '> 85%' }],
+              punchline: '任何普通头盔均可磁吸贴装，信息投射在眼睛前方 3 米虚像，无需重新对焦。'
+            },
+            {
+              step: '2 系统反应', title: '极简黄色转向浮空',
+              hud: { icon: '↗️', title: '浮空动态路标', desc: '视野右上角浮现极简黄色箭头「80m 后右转辅道」，3000 nits 白天清晰' },
+              voice: '保持当前车道，80 米后由右侧辅道进入盘山公路。',
+              vals: [{ k: '转向距离', v: '80 m', cls: 'success' }, { k: '峰值亮度', v: '3,000 nits' }, { k: '视野遮挡', v: '0%' }],
+              punchline: '只显示最关键信息（转向、时速、盲区红框），绝不遮挡路面观察视线。'
+            },
+            {
+              step: '3 解决', title: '盲操过弯视线全专注',
+              hud: { icon: '🛡️', title: '安全通过复杂路口', desc: '骑手无需低头，眼睛全程注视前方弯心，过弯安全性提升 85%' },
+              voice: '转向完成，恢复标准巡航 HUD 视图。',
+              vals: [{ k: '低头盲区', v: '0 秒', cls: 'success' }, { k: '对焦延时', v: '0 ms' }, { k: '驾驶专注度', v: '100%', cls: 'accent' }],
+              punchline: '小白秒懂：告别在高速或山道低头看手机的致命隐患，像战斗机飞行员一样看浮空指引。'
+            }
+          ]
         },
         {
-          name: 'Glimpse 圆屏二次开发 + 物理按键',
-          desc: '基于开源 Glimpse 圆屏，给车把实体键绑定切页动作',
-          action: '点击模拟：按压车把物理键 → 圆屏秒切车队与胎压页',
-          render: function (active) {
-            return '<div class="sim-split">' +
-              '<div class="round-dial-wrap">' +
-                '<div class="round-cnc"><div class="round-oled-face" id="glimpse-face">' +
-                  '<span style="font-size:11px;color:var(--cyan);font-weight:700">' + (active ? '车队位置雷达 · 第 2 页' : 'Glimpse 转向导航 · 第 1 页') + '</span>' +
-                  '<b style="font:900 32px/1.15 var(--mono);color:#fff;margin:8px 0">' + (active ? '阿岳 +180m' : '↱ 240 m') + '</b>' +
-                  '<small style="font-size:12px;color:var(--soft)">' + (active ? '老周在后方 -90m · 全队在线' : '前方右转进入松林大道') + '</small>' +
-                '</div></div>' +
-                '<span style="font-size:12px;color:var(--muted)">1.8" Glimpse 开源圆屏二次开发</span>' +
-              '</div>' +
-              '<div class="hw-key-pod">' +
-                '<div style="font-size:12px;color:var(--cyan);font-weight:700;margin-bottom:10px">左手车把自定义物理按键</div>' +
-                '<button type="button" class="hw-phys-btn' + (active ? ' pressed' : '') + '" id="phys-key-btn">' +
-                  '<span>按一下切页</span><small style="font-size:11px;opacity:.8">戴厚手套可盲按</small>' +
-                '</button>' +
-                '<div style="margin-top:12px;font-size:12.5px;color:var(--soft)">当前映射：<b>短按 = 循环切换圆屏页面</b></div>' +
-              '</div>' +
-            '</div>';
-          },
-          mount: function (active, toggle) {
-            var b = document.getElementById('phys-key-btn');
-            if (b) b.addEventListener('click', toggle);
-          }
+          id: 'glimpse',
+          name: 'Glimpse圆屏与自定义按键',
+          sub: '1.4寸纯圆机械质感表盘 · 手把大拇指物理拨轮盲操',
+          bg: 'hardware-kit',
+          videoType: 'round_gauge',
+          cam: [{ z: 1.08, ox: 0, oy: 15 }, { z: 1.25, ox: 10, oy: 16 }, { z: 1.10, ox: 0, oy: 5 }],
+          phases: [
+            {
+              step: '1 发生', title: '复古纯圆仪表就绪',
+              hud: { icon: '🔘', title: 'Glimpse 智能圆屏', desc: '复刻机械表盘质感，开放开源二次开发接口' },
+              voice: 'Glimpse 车把表头已连接，当前加载复古时速表盘。',
+              vals: [{ k: '屏幕形态', v: '1.4寸 纯圆', cls: 'accent' }, { k: '分辨率', v: '454×454 Retina' }, { k: '安装位置', v: '手把中央上盖' }],
+              punchline: '兼顾复古机车美学与现代数字功能，小巧不破坏爱车整体颜值。'
+            },
+            {
+              step: '2 系统反应', title: '物理按键盲操切换',
+              hud: { icon: '🎛️', title: '拨轮切换多模态', desc: '大拇指轻推左侧五向拨轮，瞬间切至「胎温胎压监控」与「倾角罗盘」' },
+              voice: '切换至胎压监控，前轮 2.3 bar，后轮 2.5 bar。',
+              vals: [{ k: '前轮胎压', v: '2.3 bar', cls: 'success' }, { k: '后轮胎压', v: '2.5 bar', cls: 'accent' }, { k: '切屏响应', v: '16 ms' }],
+              punchline: '戴重型手套也能通过机械按键盲操切屏，长按还能一键对讲或打双闪。'
+            },
+            {
+              step: '3 解决', title: '关键数据尽在掌控',
+              hud: { icon: '✨', title: '多信息极简直观', desc: '胎压异常时边缘爆闪红色环形警示，指针指示领航方位' },
+              voice: '当前胎温胎压处于最佳抓地力区间，可放心过弯。',
+              vals: [{ k: '盲操准确率', v: '100%', cls: 'success' }, { k: '抗振等级', v: '车规 20G' }, { k: '个性皮肤', v: '自由定制' }],
+              punchline: '小白秒懂：大拇指一抠就能看胎压和罗盘，扎实省心，手机再也不会震坏脱落。'
+            }
+          ]
         },
         {
-          name: 'CarPlay 屏与 HUD 抬头显示协同',
-          desc: '看全程全局用 CarPlay 大屏，看眼下下一步用 HUD',
-          action: '点击模拟：开启 CarPlay 全局路线 + HUD 抬头转向双屏联动',
-          render: function (active) {
-            return '<div class="sim-full" style="display:grid;gap:12px">' +
-              '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-radius:14px;background:rgba(107,255,184,0.12);border:1.5px solid var(--hud)">' +
-                '<div><span style="font-size:11px;color:var(--hud);display:block">上方 HUD 抬头显示（只看下一步，不分散注意力）</span>' +
-                '<strong style="font:900 22px var(--mono);color:#fff">' + (active ? '↱ 前方 180m 右转进入观景台匝道' : '等待导航路线同步…') + '</strong></div>' +
-                '<span class="state-badge on">' + (active ? 'HUD 已同步' : '待机') + '</span>' +
-              '</div>' +
-              '<div style="padding:12px;border-radius:16px;background:#0b131e;border:2px solid #263649">' +
-                '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:6px"><span>下方车把 CarPlay 屏（承载全局路线、路况与预计到达）</span><b style="color:var(--amber)">剩余 8.4 km · 预计 12 分钟</b></div>' +
-                '<canvas class="sim-canvas" id="s2-carplay-canvas" width="800" height="220"></canvas>' +
-              '</div>' +
-            '</div>';
-          },
-          mount: function (active) {
-            mountMapCanvas(document.getElementById('s2-carplay-canvas'), 'guide', active);
-          }
+          id: 'carplay_hud',
+          name: 'CarPlay屏与HUD协同',
+          sub: '中控7寸大屏全景规划 · 头盔HUD微光关键指引',
+          bg: 'hardware-installed',
+          videoType: 'cockpit_sync',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.18, ox: -10, oy: 8 }, { z: 1.10, ox: 0, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '双屏任务智能分配',
+              hud: { icon: '📱', title: 'CarPlay 中控连接', desc: '7 英寸高亮车规大屏无线直连 Apple CarPlay / HiCar' },
+              voice: '双屏协同已激活：大屏看全景路网，头盔负责关键转弯。',
+              vals: [{ k: '主屏形态', v: '7寸 车规大屏', cls: 'accent' }, { k: '无线协议', v: 'WiFi 6 + BLE' }, { k: '协同架构', v: '双屏异显' }],
+              punchline: '大屏看全城路况与拥堵红线，头盔 HUD 仅在临近路口弹窗精简黄色箭头。'
+            },
+            {
+              step: '2 系统反应', title: '视线焦点自动流转',
+              hud: { icon: '🔄', title: '焦点智能流转', desc: '直道大屏待机，入弯前头盔高亮锁定，盲区有车时边缘闪烁黄色预警' },
+              voice: '右后盲区有车辆接近，HUD 右下角已同步闪烁警示。',
+              vals: [{ k: '双屏同步差', v: '< 8 ms', cls: 'success' }, { k: '防雨触控', v: '手套触控' }, { k: '自动亮度', v: '双光感联动' }],
+              punchline: '不仅支持导航，还能将音乐歌词、来电与对讲频道在多屏之间智能分流。'
+            },
+            {
+              step: '3 解决', title: '沉浸式智能座舱体验',
+              hud: { icon: '🏍️', title: '顶级人机交互协同', desc: '全车信息井井有条，既有科技豪华感，又将安全风险降至最低' },
+              voice: '当前巡航模式已设定，双屏协同稳定工作中。',
+              vals: [{ k: '信息认知时耗', v: '-70%', cls: 'success' }, { k: '多端协同度', v: '100%' }, { k: '座舱科技感', v: '豪华尊享', cls: 'accent' }],
+              punchline: '小白秒懂：像开跑车一样骑摩托，车机大屏看宏观路线，头盔 HUD 引导过弯。'
+            }
+          ]
         }
       ]
     },
-
     {
-      name: 'AI 交互与手机操控',
-      heading: '手留在车把，手机交给语音',
-      summary: '用实体键发起指令，听摘要，确认后再发送消息。',
-      hero: ['voice', '骑手佩戴头盔和手套的场景示意'],
+      id: 's3',
+      num: '03',
+      eyebrow: 'AI INTERACTION & PHONE CONTROL',
+      title: 'AI 交互与手机操控',
+      tagline: '戴手套小设备盲操 · 手把触感微控器 · 80km/h风噪过滤 · 语音总结与口述代发微信',
       features: [
         {
-          name: '戴手套用小设备 + AI 操控手机',
-          desc: '按一下车把小设备唤醒 AI，语音指令直接交给手机执行',
-          action: '点击模拟：戴手套短按唤醒 AI → 说“切到下一首歌”',
-          render: function (active) {
-            var bars = Array(16).fill('<i></i>').join('');
-            return '<div class="sim-split">' +
-              '<div class="hw-key-pod">' +
-                '<span style="font-size:12px;color:var(--cyan);font-weight:700">车把蓝牙小设备（戴手套一摸即按）</span>' +
-                '<div class="eq-bars" style="margin:16px 0">' + bars + '</div>' +
-                '<strong style="font-size:16px;color:var(--amber);display:block">' + (active ? '🎙 “帮我切到下一首歌，音量调大”' : '短按实体键 → 唤醒 AI 语音助手') + '</strong>' +
-              '</div>' +
-              '<div class="wx-visual-panel">' +
-                '<div class="wx-panel-head"><span>📱 口袋里的手机执行结果</span><span style="color:var(--green)">● AI 已接管</span></div>' +
-                '<div style="padding:24px 18px;text-align:center">' +
-                  '<div style="font-size:12px;color:var(--muted)">车载音乐 / 导航控制</div>' +
-                  '<strong style="font-size:22px;color:#fff;display:block;margin:10px 0">' + (active ? '🎵 已切换：公路之歌 (音量 80%)' : '🎵 当前播放：夜航星 (音量 60%)') + '</strong>' +
-                  '<span class="state-badge on">' + (active ? '✓ 全程未摘手套 · 未掏手机' : '等待车把按键指令') + '</span>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          }
+          id: 'glove',
+          name: '戴手套用小设备操控',
+          sub: '无线指环/手把微触控器 · 免脱手套机械盲操',
+          bg: 'voice',
+          videoType: 'tactile_ring',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: -12, oy: 15 }, { z: 1.10, ox: 0, oy: 5 }],
+          phases: [
+            {
+              step: '1 发生', title: '厚重手套无法触屏',
+              hud: { icon: '🧤', title: '传统触屏痛点', desc: '冬季/防摔碳纤维手套无法滑动手机屏幕，以往看消息必须停车' },
+              voice: '戴着碳纤维硬壳手套，手机来电与消息无法触控。',
+              vals: [{ k: '传统操作', v: '必须停车脱手套', cls: 'danger' }, { k: '安全隐患', v: '路边违停 / 分心' }, { k: '耗时', v: '> 60 秒' }],
+              punchline: '专业骑行手套有厚重护具，很多新手因强行单手脱手套划手机而摔车追尾。'
+            },
+            {
+              step: '2 系统反应', title: '手把微触控器触发',
+              hud: { icon: '🖲️', title: '微动触控秒级激活', desc: '大拇指轻按手把控制器，无需脱手套，直达手机后台唤醒 AI' },
+              voice: '手把控制器已捕获双击手势，进入骑行免触控制模式。',
+              vals: [{ k: '响应延迟', v: '12 ms', cls: 'success' }, { k: '连接协议', v: 'BLE 5.3 工业级' }, { k: '防护等级', v: 'IP67 防水抗汗' }],
+              punchline: '微控制器体积如硬币大小，微动按键隔着 5mm 厚手套也有清脆机械手感。'
+            },
+            {
+              step: '3 解决', title: '双手不离把操控一切',
+              hud: { icon: '✨', title: '全程双手紧握龙头', desc: '切歌、接电话、唤醒导航、呼叫队友，手指轻拨一秒完成' },
+              voice: '已接通老周的语音通话，降噪麦克风已过滤发动机轰鸣。',
+              vals: [{ k: '脱把概率', v: '0% 安全', cls: 'accent' }, { k: '操作成功率', v: '99.8%', cls: 'success' }, { k: '骑行安全感', v: '极佳' }],
+              punchline: '小白秒懂：手套不用脱，双手不离车把，大拇指按一下搞定手机一切功能。'
+            }
+          ]
         },
         {
-          name: 'AI 总结微信群消息',
-          desc: '从几十条嘈杂群聊里提炼出集合时间、地点与注意事项',
-          action: '点击模拟：AI 一秒扫描 6 条群聊 → 提炼 3 条核心卡片并播报',
-          render: function (active) {
-            return '<div class="sim-split">' +
-              '<div class="wx-visual-panel">' +
-                '<div class="wx-panel-head"><span>💬 松林车友微信群 (28人)</span><span>6 条新消息</span></div>' +
-                '<div class="wx-panel-body">' +
-                  '<div class="wx-msg-pill"><b>阿岳:</b>今天天气太爽了哈哈，大家 09:10 集合啊！</div>' +
-                  '<div class="wx-msg-pill"><b>老周:</b>[表情包] 我刚洗完车，昨晚激动得没睡着😂</div>' +
-                  '<div class="wx-msg-pill"><b>小程:</b>@所有人 原路口修路，改在「山脚中石化加油站」碰面！</div>' +
-                  '<div class="wx-msg-pill"><b>阿岳:</b>收到！大家记住进山前先加满油，山上没油站。</div>' +
-                '</div>' +
-              '</div>' +
-              '<div class="wx-visual-panel" style="border-color:' + (active ? 'var(--cyan)' : 'var(--line)') + '">' +
-                '<div class="wx-panel-head"><span>🤖 ROADLINK AI 语音提炼重点</span><span style="color:var(--cyan)">' + (active ? '🔊 耳机播报中' : '待提炼') + '</span></div>' +
-                '<div class="wx-panel-body">' +
-                  '<div class="ai-key-card"><div class="ai-key-icon">🕘</div><div><small style="color:var(--cyan);font-weight:700">集合时间</small><strong style="display:block;font-size:15px">今天上午 09:10 准时出发</strong></div></div>' +
-                  '<div class="ai-key-card"><div class="ai-key-icon">📍</div><div><small style="color:var(--cyan);font-weight:700">集合地点（有变更）</small><strong style="display:block;font-size:15px">山脚中石化加油站</strong></div></div>' +
-                  '<div class="ai-key-card"><div class="ai-key-icon">⛽</div><div><small style="color:var(--cyan);font-weight:700">出发前必做</small><strong style="display:block;font-size:15px">进山前务必先加满油（已过滤闲聊）</strong></div></div>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          }
-        },
-        {
-          name: 'AI 拟稿并代发微信',
-          desc: '骑手说一句大白话，AI 润色成通顺消息，确认后代发',
-          action: '点击模拟：口述“我晚到十分钟” → AI 拟稿并确认发到微信群',
-          render: function (active) {
-            return '<div class="sim-full" style="max-width:740px">' +
-              '<div class="wx-visual-panel">' +
-                '<div class="wx-panel-head"><span>✍ AI 微信拟稿与代发助手</span><span style="color:var(--green)">' + (active ? '✓ 已确认发送至车友群' : '步骤 1：识别骑手语音意图') + '</span></div>' +
-                '<div class="wx-panel-body" style="gap:12px;padding:18px">' +
-                  '<div class="wx-msg-pill" style="font-size:14px"><b>🎙 骑手口述指令：</b>“告诉群里路上有点堵，我会晚到十分钟。”</div>' +
-                  '<div class="ai-key-card" style="border-color:' + (active ? 'var(--green)' : 'var(--amber)') + ';background:' + (active ? 'var(--green-soft)' : 'var(--amber-soft)') + '">' +
-                    '<div class="ai-key-icon" style="background:rgba(0,0,0,0.2);color:#fff">' + (active ? '✓' : '🤖') + '</div>' +
-                    '<div><small style="color:' + (active ? 'var(--green)' : 'var(--amber)') + ';font-weight:800">' + (active ? '已代发至「松林车友群」' : 'AI 拟稿完成 · 等待骑手短按确认') + '</small>' +
-                    '<strong style="display:block;font-size:15.5px;margin-top:2px">“兄弟们，路上稍微有点堵，我大约晚到 10 分钟，你们先在山脚加油站等我！”</strong></div>' +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          }
+          id: 'wechat',
+          name: 'AI总结与代发微信',
+          sub: '主动抗风噪降噪 · 大模型长消息提炼 · 口述代发微信',
+          bg: 'ai-engine',
+          videoType: 'ai_wechat',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.22, ox: 15, oy: -10 }, { z: 1.10, ox: 5, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '连续收到 8 条长消息',
+              hud: { icon: '💬', title: '收到紧急长消息', desc: '工作群发来 5 条语音与 3 条文本：「今晚评审改 8 点，需要你确认方案」' },
+              voice: '收到微信群聊 8 条未读消息，骑行 AI 助理正在提炼核心摘要。',
+              vals: [{ k: '未读条数', v: '8 条消息', cls: 'accent' }, { k: '原始字数', v: '286 字' }, { k: '阅读负荷', v: '不可看' }],
+              punchline: '骑行中手机震个不停极度焦虑，端侧大模型第一时间浓缩为一句干练口语。'
+            },
+            {
+              step: '2 系统反应', title: 'AI 精炼一句话播报',
+              hud: { icon: '🤖', title: 'AI 提炼一句话播报', desc: '耳机播报：「张总通知今晚评审改 8 点，问你方案是否就绪」' },
+              voice: '张总问您今晚8点评审方案是否OK？您可直接口述回复。',
+              vals: [{ k: '信息浓缩比', v: '90%', cls: 'success' }, { k: '提炼耗时', v: '0.6 秒' }, { k: '语义准确度', v: '99.2%' }],
+              punchline: '不仅读消息，AI 能根据对话上下文智能推断最合理的回复方案。'
+            },
+            {
+              step: '3 解决', title: '口述转商务格式代发',
+              hud: { icon: '🚀', title: '微信消息已自动发送', desc: 'AI 整理为：「收到，方案已在飞书更新，今晚 8 点准时参会。」并秒发群聊' },
+              voice: '微信已成功代发张总。已为您开启免打扰，请专心骑行。',
+              vals: [{ k: '代发状态', v: '已发送', cls: 'success' }, { k: '格式润色', v: '商务得体' }, { k: '停车次数', v: '0 次', cls: 'accent' }],
+              punchline: '小白秒懂：骑在路上不耽误工作，听一句话、动一下嘴全搞定。'
+            }
+          ]
         }
       ]
     },
-
     {
-      name: '安全与主动预警',
-      heading: '看见风险，及时提醒',
-      summary: '从后方接近到疑似摔车，把需要注意的情况及时提示给骑手。',
-      hero: ['guard', '主动预警场景示意'],
+      id: 's4',
+      num: '04',
+      eyebrow: 'ACTIVE SAFETY & PRE-WARNING',
+      title: '安全与主动预警',
+      tagline: '头盔减速刹车灯 · 后视盲区摄像头 · 摔车监测自动求救 · 疲劳检测 · 安全车距预警',
       features: [
         {
-          name: '头盔后部减速刹车灯',
-          desc: '检测到减速时头盔后部红灯自动高亮爆闪，后车更容易看到',
-          action: '点击模拟：紧急减速（65 → 18 km/h），触发头盔高位红灯爆闪',
-          bleed: true,
-          render: function (active) {
-            return '<div class="visor-full">' +
-              '<img src="' + asset('helmet') + '" alt="头盔后部减速刹车灯" style="filter:' + (active ? 'brightness(1.05)' : 'brightness(0.65) grayscale(0.5)') + ';transition:filter .3s">' +
-              (active ? '<div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:220px;height:90px;border-radius:50%;background:radial-gradient(circle,#ff1a1a 0%,rgba(255,25,25,0.55) 50%,transparent 75%);box-shadow:0 0 60px #ff1a1a;animation:led-pulse .35s infinite alternate"></div>' : '') +
-              '<div style="position:absolute;left:24px;bottom:20px;right:24px;padding:12px 18px;border-radius:14px;background:rgba(6,10,16,0.86);backdrop-filter:blur(10px);border:1px solid var(--line-strong);display:flex;justify-content:space-between;align-items:center">' +
-                '<div><strong style="font-size:16px;color:' + (active ? '#ff6b6b' : '#fff') + '">' + (active ? '🚨 惯导检测到 -0.65G 减速 · 头盔高位红灯爆闪中！' : '头盔后部惯导刹车灯 · 匀速待命') + '</strong>' +
-                '<div style="font-size:12px;color:var(--soft)">无需接原车线路，内置加速度传感器一减速就亮</div></div>' +
-                '<b style="font:900 22px var(--mono);color:' + (active ? '#ff6b6b' : 'var(--cyan)') + '">' + (active ? '65 → 18 km/h' : '65 km/h') + '</b>' +
-              '</div>' +
-            '</div>';
-          }
+          id: 'brakelight',
+          name: '头盔减速刹车灯',
+          sub: '六轴 IMU 感知负加速度 · 发动机制动 8ms 超频爆闪',
+          bg: 'helmet',
+          videoType: 'brake_flash',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: 0, oy: -15 }, { z: 1.10, ox: 0, oy: -5 }],
+          phases: [
+            {
+              step: '1 发生', title: '降档发动机制动',
+              hud: { icon: '🛑', title: '发动机制动发生', desc: '降档车速骤降，但未捏物理刹车杆，传统车尾灯不亮' },
+              voice: '降档减速入弯，物理刹车灯未通电点亮。',
+              vals: [{ k: '减速度', v: '-0.42 G', cls: 'accent' }, { k: '物理刹车杆', v: '未触发' }, { k: '后车视线', v: '易追尾盲区' }],
+              punchline: '老手降档发动机制动时车速骤降，但传统尾灯不亮，后方 SUV 极易追尾！'
+            },
+            {
+              step: '2 系统反应', title: '头盔高位刹车灯爆闪',
+              hud: { icon: '💡', title: '头盔高位超频爆闪', desc: '内置 IMU 检测到负加速度，高位矩阵灯带 8ms 内超频爆闪' },
+              voice: '惯性传感器检测到紧急减速，头盔高位警示灯爆闪中。',
+              vals: [{ k: '响应时间', v: '8 ms', cls: 'danger' }, { k: '发光高度', v: '人眼 1.5 米' }, { k: '可视距离', v: '500 m' }],
+              punchline: '处于后车司机眼睛最敏感的 1.5 米平视高度，穿透雨雾能力极强。'
+            },
+            {
+              step: '3 解决', title: '后车平缓刹车防追尾',
+              hud: { icon: '🛡️', title: '追尾风险直降 92%', desc: '后方车辆第一时间收到减速信号并平缓刹车，保持 28m 间距' },
+              voice: '后车已同步减速，保持安全间距 28 米。',
+              vals: [{ k: '追尾防范率', v: '92%', cls: 'success' }, { k: '安装适配', v: '磁吸免破线' }, { k: '续航能力', v: '30 小时' }],
+              punchline: '小白秒懂：哪怕只是松油门降档，头盔也能自动替你亮灯提醒后车，保命护体。'
+            }
+          ]
         },
         {
-          name: '后视摄像头（盲区监测）',
-          desc: '在前方屏幕实时看到身后车道来车与盲区距离预警',
-          action: '点击模拟：后方车辆高速逼近至 6 米，触发红框盲区警报',
-          render: function () {
-            return '<div class="sim-full"><canvas class="sim-canvas" id="s4-rear-canvas" width="800" height="320"></canvas></div>';
-          },
-          mount: function (active) {
-            mountRoadRadarCanvas(document.getElementById('s4-rear-canvas'), 'rear', active);
-          }
+          id: 'rearview',
+          name: '后视摄像头与盲区感知',
+          sub: '170° 星光夜视超微光镜头 · 盲区逼近 HUD 动态红框',
+          bg: 'corner',
+          videoType: 'rear_reticle',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: 18, oy: 10 }, { z: 1.10, ox: 5, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '盲区车辆快速插上',
+              hud: { icon: '👀', title: '传统后视镜死角', desc: '后方一辆轿车正以 85km/h 从右后死角盲区插上，物理后视镜看不到' },
+              voice: '警告：右后方盲区发现高速逼近目标，正处于物理死角。',
+              vals: [{ k: '目标车速', v: '85 km/h', cls: 'accent' }, { k: '盲区位置', v: '右后 45°' }, { k: '碰撞预计', v: '2.8 秒后' }],
+              punchline: '摩托车后视镜常被骑手肩膀遮挡，车尾集成 170° 星光夜视镜头全天候戒备。'
+            },
+            {
+              step: '2 系统反应', title: 'HUD 亮起危险红框',
+              hud: { icon: '⚠️', title: '盲区超车高亮锁定', desc: 'HUD 右边缘亮起危险红框，圆屏切出流媒体画面，禁止向右变道' },
+              voice: '右侧盲区有车超车！请切勿向右变道！',
+              vals: [{ k: '预警延迟', v: '< 20 ms', cls: 'danger' }, { k: '视场角度', v: '170° 超广角' }, { k: '流媒体延迟', v: '32 ms' }],
+              punchline: '测算逼近速度（TTC 时间），若骑手打右转向灯，耳机会发出急促蜂鸣警示。'
+            },
+            {
+              step: '3 解决', title: '安然避让安全过弯',
+              hud: { icon: '✅', title: '危险目标超车完毕', desc: '目标车辆安全掠过，HUD 警示自动撤销，恢复标准导航视图' },
+              voice: '危险目标已越过，盲区恢复安全状态。',
+              vals: [{ k: '侧翻风险', v: '完全规避', cls: 'success' }, { k: '夜视感度', v: '0.001 Lux' }, { k: '雨天可视', v: '疏水涂层' }],
+              punchline: '小白秒懂：就像脑后长了眼睛，变道过弯再也不用别扭扭头回看后方。'
+            }
+          ]
         },
         {
-          name: '摔车监测与自动发送求救',
-          desc: '疑似摔车且倒计时无人取消时，自动把精准定位发给紧急联系人',
-          action: '点击模拟：检测到 84° 疑似摔车 → 启动 10 秒自动 SOS 求救',
-          render: function (active) {
-            return '<div class="sos-visual' + (active ? ' alert' : '') + '">' +
-              '<div class="sos-dial">' +
-                '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="9"/>' +
-                '<circle id="sos-ring-bar" cx="60" cy="60" r="52" fill="none" stroke="' + (active ? '#ff4d4f' : '#2ee59d') + '" stroke-width="9" stroke-dasharray="326.7" stroke-dashoffset="0" stroke-linecap="round"/></svg>' +
-                '<strong id="sos-timer-txt" style="color:' + (active ? '#ff6b6b' : 'var(--green)') + '">' + (active ? '10s' : '正常') + '</strong>' +
-              '</div>' +
-              '<div>' +
-                '<div style="font-size:12.5px;font-weight:800;color:' + (active ? '#ff8a8a' : 'var(--green)') + '">' + (active ? '🚨 陀螺仪检测到车身倾角 84° · 疑似摔车静止' : '● 六轴陀螺仪实时监测中 · 当前倾角 12° 正常') + '</div>' +
-                '<h3 style="margin:6px 0 8px;font-size:20px">' + (active ? '倒计时结束将自动向家人和队友发送定位求救！' : '正常压弯不误报，异常倒地自动触发救援确认') + '</h3>' +
-                '<div style="padding:12px;border-radius:12px;background:rgba(0,0,0,0.35);border:1px solid var(--line);font-size:13px;color:var(--soft)" id="sos-msg-box">' +
-                  (active
-                    ? '📍 <b>SOS 求救包已就绪：</b>陈默于松林山道 K3.2（30.248°N, 120.112°E）疑似摔车未响应，点击直接导航救援！'
-                    : '提示：如果只是原地倒车，骑手可在 10 秒内按键取消，不会惊动家人。') +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          },
-          mount: function (active) {
-            if (!active) return;
-            var left = 10;
-            var txt = document.getElementById('sos-timer-txt');
-            var ring = document.getElementById('sos-ring-bar');
-            var box = document.getElementById('sos-msg-box');
-            var timer = setInterval(function () {
-              left--;
-              if (left > 0) {
-                if (txt) txt.textContent = left + 's';
-                if (ring) ring.setAttribute('stroke-dashoffset', String(((10 - left) / 10) * 326.7));
-              } else {
-                clearInterval(timer);
-                if (txt) txt.textContent = '已发';
-                if (box) box.innerHTML = '✅ <b style="color:var(--green)">SOS 已自动发送给【妻子、队长老周】：</b>含精准 GPS 经纬度、最后车速与一键救援导航链接！';
-              }
-            }, 850);
-            onCleanup(function () { clearInterval(timer); });
-          }
+          id: 'crash',
+          name: '摔车监测与自动求救',
+          sub: '倾覆姿态冲击算法 · 60s 倒计时呼救与北斗卫星短报文',
+          bg: 'rescue',
+          videoType: 'crash_sos',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: -15, oy: 15 }, { z: 1.10, ox: 0, oy: 5 }],
+          phases: [
+            {
+              step: '1 发生', title: '弯道滑倒车身倾覆',
+              hud: { icon: '🚨', title: '严重碰撞倾覆 78°', desc: '车身倾角达 78.5°，六轴加速度达 6.8G，发动机自动熄火' },
+              voice: '检测到摔车姿态与强烈冲击，正在检测生命体征！',
+              vals: [{ k: '车身倾角', v: '78.5° (倒地)', cls: 'danger' }, { k: '冲击峰值', v: '6.8 G' }, { k: '引擎状态', v: '防爆燃熄火' }],
+              punchline: '最怕摔车后人晕倒在无人荒郊野岭、手机摔飞无法求救。车备有独立电池与传感器。'
+            },
+            {
+              step: '2 系统反应', title: '60秒防误报倒计时',
+              hud: { icon: '⏱️', title: '紧急救助倒计时 48s', desc: '耳机大声询问状态，若无车手按键或语音取消，倒计时结束发 SOS' },
+              voice: '您还好吗？若无大碍请按手把任意键取消；48 秒后自动呼救！',
+              vals: [{ k: '倒计时剩余', v: '48 秒', cls: 'danger' }, { k: '高精定位', v: '北斗三号双频' }, { k: '坐标锁定', v: '30.184°N, 120.218°E' }],
+              punchline: '结合车速与心率综合研判，轻微原地倒车只要扶起车子或按键即可随时取消。'
+            },
+            {
+              step: '3 解决', title: '北斗卫星发射求救信',
+              hud: { icon: '🚑', title: 'SOS 报警已自动发出', desc: '向 120 中心与紧急联系人发送准确定位，赢得 45 分钟黄金时间' },
+              voice: '紧急联系人已收到您的遇险短信与求救电话，救援力量正在赶往。',
+              vals: [{ k: '报警时效', v: '即刻发送', cls: 'success' }, { k: '通信通道', v: '4G + 卫星短报文' }, { k: '黄金时间', v: '赢得 45 分钟', cls: 'accent' }],
+              punchline: '小白秒懂：深山没手机信号也能发坐标，一个人跑长途，家里人最放心的定心丸。'
+            }
+          ]
         },
         {
+          id: 'fatigue',
           name: '疲劳检测与提醒',
-          desc: '持续识别骑行时长与操控波动，发现疲劳迹象及时提醒休息',
-          action: '点击模拟：连续骑行 2 小时检出疲劳波动 → 弹出服务区休息提醒',
-          render: function () {
-            return '<div class="sim-full"><canvas class="sim-canvas" id="s4-fatigue-canvas" width="800" height="260"></canvas></div>';
-          },
-          mount: function (active) {
-            mountFatigueCanvas(document.getElementById('s4-fatigue-canvas'), active);
-          }
+          sub: '连续骑行微操僵硬分析 · 主动规划咖啡驿站',
+          bg: 'guard',
+          videoType: 'fatigue_rest',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.15, ox: -10, oy: -10 }, { z: 1.08, ox: 0, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '连续骑行 2.5 小时',
+              hud: { icon: '☕', title: '疲劳表征显现', desc: '连续骑行 150km，龙头微修正频率下降 40%，反应灵敏度衰减' },
+              voice: '系统监测到您已连续骑行 150 公里，反应灵敏度出现疲劳衰减。',
+              vals: [{ k: '连续时长', v: '2 小时 34 分', cls: 'accent' }, { k: '微操反应率', v: '下降 40%' }, { k: '心率均值', v: '118 bpm' }],
+              punchline: '长途跑高速容易产生公路催眠，系统精准判断中枢神经疲劳程度。'
+            },
+            {
+              step: '2 系统反应', title: '主动提议就近补给',
+              hud: { icon: '💡', title: '推荐就近机车驿站', desc: '前方 3.8 公里有「莫干山观景服务区」，备有机车水吧与充气桩' },
+              voice: '前方 3.8 公里有很棒的机车驿站，我们进去喝杯咖啡活动下肩颈吧？',
+              vals: [{ k: '推荐驿站', v: '莫干山驿站' }, { k: '距离', v: '3.8 km', cls: 'success' }, { k: '车友评价', v: '4.9 分 ★★★★★' }],
+              punchline: '像一位懂你的老车友副驾驶，按一下车把拨轮即可将该休息点顺畅插入导航。'
+            },
+            {
+              step: '3 解决', title: '进站休整精力满血',
+              hud: { icon: '🔋', title: '体能状态满血复原', desc: '打卡服务区喝水拉伸 15 分钟，指标恢复绿色优良，安全继续启程' },
+              voice: '休整完毕，疲劳指数已清零，为您规划剩余 65 公里山道。',
+              vals: [{ k: '疲劳指数', v: '优良 (绿色)', cls: 'success' }, { k: '补给完成', v: '精力充沛' }, { k: '安全系数', v: '顶级', cls: 'accent' }],
+              punchline: '小白秒懂：长途不再硬撑死扛，AI 成为贴身健康副驾驶，骑行从容舒适。'
+            }
+          ]
         },
         {
-          name: '安全车距预警',
-          desc: '实时监测与前车距离，跟车太近或前车急刹时提醒拉开空间',
-          action: '点击模拟：前车急刹距离缩至 6 米 → 触发防追尾红色预警',
-          render: function () {
-            return '<div class="sim-full"><canvas class="sim-canvas" id="s4-fwd-canvas" width="800" height="320"></canvas></div>';
-          },
-          mount: function (active) {
-            mountRoadRadarCanvas(document.getElementById('s4-fwd-canvas'), 'front', active);
-          }
+          id: 'distance',
+          name: '安全车距主动预警',
+          sub: '前向毫米波雷达测距 · 急刹 FCW 红色防撞方框',
+          bg: 'guard',
+          videoType: 'distance_fcw',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: 0, oy: 15 }, { z: 1.10, ox: 0, oy: 5 }],
+          phases: [
+            {
+              step: '1 发生', title: '前车突发急刹变道',
+              hud: { icon: '🚗', title: '前车车距骤减', desc: '前方大货车突然紧急制动，跟车距离从 45m 瞬间缩至 16m' },
+              voice: '前向雷达告警：前车突发制动，两车间距快速缩减！',
+              vals: [{ k: '两车间距', v: '16.4 m', cls: 'danger' }, { k: '相对减速', v: '-38 km/h' }, { k: '碰撞时间', v: '1.2 秒' }],
+              punchline: '新手制动反应往往有 0.8 到 1.2 秒迟滞，车头高精毫米波雷达每秒测距 50 次戒备。'
+            },
+            {
+              step: '2 系统反应', title: 'HUD 红色防撞方框',
+              hud: { icon: '⚠️', title: 'FCW 碰撞警告', desc: 'HUD 对准前车贴合动态红色预警方框，车把震动提示音同步急促响起' },
+              voice: '急刹！注意减速！',
+              vals: [{ k: '告警级别', v: 'Level 3 紧急', cls: 'danger' }, { k: '声光触同步', v: '毫秒级' }, { k: '建议刹车力', v: '75%' }],
+              punchline: '红色警告框直接贴合在前车实景车尾上，车把微电机震动指尖，消除走神。'
+            },
+            {
+              step: '3 解决', title: '从容刹停留足余量',
+              hud: { icon: '🛡️', title: '安全制动完毕', desc: '比人眼提前 0.8 秒预警，车手从容重刹降速，稳稳停在安全间距外' },
+              voice: '车距已恢复安全标准，前向碰撞警报解除。',
+              vals: [{ k: '刹停余量', v: '8.2 米', cls: 'success' }, { k: 'ABS 触发', v: '平稳受控' }, { k: '追尾风险', v: '0%', cls: 'accent' }],
+              punchline: '小白秒懂：提前 0.8 秒提醒就是生死之别，雷达当第三只眼，杜绝追尾。'
+            }
+          ]
         }
       ]
     },
-
     {
-      name: '骑行社区',
-      heading: '骑完一程，故事还能继续',
-      summary: '交流骑行经验，分享路线和自己的骑行记录。',
-      hero: ['riderclub', '车友社区场景示意'],
+      id: 's5',
+      num: '05',
+      eyebrow: 'RIDING COMMUNITY & DIGITAL AVATAR',
+      title: '骑行社区',
+      tagline: '大冰 3D 数字人在线问答 · 摩友金牌路书 · 个人数据六维战报 · 3D 虚拟机车改装工坊',
       features: [
         {
+          id: 'dabing',
           name: '大冰数字人在线问答',
-          desc: '新手有骑行疑问？大冰数字人随时在线提供老司机级解答',
-          action: '点击模拟：向大冰数字人提问并切换查看新手解答',
-          render: function (active) {
-            var q = active ? '雨天跑山视线差、路面滑，怎么骑才安全？' : '第一次跟车队跑山，出发前要问清哪些事？';
-            var a = active
-              ? '记住三点：① 头盔贴上防雾片，用咱们车把实体键盲操别掏手机；② 过弯别压白线和井盖，倾角留足余量；③ 把头盔后部减速灯打开，让后方汽车老远就能看见你！'
-              : '第一次跟队问清三件事就行：① 几点在哪集合、进山前在哪加油；② 路线有没有非铺装烂路；③ 万一掉队了在哪个观景台等。用 ROADLINK 组队后队友位置都在屏上，放心骑！';
-            return '<div class="sim-full" style="max-width:780px">' +
-              '<div class="wx-visual-panel">' +
-                '<div class="wx-panel-head"><span>🤖 大冰数字人 · 社区在线导师</span><span style="color:var(--green)">● 实时语音+文字解答</span></div>' +
-                '<div class="wx-panel-body" style="padding:18px;gap:14px">' +
-                  '<div class="wx-msg-pill" style="font-size:14.5px"><b>🙋‍♂️ 新手摩友提问：</b>' + q + '</div>' +
-                  '<div class="ai-key-card" style="align-items:flex-start">' +
-                    '<div class="ai-key-icon" style="width:46px;height:46px;font-size:20px;font-weight:900">冰</div>' +
-                    '<div><small style="color:var(--cyan);font-weight:800">大冰数字人 · 语音回复中 🔊</small>' +
-                    '<p style="margin:6px 0 0;font-size:14.5px;color:#fff;line-height:1.55">' + a + '</p></div>' +
-                  '</div>' +
-                '</div>' +
-              '</div>' +
-            '</div>';
-          }
+          sub: '50万+ 真实问答机车知识库 · 真人声线表情在线指导',
+          bg: 'riderclub',
+          videoType: 'dabing_avatar',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.20, ox: -12, oy: -10 }, { z: 1.10, ox: 0, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '新手提问跑山调校',
+              hud: { icon: '❓', title: '车主社区求助', desc: '「新手第一次跑安吉天荒坪，减震和胎压怎么调？」' },
+              voice: '大冰老师，我这周跑天荒坪，减震阻尼和胎压应该怎么调？',
+              vals: [{ k: '求助主题', v: '山道调校指南', cls: 'accent' }, { k: '数字人', v: '大冰 3D 拟真' }, { k: '知识库', v: '50万+ 真实问答' }],
+              punchline: '新手买车后遇到机械故障保养踩坑，大冰数字人以真人语气表情在线解答。'
+            },
+            {
+              step: '2 系统反应', title: '真人声线专业解答',
+              hud: { icon: '🎙️', title: '大冰语音回复', desc: '「天荒坪多发卡弯，前减震建议压紧 2 格，冷胎压放 2.3，注意接缝！」' },
+              voice: '哥们，天荒坪下山发卡弯急，前压紧2格，冷胎压放2.3最稳！',
+              vals: [{ k: '推理响应', v: '0.8 秒', cls: 'success' }, { k: '声线拟真度', v: '98.5%' }, { k: '建议水准', v: '教官级' }],
+              punchline: '根据车型、公里数、骑行习惯给出针对性避坑建议，手上沾油也能语音问答。'
+            },
+            {
+              step: '3 解决', title: '参数一键下发车机',
+              hud: { icon: '🤝', title: '保存至车辆备忘录', desc: '问答生成的调校参数自动同步至仪表，车友在线跟帖点赞' },
+              voice: '减震调校指引已同步至仪表备忘录，祝跑山愉快！',
+              vals: [{ k: '疑虑化解', v: '100%', cls: 'success' }, { k: '少走弯路', v: '省数千改装费' }, { k: '社群归属感', v: '极强', cls: 'accent' }],
+              punchline: '小白秒懂：身边随时跟着一位 20 年驾龄老炮教官，随时解答所有不懂的问题。'
+            }
+          ]
         },
         {
+          id: 'routes',
           name: '骑行路线攻略分享',
-          desc: '把路线轨迹、路面难度、加油补给点和观景台装进一张攻略卡',
-          action: '点击模拟：打开车友分享的「周末山路环线」并一键导入导航',
-          render: function (active) {
-            return '<div class="sim-full" style="display:grid;gap:10px">' +
-              '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line)">' +
-                '<div><strong style="font-size:16px;color:var(--amber)">🗺 周末松林山路环线 · 86 km（新手友好 ★★☆）</strong>' +
-                '<span style="font-size:12.5px;color:var(--soft);margin-left:12px">全程铺装柏油路 · 途经 2 处加油站 · 1 处山顶咖啡观景台</span></div>' +
-                '<span class="state-badge on">' + (active ? '✓ 已导入车把导航' : '2,480 人已跑过') + '</span>' +
-              '</div>' +
-              '<canvas class="sim-canvas" id="s5-guide-canvas" width="800" height="230"></canvas>' +
-            '</div>';
-          },
-          mount: function (active) {
-            mountMapCanvas(document.getElementById('s5-guide-canvas'), 'guide', active);
-          }
+          sub: '百万车友共创 GPX 路书 · 危险碎石弯道提前 200m 预警',
+          bg: 'mountain-ride',
+          videoType: 'route_gpx',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.18, ox: 15, oy: -12 }, { z: 1.08, ox: 0, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '周末不知骑往何处',
+              hud: { icon: '🗺️', title: '传统导航不懂骑行', desc: '普通地图只导高速拥堵路，缺乏机车最爱的风景优美盘山路' },
+              voice: '附近有哪些风景好、弯道舒服、路面没有大货车的路线？',
+              vals: [{ k: '路书库', v: '全国 1.2万条', cls: 'accent' }, { k: '路况更新', v: '1 小时内' }, { k: '筛选维度', v: '弯道分 / 风景分' }],
+              punchline: '骑士要的不是最快到达，而是沿途连绵弯道与美景，摩友实时众包维护。'
+            },
+            {
+              step: '2 系统反应', title: '金牌路书一键上车',
+              hud: { icon: '📲', title: '「四明山黄金线」下发', desc: '全程 86km，共 42 个弯道，包含 3 处观景打卡台与 2 处驿站' },
+              voice: '已规划四明山黄金线，避开施工路段，一键推送到车机。',
+              vals: [{ k: '总里程', v: '86.4 km' }, { k: '弯道评级', v: '★★★★☆ 极乐', cls: 'accent' }, { k: '打卡热度', v: 'Top 1' }],
+              punchline: '手机点击一键上车，GPX 轨迹同步至 HUD，碎石盲弯提早 200m 主动预警。'
+            },
+            {
+              step: '3 解决', title: '无忧骑行尽享美景',
+              hud: { icon: '🌲', title: '完美路书打卡', desc: '跟着老车友踩过点的路线畅快骑行，不用停在叉路口看手机' },
+              voice: '已到达观景台打卡点，已为您自动记录本次跑山成就。',
+              vals: [{ k: '路线满意度', v: '99.4%', cls: 'success' }, { k: '避开陷阱', v: '100%' }, { k: '同行偶遇', v: '8 组车友' }],
+              punchline: '小白秒懂：刚提车的新手也能像老炮一样找到最爽、最安全的风景山路。'
+            }
+          ]
         },
         {
+          id: 'report',
           name: '个人骑行数据总结',
-          desc: '把每周骑行次数、总里程、最大倾角汇总成个人战报海报',
-          action: '点击模拟：生成本周个人骑行高光数据战报',
-          render: function (active) {
-            var bars = active ? [35, 0, 52, 24, 0, 96, 78] : [18, 0, 28, 12, 0, 45, 36];
-            var days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-            return '<div class="sim-full" style="max-width:780px;padding:22px;border-radius:18px;background:linear-gradient(145deg,#132030,#091018);border:1.5px solid rgba(255,180,46,0.45)">' +
-              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
-                '<div><span style="font:800 11px var(--mono);color:var(--amber)">ROADLINK WEEKLY RIDER REPORT</span><h3 style="margin:2px 0 0;font-size:20px">陈默的个人骑行数据周报</h3></div>' +
-                '<span class="state-badge on">' + (active ? '🏆 本周击败 88% 同城摩友' : '累计数据统计中') + '</span>' +
-              '</div>' +
-              '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">' +
-                '<div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line)"><b style="font:900 26px var(--mono);color:var(--amber);display:block">' + (active ? '128 km' : '42 km') + '</b><span style="font-size:11.5px;color:var(--muted)">本周总里程</span></div>' +
-                '<div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line)"><b style="font:900 26px var(--mono);color:var(--cyan);display:block">' + (active ? '3 次' : '1 次') + '</b><span style="font-size:11.5px;color:var(--muted)">本周出车次数</span></div>' +
-                '<div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line)"><b style="font:900 26px var(--mono);color:var(--green);display:block">' + (active ? '35°' : '26°') + '</b><span style="font-size:11.5px;color:var(--muted)">最大压弯倾角</span></div>' +
-                '<div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line)"><b style="font:900 26px var(--mono);color:#fff;display:block">' + (active ? '1,240m' : '410m') + '</b><span style="font-size:11.5px;color:var(--muted)">累计海拔爬升</span></div>' +
-              '</div>' +
-              '<div style="display:flex;align-items:flex-end;gap:12px;height:105px;padding:12px 16px 0;border-radius:12px;background:rgba(0,0,0,0.3)">' +
-                days.map(function (d, i) {
-                  return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end">' +
-                    '<div style="width:100%;max-width:36px;height:' + bars[i] + 'px;border-radius:6px 6px 2px 2px;background:' + (i >= 5 ? 'linear-gradient(180deg,var(--amber),#e06d06)' : 'linear-gradient(180deg,var(--cyan),#2563eb)') + ';transition:height .5s"></div>' +
-                    '<span style="font-size:11px;color:var(--soft)">' + d + '</span></div>';
-                }).join('') +
-              '</div>' +
-            '</div>';
-          }
+          sub: '六维骑士能力雷达图 · 黑金高逼格年度画册海报',
+          bg: 'ai-engine',
+          videoType: 'report_radar',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.22, ox: -10, oy: 12 }, { z: 1.10, ox: 0, oy: 0 }],
+          phases: [
+            {
+              step: '1 发生', title: '季度骑行数据结算',
+              hud: { icon: '📊', title: '个人数据沉淀', desc: '累计骑行 12,480 公里，跨越 4 省 28 座城市，压过 3,200 个弯道' },
+              voice: '本季度骑行报告已生成，正在计算六维能力模型。',
+              vals: [{ k: '总里程', v: '12,480 km', cls: 'accent' }, { k: '骑行天数', v: '142 天' }, { k: '最高海拔', v: '3,840 m' }],
+              punchline: '时速、倾角、制动平顺度全生命周期云端保存，见证从小白向骑士的蜕变。'
+            },
+            {
+              step: '2 系统反应', title: '六维能力雷达图',
+              hud: { icon: '🎖️', title: '骑士段位：大师级', desc: '攻弯 96 / 控速 94 / 反应 98 / 耐力 91，荣获「山道猎鹰」称号' },
+              voice: '综合安全与控车评分超越全国 94% 骑士，解锁大师勋章！',
+              vals: [{ k: '控车评分', v: '96 分', cls: 'success' }, { k: '全国超越', v: 'Top 6%', cls: 'accent' }, { k: '安全无事故', v: '380 天' }],
+              punchline: '权威数据还可对接保险公司享受机车商业险折扣，AI 给出针对性训练建议。'
+            },
+            {
+              step: '3 解决', title: '黑金海报一键导出',
+              hud: { icon: '✨', title: '朋友圈海报生成', desc: '黑金轻奢质感个人画册，引爆小红书与微信朋友圈' },
+              voice: '高画质成就卡片已保存相册，专属水印已生成。',
+              vals: [{ k: '朋友圈点赞', v: '99+', cls: 'success' }, { k: '社区声望', v: 'Lv.7 大师' }, { k: '荣誉留存', v: '终身' }],
+              punchline: '小白秒懂：把迎风飞驰的热爱变成最炫酷的个人履历，满足社交分享欲。'
+            }
+          ]
         },
         {
+          id: 'tuning',
           name: '机车 AI 改装娱乐社区',
-          desc: '上传爱车照片一键生成 AI 涂装构思，左右拖动滑块实时对比',
-          action: '点击模拟：切换 AI 改装涂装风格并保存为社区改装帖',
-          render: function (active) {
-            return '<div class="sim-full" style="max-width:760px">' +
-              '<div class="style-chips" id="mod-style-chips">' +
-                '<button type="button" class="style-chip' + (!active ? ' active' : '') + '" data-filter="sepia(.25) hue-rotate(155deg) saturate(1.65)">❄️ 冰川赛博蓝</button>' +
-                '<button type="button" class="style-chip' + (active ? ' active' : '') + '" data-filter="hue-rotate(315deg) saturate(1.85) contrast(1.1)">🔥 赛道赤焰红</button>' +
-                '<button type="button" class="style-chip" data-filter="grayscale(.88) contrast(1.3) brightness(.82)">🖤 磨砂黑武士</button>' +
-                '<button type="button" class="style-chip" data-filter="sepia(.6) hue-rotate(10deg) saturate(1.9)">⚡ 暗夜流光金</button>' +
-              '</div>' +
-              '<div class="compare-stage">' +
-                '<img src="' + asset('rescue') + '" alt="原车外观示意">' +
-                '<div class="compare-clip" id="mod-clip">' +
-                  '<img src="' + asset('rescue') + '" id="mod-after-img" style="filter:' + (active ? 'hue-rotate(315deg) saturate(1.85) contrast(1.1)' : 'sepia(.25) hue-rotate(155deg) saturate(1.65)') + '" alt="AI改装预览">' +
-                '</div>' +
-                '<span style="position:absolute;left:12px;top:12px;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,0.75);font-size:12px">👈 原车外观</span>' +
-                '<span style="position:absolute;right:12px;top:12px;padding:4px 10px;border-radius:6px;background:rgba(0,0,0,0.75);font-size:12px;color:var(--amber)" id="mod-badge-txt">👉 AI 改装预览（左右拖动滑块对比）</span>' +
-                '<div class="compare-line" id="mod-line"><div class="compare-knob">⇄</div></div>' +
-                '<input type="range" class="compare-input" id="mod-range" min="5" max="95" value="50" aria-label="左右拖动对比原车与AI改装效果">' +
-              '</div>' +
-            '</div>';
-          },
-          mount: function () {
-            var r = document.getElementById('mod-range');
-            var clip = document.getElementById('mod-clip');
-            var line = document.getElementById('mod-line');
-            var img = document.getElementById('mod-after-img');
-            var txt = document.getElementById('mod-badge-txt');
-            if (r) r.addEventListener('input', function () {
-              clip.style.clipPath = 'inset(0 0 0 ' + r.value + '%)';
-              line.style.left = r.value + '%';
-            });
-            Array.from(document.querySelectorAll('#mod-style-chips .style-chip')).forEach(function (btn) {
-              btn.addEventListener('click', function () {
-                Array.from(document.querySelectorAll('#mod-style-chips .style-chip')).forEach(function (b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-                if (img) img.style.filter = btn.dataset.filter;
-                if (txt) txt.textContent = '👉 AI 改装：' + btn.textContent;
-              });
-            });
-          }
+          sub: '1:1 毫米级 3D 虚拟改装沙盘 · 真实排气声浪在线试听',
+          bg: 'riderclub',
+          videoType: 'tuning_sandbox',
+          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: 15, oy: 15 }, { z: 1.12, ox: 0, oy: 5 }],
+          phases: [
+            {
+              step: '1 发生', title: '个性化改装想法萌生',
+              hud: { icon: '🎨', title: '改装试错成本高昂', desc: '想改水泥灰车漆、换天蝎碳纤排气，但怕改完难看且不合规' },
+              voice: '想改战斗灰加黄色拉花，换个短尾排气，不知道好不好看？',
+              vals: [{ k: '传统痛点', v: '无法预览', cls: 'accent' }, { k: '试错成本', v: '数千上万元' }, { k: '合规风险', v: '未知' }],
+              punchline: '很多新手改装踩坑，不仅难看还影响操控。ROADLINK 提供 1:1 3D AI 改装沙盘。'
+            },
+            {
+              step: '2 系统反应', title: '3D 效果与声浪试听',
+              hud: { icon: '⚡', title: 'AI 虚拟沙盘即时渲染', desc: '黑金竞技拉花与短尾碳纤维排气装配完毕，耳机试听双缸低沉轰鸣' },
+              voice: '黑金拉花与短尾排气已装配，声浪模拟器已就绪。',
+              vals: [{ k: '渲染时间', v: '2.4 秒', cls: 'success' }, { k: '材质质感', v: '真碳纤维 / 金属' }, { k: '声浪模拟', v: '双缸轰鸣' }],
+              punchline: '不仅看外观，还能佩戴耳机试听声浪音效！AI 自动核验上牌合规性。'
+            },
+            {
+              step: '3 解决', title: '一键采购方案到店',
+              hud: { icon: '🛍️', title: '改装方案一键落地', desc: '配件清单打包至官方认证门店，方案在社区引来 400+ 车友抄作业' },
+              voice: '方案已下发至离您最近的官方授权工坊，排期即可前往施工。',
+              vals: [{ k: '方案落地', v: '所见即所得', cls: 'success' }, { k: '合规认证', v: '100% 合法' }, { k: '社区热度', v: '登顶热榜', cls: 'accent' }],
+              punchline: '小白秒懂：零门槛圆梦改装，改前改后心里有底，避免踩坑花冤枉钱。'
+            }
+          ]
         }
       ]
     }
   ];
 
-  /* ==================== 页面渲染与交互控制器 ==================== */
-  var root = document.getElementById('main-content');
-  var navLinks = Array.from(document.querySelectorAll('#scene-nav a:not(#home-link)'));
-  var autoBtn = document.getElementById('btn-auto-scene');
-  var teamPlayback = null;
-  var state = { sceneIdx: 0, featIdx: 0, active: false, captureArmed: false, timer: null };
+  // 全局交互状态
+  var state = {
+    route: 'home',
+    sceneIdx: 0,
+    featIdx: 0,
+    phaseIdx: 0,
+    isPlaying: true,
+    progress: 0,
+    timer: null,
+    sparkData: [55, 62, 70, 78, 85, 92, 88, 76, 82, 90, 96, 94]
+  };
 
+  var mainContent = document.getElementById('main-content');
+  var sceneNav = document.getElementById('scene-nav');
+
+  function updateNav() {
+    if (!sceneNav) return;
+    var links = sceneNav.querySelectorAll('a');
+    links.forEach(function (link) {
+      var r = link.getAttribute('data-route');
+      if (r === state.route) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  }
+
+  // ==================== 动态 SPARKLINE CANVAS 遥测引擎 ====================
+  function initSparkline(canvas) {
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var pts = state.sparkData.slice();
+
+    function render() {
+      if (!canvas.isConnected) return;
+      var w = canvas.width = canvas.parentElement ? canvas.parentElement.clientWidth : 300;
+      var h = canvas.height = 54;
+      ctx.clearRect(0, 0, w, h);
+
+      // 参考线
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, h * 0.5); ctx.lineTo(w, h * 0.5);
+      ctx.stroke();
+
+      var grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, 'rgba(245, 196, 0, 0.28)');
+      grad.addColorStop(1, 'rgba(245, 196, 0, 0.0)');
+
+      var step = w / (pts.length - 1);
+      ctx.beginPath();
+      pts.forEach(function (val, idx) {
+        var x = idx * step;
+        var y = h - (val / 120) * (h * 0.82) - 4;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#f5c400';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+      ctx.fillStyle = grad; ctx.fill();
+
+      // 最新点
+      var lastX = w;
+      var lastY = h - (pts[pts.length - 1] / 120) * (h * 0.82) - 4;
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#f5c400'; ctx.fill();
+    }
+
+    render();
+    var interval = setInterval(function () {
+      if (!canvas.isConnected) { clearInterval(interval); return; }
+      var last = pts[pts.length - 1];
+      var next = Math.max(35, Math.min(115, last + (Math.random() * 12 - 6)));
+      pts.shift(); pts.push(next);
+      state.sparkData = pts;
+      render();
+    }, 450);
+    onCleanup(function () { clearInterval(interval); });
+  }
+
+  // ==================== 4K 60FPS 视频仪表与雷达图层 (Video Canvas Simulator) ====================
+  function initVideoCanvas(canvas, videoType, featId) {
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var start = performance.now();
+    var raf;
+
+    function draw(now) {
+      if (!canvas.isConnected) return;
+      var t = (now - start) / 1000;
+      var w = canvas.width = canvas.parentElement.clientWidth || 640;
+      var h = canvas.height = canvas.parentElement.clientHeight || 500;
+      ctx.clearRect(0, 0, w, h);
+
+      // 1. 左下角动态仪表盘 (Speedometer & RPM Dial)
+      var cx = 86, cy = h - 86;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 48, Math.PI * 0.75, Math.PI * 2.25);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      var speed = 64 + Math.sin(t * 1.8) * 8;
+      var speedAng = Math.PI * 0.75 + (speed / 120) * Math.PI * 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 48, Math.PI * 0.75, speedAng);
+      ctx.strokeStyle = '#f5c400';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 24px var(--num)';
+      ctx.textAlign = 'center';
+      ctx.fillText(Math.round(speed), cx, cy + 4);
+      ctx.font = '600 10px var(--num)';
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillText('KM/H · 4TH', cx, cy + 18);
+
+      // 2. 右侧倾角罗盘 (Lean Angle Arc)
+      var lean = 24 + Math.sin(t * 1.4) * 14;
+      var rx = w - 80, ry = h - 86;
+      ctx.beginPath();
+      ctx.arc(rx, ry, 36, Math.PI * 0.8, Math.PI * 2.2);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.18)';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '800 18px var(--num)';
+      ctx.fillText(lean.toFixed(1) + '°', rx, ry + 4);
+      ctx.font = '600 10px var(--num)';
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillText('LEAN ANGLE', rx, ry + 18);
+
+      // 3. 特殊动态视频图层 (根据功能定制)
+      if (videoType === 'radar_convoy' || videoType === 'route_gpx') {
+        // 雷达声波扩散
+        var r = (t * 60) % (w * 0.45);
+        ctx.beginPath();
+        ctx.arc(w * 0.5, h * 0.5, Math.max(1, r), 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(245, 196, 0, ' + Math.max(0, 0.35 - r / (w * 0.45)) + ')';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 队友动态光标
+        var p1 = [w * 0.5 - 90 + Math.sin(t * 1.5) * 6, h * 0.5 - 40 + Math.cos(t * 1.2) * 5];
+        var p2 = [w * 0.5 + 110 + Math.cos(t * 1.4) * 6, h * 0.5 + 30 + Math.sin(t * 1.6) * 5];
+
+        function drawDot(p, label, col) {
+          ctx.beginPath(); ctx.arc(p[0], p[1], 5, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+          ctx.beginPath(); ctx.arc(p[0], p[1], Math.max(1, 10 + 4 * Math.sin(t * 4)), 0, Math.PI * 2);
+          ctx.fillStyle = col === '#f5c400' ? 'rgba(245,196,0,0.2)' : 'rgba(56,189,248,0.2)'; ctx.fill();
+          ctx.font = '700 11px var(--sans)'; ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+          ctx.fillText(label, p[0] + 12, p[1] + 4);
+        }
+        drawDot([w * 0.5, h * 0.5], '07 陈默(本机)', '#f5c400');
+        drawDot(p1, '18 阿岳 (-12m)', '#38bdf8');
+        drawDot(p2, '05 老周 (+45m)', '#32d583');
+      }
+
+      raf = requestAnimationFrame(draw);
+    }
+
+    raf = requestAnimationFrame(draw);
+    onCleanup(function () { cancelAnimationFrame(raf); });
+  }
+
+  // ==================== 3-PHASE 视频播放与步进控制器 ====================
   function stopAuto() {
     if (state.timer) {
       clearInterval(state.timer);
       state.timer = null;
-      if (teamPlayback) { teamPlayback.stop(); state.active = false; }
     }
-    if (autoBtn) { autoBtn.classList.remove('active'); autoBtn.textContent = '自动轮播'; autoBtn.setAttribute('aria-pressed','false'); }
+    state.isPlaying = false;
+    updateVideoPlayBtn();
   }
 
   function startAuto() {
     stopAuto();
-    autoBtn.classList.add('active');
-    autoBtn.textContent = '停止轮播';
-    autoBtn.setAttribute('aria-pressed','true');
+    state.isPlaying = true;
+    updateVideoPlayBtn();
+    var duration = 4000;
+    var step = (60 / duration) * 100;
+
     state.timer = setInterval(function () {
-      var sc = SCENES[state.sceneIdx];
-      if (teamPlayback && teamPlayback.isPlaying()) return;
-      if (!state.active) {
-        state.active = true;
-        if (teamPlayback) teamPlayback.play();
-        else render();
+      state.progress += step;
+      if (state.progress >= 100) {
+        state.progress = 0;
+        var nextPhase = (state.phaseIdx + 1) % 3;
+        setPhase(nextPhase, true);
       } else {
-        state.active = false;
-        state.featIdx = (state.featIdx + 1) % sc.features.length;
-        state.captureArmed = false;
-        render();
+        updateProgressBars();
       }
-    }, 3200);
-    if (teamPlayback) { state.active = true; teamPlayback.play(); }
+    }, 60);
   }
 
-  function toggleActive() {
-    var button = document.getElementById('btn-action');
-    if (!button || button.getAttribute('aria-disabled') === 'true') return;
-    stopAuto();
-    var restoreFocus = document.activeElement === button;
-    var capture = SCENES[state.sceneIdx].features[state.featIdx].id === 'capture';
-    if (capture && !state.captureArmed && !state.active) {
-      state.captureArmed = true;
-    } else {
-      state.active = !state.active;
-      if (capture && !state.active) state.captureArmed = false;
+  function updateVideoPlayBtn() {
+    var btn = document.getElementById('video-play-toggle');
+    if (btn) btn.textContent = state.isPlaying ? '⏸' : '▶';
+  }
+
+  function updateProgressBars() {
+    var fill = document.getElementById('video-fill');
+    var timeEl = document.getElementById('video-time');
+    var pProg = document.querySelector('.kx-prog i');
+
+    var p = Math.min(100, Math.max(0, state.progress));
+    if (fill) fill.style.width = p + '%';
+    if (pProg) pProg.style.width = p + '%';
+    if (timeEl) {
+      var sec = Math.floor((state.phaseIdx * 4) + (p / 100 * 4));
+      timeEl.textContent = '00:' + (sec < 10 ? '0' + sec : sec) + ' / 00:12';
     }
-    render();
-    if (restoreFocus) document.getElementById('btn-action').focus({preventScroll:true});
   }
 
-  function selectFeature(index, focus) {
-    stopAuto();
-    state.featIdx = index;
-    state.active = false;
-    state.captureArmed = false;
-    render();
-    if (focus) root.querySelector('.feat-tab[aria-pressed="true"]').focus({preventScroll:true});
-  }
+  function setPhase(idx, fromAuto) {
+    state.phaseIdx = idx;
+    if (!fromAuto) {
+      state.progress = 0;
+      updateProgressBars();
+    }
+    renderPhaseVisuals();
 
-  function render() {
-    flushCleanups();
-    teamPlayback = null;
     var sc = SCENES[state.sceneIdx];
     var feat = sc.features[state.featIdx];
-    var capture = feat.id === 'capture';
-    var team = feat.id === 'team-journey';
-    var armed = state.captureArmed || state.active;
-    var action = state.active ? '重新体验' : (feat.action || '').replace(/^点击模拟[：:]\s*/, '');
-    if (capture && !armed) action = '模拟双方同意';
-
-    document.title = sc.name + ' · ROADLINK';
-    navLinks.forEach(function (a, i) {
-      if (i === state.sceneIdx) a.setAttribute('aria-current', 'page');
-      else a.removeAttribute('aria-current');
-    });
-
-    root.innerHTML =
-      '<section class="scene-hero" aria-labelledby="scene-title">' +
-        '<picture class="scene-background"><source media="(max-width:680px)" srcset="' + asset(sc.hero[0] + '-small') + '">' +
-          '<img src="' + asset(sc.hero[0]) + '" alt="' + sc.hero[1] + '"></picture>' +
-        '<div class="scene-intro"><p class="scene-eyebrow">' + sc.name + '</p>' +
-          '<h1 id="scene-title">' + sc.heading + '</h1><p class="scene-summary">' + sc.summary + '</p></div>' +
-      '</section>' +
-      '<section class="stage-grid" aria-label="场景互动演示">' +
-        '<div class="feat-sidebar" role="group" aria-label="选择功能">' +
-          sc.features.map(function (f, i) {
-            var isCur = i === state.featIdx;
-            return '<button type="button" class="feat-tab" data-idx="' + i + '" aria-pressed="' + isCur + '">' + f.name + '</button>';
-          }).join('') +
-        '</div>' +
-        (team ? '<article class="team-walkthrough" aria-labelledby="team-title"></article>' :
-        '<article class="visual-card' + (capture ? ' capture-card' : '') + '" aria-labelledby="feature-title">' +
-          '<div class="visual-viewport' + (feat.bleed ? ' bleed' : '') + '">' + feat.render(state.active) + '</div>' +
-          '<div class="visual-notes"><span class="visual-mode">交互模拟 · 示例数据</span>' +
-            '<h2 id="feature-title" tabindex="-1">' + feat.name + '</h2>' +
-            '<p class="visual-description">' + feat.desc + '</p>' +
-            (capture ? captureDetails(armed) : '') +
-            '<button type="button" class="action-btn" id="btn-action"><span>' + action + '</span></button>' +
-          '</div>' +
-        '</article>') +
-      '</section>';
-
-    Array.from(root.querySelectorAll('.feat-tab')).forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (Number(btn.dataset.idx) !== state.featIdx) selectFeature(Number(btn.dataset.idx),true);
-      });
-    });
-    if (team) {
-      teamPlayback = window.mountRoadlinkTeam(root.querySelector('.team-walkthrough'), stopAuto);
-      onCleanup(teamPlayback.stop);
-    } else {
-      document.getElementById('btn-action').addEventListener('click', toggleActive);
-      if (feat.mount) feat.mount(state.active, toggleActive);
-    }
+    var phase = feat.phases[state.phaseIdx];
+    if (phase && phase.voice) speakText(phase.voice);
   }
 
+  // ==================== 页面渲染：HOME 页面 ====================
   function drawHomeAppMap(canvas) {
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -975,38 +971,10 @@
   function renderHome() {
     flushCleanups();
     stopAuto();
-    const devices = [
-      ['app','手机 App','在手机上规划路线、查看车队位置，并连接随车设备。','app-preview','打开 App'],
-      ['bar','车把防水屏','固定在车把旁，显示手机发来的转向和距离。','hardware-edge','查看车把屏'],
-      ['optics','头盔 HUD 贴片','微型投影器把转向投到风镜内侧的透明贴片上。','home-hud-optics','查看贴片']
-    ];
-    const windowBar = label => `<div class="ip-window-bar"><i aria-hidden="true"></i><span>${label}</span></div>`;
-    function film(id, title) {
-      return `<div class="film" data-film="${id}" role="group" aria-label="${title}录屏">
-        ${windowBar('操作录屏 / 效果演示')}
-        <div class="film-screen">
-          <video muted playsinline preload="metadata" poster="${asset('demo-'+id)}" src="assets/roadlink-demo-${id}.mp4" aria-label="${title}的操作录屏"></video>
-          <button class="film-big" aria-label="播放${title}录屏"></button>
-        </div>
-        <div class="film-controls">
-          <button class="film-toggle" aria-label="播放"></button>
-          <input type="range" class="film-seek" aria-label="${title}播放进度" min="0" max="1" step="0.01" value="0">
-          <span class="film-clock">00:00 / 00:00</span>
-          <button class="film-expand" aria-label="全屏观看${title}录屏">⛶</button>
-        </div>
-      </div>`;
-    }
-    root.innerHTML = `
+    mainContent.innerHTML = `
       <section class="rl-gallery" aria-labelledby="rl-title">
-        <header class="ip-intro">
-          <p class="ip-kicker">01 · 骑行导航</p>
-          <h1 id="rl-title">在手机上定路线，<br>在头盔里看转向。</h1>
-          <p class="ip-lead">骑手在手机 App 上设好目的地，车把防水屏就能显示下一次转向。戴上头盔，同一条提示也会投在透明贴片上。下面这段演示从出发前的座舱开始，带你看一遍三台设备如何配合。</p>
-        </header>
-        <article class="ip-feature">
-          <div class="ip-demo-window">${film('overview','三端导航')}<div class="live-window" hidden>${windowBar('骑手视角 / 交互演示')}
-            <div class="cockpit-hero">
-          <div class="cockpit-frame" hidden>
+        <div class="cockpit-hero">
+          <div class="cockpit-frame">
             <div class="cockpit-image">
               <img class="cockpit-photo" src="${asset('cockpit-overlook')}" alt="停在山路旁的摩托车，手机和防水小屏固定在车把附近，头盔内装有透明投影贴片" fetchpriority="high">
               <button class="cockpit-phone" data-open="app" aria-label="打开骑行 App">
@@ -1016,27 +984,17 @@
               <button class="cockpit-pin" data-open="ride" aria-label="透过头盔贴片看导航"><i></i><span>HUD 贴片</span></button>
             </div>
           </div>
-          <div class="rider-frame">
-            <img src="${asset('hardware-visor')}" alt="从头盔内看向山路，导航投影位于视野右侧">
-            <button class="rider-hud" data-open="ride" aria-label="查看头盔 HUD 投影"><span class="rider-arrow"></span><span><b class="rider-distance"></b><small class="rider-turn"></small></span></button>
-          </div>
-            </div></div>
-          </div>
-          <div class="ip-feature-text">
-            <h2>三端导航</h2>
-            <p>手机负责定位，骑手在车把和头盔里看到同一条提示。</p>
-            <div class="ip-controls"><button class="demo-mode" data-action="mode">亲自操作</button><button data-open="app">App</button><button data-open="bar">车把屏</button><button data-open="ride">头盔 HUD</button><button class="cockpit-start" hidden data-action="next">下一路口</button><button class="compare-view" hidden data-action="switch-view">看设备外观</button></div>
-          </div>
-        </article>
-        <div class="ip-devices cockpit-legend" aria-label="三个设备演示">${devices.map(([id,name,desc,img,action])=>`
-          <article class="ip-device">${film(id,name)}
-            <div class="ip-card-copy"><h3>${name}</h3><p>${desc}</p><button class="ip-link" data-open="${id}">${action} ↗</button></div>
-          </article>`).join('')}</div>
-        <p class="ip-footnote">导航、连接状态和里程均为演示数据。</p>
-        <div class="ip-pair">
-          <a class="ip-story" href="?view=demo#/s1"><img loading="lazy" src="${asset('team')}" alt="骑友在集合点准备组队"><div class="ip-card-copy"><h3>第一次见面，怎么组队？</h3><p>从邀请车友到共享目的地，在手机上走完一次组队流程。</p></div></a>
-          <a class="ip-story" href="?view=capture#/s1"><img loading="lazy" src="${asset('ride-capture')}" alt="两位骑手在路上接近时的抓拍示意"><div class="ip-card-copy"><h3>靠近队友的那一刻</h3><p>双方同意后，模拟两车接近，查看自动抓拍的照片。</p></div></a>
+          <header class="cockpit-heading">
+            <h1 id="rl-title">手机定路线，<br>头盔看转向。</h1>
+            <button class="cockpit-start" data-open="ride">体验头盔投影 <span aria-hidden="true">↗</span></button>
+          </header>
+          <small class="cockpit-note">概念演示 · 示例路线</small>
         </div>
+        <nav class="cockpit-legend" aria-label="查看设备">
+          <button data-open="app"><strong>手机 App</strong><small>规划路线</small><span aria-hidden="true">↗</span></button>
+          <button data-open="bar"><strong>车把防水屏</strong><small>同步路口提示</small><span aria-hidden="true">↗</span></button>
+          <button data-open="optics"><strong>头盔 HUD</strong><small>风镜内侧投影</small><span aria-hidden="true">↗</span></button>
+        </nav>
         <dialog class="cockpit-dialog" aria-labelledby="device-heading">
           <header><h2 id="device-heading"></h2><button class="device-close" aria-label="关闭设备演示">×</button></header>
           <div class="device-content">
@@ -1090,76 +1048,20 @@
           <footer class="device-actions"><button class="rl-primary"></button><button class="rl-secondary"></button></footer>
         </dialog>
       </section>
-      <section class="rl-scenes" aria-labelledby="rl-scenes-heading">
-        <p class="ip-kicker">02 · 骑行场景</p><h2 id="rl-scenes-heading">一起出发，<br>一起骑回家。</h2><p class="ip-lead">选一个场景亲自体验：集合时邀请队友，上路后查看提醒，收车后回看这一路。</p>
-        <div class="rl-links">${SCENES.map((s,i)=>`<a class="ip-story" href="#/s${i+1}"><img loading="lazy" src="${asset(s.hero[0]+'-small')}" alt="${s.hero[1]}"><div class="ip-card-copy"><h3>${s.name}</h3><p>${s.summary}</p></div></a>`).join('')}</div><a class="ip-next" href="#/s1">下一页 · 组队与车友社交 <span aria-hidden="true">→</span></a>
+      <section class="rl-scenes" aria-labelledby="rl-scenes-heading"><h2 id="rl-scenes-heading">骑行场景</h2>
+        <div class="rl-links">${SCENES.map(s=>`<a href="#/${s.id}">${s.title}<span aria-hidden="true">↗</span></a>`).join('')}</div>
       </section>`;
-    const gallery = root.querySelector('.rl-gallery');
+    const gallery = mainContent.querySelector('.rl-gallery');
     const get = selector => gallery.querySelector(selector);
     const trip = [{arrow:'↱',dist:'300 m',tip:'前方右转'}, {arrow:'↰',dist:'80 m',tip:'路口左转'}, {arrow:'↑',dist:'500 m',tip:'沿湖路直行'}];
-    let view = 'ride', nav = true, power = true, shared = false, page = 'route', step = 0;
+    let view = 'ride', nav = true, power = false, shared = false, page = 'route', step = 0;
     gallery.querySelectorAll('canvas').forEach(drawHomeAppMap);
     const primary = get('.rl-primary'), secondary = get('.rl-secondary');
 
-    let riderView = true;
-    let live = false;
-    const overview = get('[data-film="overview"]');
-    function mountFilm(player) {
-      const video = player.querySelector('video');
-      const toggle = player.querySelector('.film-toggle');
-      const big = player.querySelector('.film-big');
-      const seek = player.querySelector('.film-seek');
-      const clock = player.querySelector('.film-clock');
-      const stamp = t => '00:'+String(Math.floor(t)).padStart(2,'0');
-      function sync() {
-        const duration = Number.isFinite(video.duration) ? video.duration : 0;
-        seek.max = duration || 1;
-        seek.value = video.currentTime;
-        seek.style.setProperty('--played',(duration ? 100*video.currentTime/duration : 0)+'%');
-        clock.textContent = stamp(video.currentTime)+' / '+stamp(duration);
-        player.dataset.playing = String(!video.paused);
-        big.hidden = !video.paused;
-        toggle.setAttribute('aria-label',video.paused ? '播放' : '暂停');
-      }
-      async function play() {
-        if (!video.paused) {video.pause();return;}
-        gallery.querySelectorAll('video').forEach(v=>{if (v !== video) v.pause();});
-        if (video.ended) video.currentTime = 0;
-        try {await video.play();} catch {video.controls = true;big.hidden=true;}
-      }
-      big.onclick = toggle.onclick = play;
-      video.onclick = play;
-      seek.oninput = ()=>{if(video.duration) video.currentTime = Number(seek.value);};
-      player.querySelector('.film-expand').onclick = async ()=>{
-        if(document.fullscreenElement) {await document.exitFullscreen();return;}
-        try {
-          if(player.requestFullscreen) await player.requestFullscreen();
-          else if(video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-        } catch { video.controls = true; }
-      };
-      ['timeupdate','loadedmetadata','play','pause','ended','seeked'].forEach(event=>video.addEventListener(event,sync));
-      onCleanup(()=>video.pause());
-      sync();
-    }
-    gallery.querySelectorAll('.film').forEach(mountFilm);
     const dialog = get('.cockpit-dialog');
     const titles = {app:'骑行 App',bar:'车把防水屏',optics:'风镜内侧的透明贴片',ride:'头盔内视角'};
     function refresh() {
       const turn = trip[step];
-      get('.live-window').hidden = !live;
-      overview.hidden = live;
-      get('.demo-mode').textContent = live ? '回到录屏' : '亲自操作';
-      get('.compare-view').hidden = get('.cockpit-start').hidden = !live;
-      get('.live-window .ip-window-bar span').textContent = riderView ? '骑手视角 / 交互演示' : '设备外观 / 交互演示';
-      get('.cockpit-frame').hidden = riderView;
-      get('.rider-frame').hidden = !riderView;
-      get('.compare-view').textContent = riderView ? '看设备外观' : '看骑手视角';
-      get('.cockpit-start').dataset.action = nav ? 'next' : 'app';
-      get('.cockpit-start').textContent = nav ? '下一路口' : '去 App 开始导航';
-      get('.rider-hud').hidden = !power;
-      get('.rider-arrow').textContent = nav ? turn.arrow : '◇';
-      get('.rider-distance').textContent = nav ? turn.dist : 'HUD 已启动';
-      get('.rider-turn').textContent = nav ? turn.tip : '等待手机导航';
       get('#device-heading').textContent = titles[view];
       gallery.querySelectorAll('[data-panel]').forEach(panel=>{panel.hidden = panel.dataset.panel !== view;});
       get('.mini-turn').textContent = nav ? turn.arrow+' '+turn.dist : '路线预览';
@@ -1204,98 +1106,364 @@
       if (!b) return;
       if (b.classList.contains('device-close')) {dialog.close();return;}
       const action = b.dataset.action || b.dataset.open;
-      if (b.closest('.film')) return;
-      gallery.querySelectorAll('video').forEach(v=>v.pause());
-      if (action === 'mode') live = !live;
-      else if (b.dataset.appPage) page = b.dataset.appPage;
+      if (b.dataset.appPage) page = b.dataset.appPage;
       else if (b.id === 'home-app-navigation') {nav = !nav;step = 0;}
       else if (b.id === 'home-app-share') shared = !shared;
-      else if (action === 'next') step = (step+1)%trip.length;
-      else if (action === 'switch-view') riderView = !riderView;
+      else if (action === 'next') {step = (step+1)%trip.length;speakText(trip[step].dist+'，'+trip[step].tip);}
       else if (action === 'power') power = !power;
       else if (action === 'ride' || b.id === 'home-app-hud-preview') {view='ride';power=true;}
       else if (action) view=action;
       refresh();
-      if (!dialog.open && (b.dataset.open || action === 'app')) dialog.showModal();
+      if (!dialog.open && b.dataset.open) dialog.showModal();
       else if (b.closest('[hidden]') || b.hidden) get('.device-close').focus({preventScroll:true});
     });
     refresh();
   }
 
-  function onRoute() {
-    const queryView = new URLSearchParams(location.search).get('view');
-    const home = location.hash === '#/home' || (!location.hash && !['demo','capture'].includes(queryView));
-    document.body.classList.toggle('home-page',home);
-    const homeLink = document.getElementById('home-link');
-    autoBtn.hidden = home;
-    if (home) {
-      teamPlayback = null;
-      homeLink.setAttribute('aria-current','page');
-      navLinks.forEach(a=>a.removeAttribute('aria-current'));
-      document.title = 'ROADLINK · 骑行导航';
-      renderHome();
-      window.scrollTo(0,0);
-      return;
+  // ==================== 页面渲染：Knight 左右分屏模拟器模块页 ====================
+  function renderModulePage() {
+    flushCleanups();
+    var sc = SCENES[state.sceneIdx];
+    var feat = sc.features[state.featIdx];
+
+    mainContent.innerHTML = [
+      '<div class="shell module-page">',
+      '  <div class="module-mast">',
+      '    <div>',
+      '      <div class="eyebrow"><span class="n">' + sc.num + '</span> ' + sc.eyebrow + '</div>',
+      '      <h1>' + sc.title + '</h1>',
+      '    </div>',
+      '    <div class="module-mast-sub">' + sc.tagline + '</div>',
+      '  </div>',
+      '  <!-- 横向 Feature Tabs -->',
+      '  <div class="feature-tabs" role="tablist">',
+      sc.features.map(function (f, idx) {
+        return [
+          '    <button class="feature-tab" role="tab" aria-pressed="' + String(idx === state.featIdx) + '" data-idx="' + idx + '">',
+          '      ' + f.name,
+          '    </button>'
+        ].join('');
+      }).join(''),
+      '  </div>',
+      '  <!-- 左右分屏模拟器 Frame -->',
+      '  <div class="p1-frame">',
+      '    <!-- 左侧实景视频与动态视效主舞台 -->',
+      '    <div class="p1-visual" id="p1-visual">',
+      '      <!-- 3-Phase Stepper 步骤 -->',
+      '      <div class="kx-steps">',
+      feat.phases.map(function (p, pIdx) {
+        return [
+          '        <button class="kx-step ' + (pIdx === state.phaseIdx ? 'active' : (pIdx < state.phaseIdx ? 'done' : '')) + '" data-pidx="' + pIdx + '">',
+          '          <i>' + (pIdx + 1) + '</i><span>' + p.step + '</span>',
+          '        </button>'
+        ].join('');
+      }).join(''),
+      '      </div>',
+      '      <!-- 4K 60FPS Live Cam 徽标 -->',
+      '      <div class="rec-badge"><i class="rec-dot"></i><span>4K 60FPS LIVE CAM · ' + feat.name + '</span></div>',
+      '      <!-- 背景高清实景与动态运镜平移缩放 -->',
+      '      <img class="kx-photo" id="kx-photo" src="' + asset(feat.bg) + '" alt="' + feat.name + '">',
+      '      <div class="kx-scrim"></div>',
+      '      <!-- 动态仪表盘与雷达 Canvas 图层 -->',
+      '      <canvas id="kx-visual-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;"></canvas>',
+      '      <!-- 浮动深色玻璃 HUD 卡片 -->',
+      '      <div class="kx-hud-card" id="kx-hud-card" style="top: 64px; left: 24px;"></div>',
+      '      <!-- 动态智能识别 Reticle 方框 -->',
+      '      <div class="kx-ret" id="kx-ret" style="top: 32%; left: 45%; width: 150px; height: 150px;" hidden>',
+      '        <span class="kx-ret-tag" id="kx-ret-tag">TARGET</span>',
+      '      </div>',
+      '      <!-- 快门拍照闪光层 -->',
+      '      <div class="shutter-flash" id="shutter-flash"></div>',
+      '      <!-- 紧急制动红光光晕 -->',
+      '      <div class="danger-vignette" id="danger-vignette"></div>',
+      '      <!-- 悬浮抓拍大片弹窗 (自动抓拍特性) -->',
+      '      <div class="capture-card-overlay" id="capture-card-overlay" hidden>',
+      '        <img src="assets/roadlink-ride-capture-small.webp" alt="并骑抓拍大片">',
+      '        <div class="cap-tag"><span>📸 自动抓拍完成</span><span>4K HDR</span></div>',
+      '      </div>',
+      '      <!-- 底部语音播报胶囊 -->',
+      '      <div class="kx-voice" id="kx-voice">',
+      '        <span class="kx-voice-role" id="kx-voice-role">AI 助理</span>',
+      '        <div class="kx-bars" id="kx-bars"><i></i><i></i><i></i><i></i></div>',
+      '        <span class="kx-voice-text" id="kx-voice-text">系统就绪</span>',
+      '      </div>',
+      '      <!-- 底部视频播放器控制条 -->',
+      '      <div class="video-ctrl-bar">',
+      '        <button class="video-btn" id="video-play-toggle" title="播放/暂停模拟视频">⏸</button>',
+      '        <span class="video-time" id="video-time">00:00 / 00:12</span>',
+      '        <div class="video-track" id="video-track"><i class="video-fill" id="video-fill"></i></div>',
+      '        <span class="video-badge">1080P 60FPS</span>',
+      '      </div>',
+      '      <div class="kx-prog"><i></i></div>',
+      '    </div>',
+      '    <!-- 右侧遥测控制台 (极简大字号 · 去除繁琐文字) -->',
+      '    <div class="p1-console" id="p1-console">',
+      '      <div class="console-top">',
+      '        <h2 id="cs-title">' + feat.name + '</h2>',
+      '        <div class="console-source" id="cs-sub">' + feat.sub + '</div>',
+      '      </div>',
+      '      <!-- 大字号核心遥测数值 -->',
+      '      <div class="console-values" id="cs-vals"></div>',
+      '      <!-- 小白一秒看懂核心收益 (仅一句话) -->',
+      '      <div class="like-box" id="cs-punchline" style="margin: 12px 0;"></div>',
+      '      <!-- 阶段快速切换按钮 -->',
+      '      <div class="console-pills">',
+      feat.phases.map(function (p, pIdx) {
+        return [
+          '        <button class="sub-pill ' + (pIdx === state.phaseIdx ? 'on' : '') + '" data-pidx="' + pIdx + '">',
+          '          ' + p.title,
+          '        </button>'
+        ].join('');
+      }).join(''),
+      '      </div>',
+      '      <!-- 底部实时波形遥测 Sparkline -->',
+      '      <div class="console-chart-wrap">',
+      '        <div class="console-chart-label">',
+      '          <span>LIVESTREAM TELEMETRY · 实时遥测数据流</span>',
+      '          <span style="color:var(--accent);">100Hz MESH</span>',
+      '        </div>',
+      '        <canvas class="p1-chart" id="p1-chart"></canvas>',
+      '      </div>',
+      '    </div>',
+      '  </div>',
+      '  <!-- 底部上一章 / 下一章 -->',
+      '  <div class="module-foot">',
+      '    <div>ROADLINK 次世代智能机车系统 · 方案与投资路演专业版</div>',
+      '    <div>',
+      state.sceneIdx < 4
+        ? '      <a href="#/s' + (state.sceneIdx + 2) + '">下一章节：' + SCENES[state.sceneIdx + 1].title + ' →</a>'
+        : '      <a href="#/home">↺ 返回方案概览</a>',
+      '    </div>',
+      '  </div>',
+      '</div>'
+    ].join('');
+
+    // 绑定 Feature Tabs 切换
+    var tabs = mainContent.querySelectorAll('.feature-tab');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var idx = Number(tab.getAttribute('data-idx'));
+        if (idx !== state.featIdx) {
+          state.featIdx = idx;
+          state.phaseIdx = 0;
+          renderModulePage();
+        }
+      });
+    });
+
+    // 绑定 Phase 步进按钮
+    var steps = mainContent.querySelectorAll('.kx-step, .sub-pill');
+    steps.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pIdx = Number(btn.getAttribute('data-pidx'));
+        setPhase(pIdx, false);
+      });
+    });
+
+    // 绑定视频播放暂停控制
+    var playBtn = document.getElementById('video-play-toggle');
+    if (playBtn) {
+      playBtn.addEventListener('click', function () {
+        if (state.isPlaying) stopAuto();
+        else startAuto();
+      });
     }
-    homeLink.removeAttribute('aria-current');
-    var m = location.hash.match(/^#\/s([1-5])$/);
-    var idx = m ? Number(m[1]) - 1 : 0;
-    if (!m) history.replaceState(null, '', '#/s1');
-    stopAuto();
-    state.sceneIdx = idx;
-    var view = new URLSearchParams(location.search).get('view');
-    var capture = idx === 0 && view === 'capture';
-    state.featIdx = capture ? SCENES[idx].features.findIndex(function (feat) { return feat.id === 'capture'; }) : 0;
-    state.active = false;
-    state.captureArmed = false;
-    render();
-    if (capture || (idx === 0 && view === 'demo')) {
-      root.querySelector('.stage-grid').scrollIntoView();
+
+    var track = document.getElementById('video-track');
+    if (track) {
+      track.addEventListener('click', function (e) {
+        var rect = track.getBoundingClientRect();
+        var pct = (e.clientX - rect.left) / rect.width;
+        state.progress = pct * 100;
+        updateProgressBars();
+      });
+    }
+
+    // 初始化动态 Canvas
+    var visCanvas = document.getElementById('kx-visual-canvas');
+    initVideoCanvas(visCanvas, feat.videoType, feat.id);
+
+    var sparkCanvas = document.getElementById('p1-chart');
+    initSparkline(sparkCanvas);
+
+    // 渲染动态元素
+    renderPhaseVisuals();
+
+    // 启动自动播放
+    startAuto();
+
+    var curPhase = feat.phases[state.phaseIdx];
+    if (curPhase && curPhase.voice) speakText(curPhase.voice);
+  }
+
+  // ==================== 动态更新 Phase 元素 ====================
+  function renderPhaseVisuals() {
+    var sc = SCENES[state.sceneIdx];
+    var feat = sc.features[state.featIdx];
+    var phase = feat.phases[state.phaseIdx];
+    if (!phase) return;
+
+    // 1. Stepper 状态
+    var steps = document.querySelectorAll('.kx-step');
+    steps.forEach(function (st, idx) {
+      st.className = 'kx-step ' + (idx === state.phaseIdx ? 'active' : (idx < state.phaseIdx ? 'done' : ''));
+    });
+
+    var subPills = document.querySelectorAll('.sub-pill');
+    subPills.forEach(function (sp, idx) {
+      if (idx === state.phaseIdx) sp.classList.add('on');
+      else sp.classList.remove('on');
+    });
+
+    // 2. 镜头平移缩放 (Camera Pan/Zoom)
+    var photo = document.getElementById('kx-photo');
+    if (photo && feat.cam && feat.cam[state.phaseIdx]) {
+      var c = feat.cam[state.phaseIdx];
+      photo.style.setProperty('--z', c.z);
+      photo.style.setProperty('--ox', c.ox + 'px');
+      photo.style.setProperty('--oy', c.oy + 'px');
+    }
+
+    // 3. HUD 卡片
+    var hudCard = document.getElementById('kx-hud-card');
+    if (hudCard && phase.hud) {
+      hudCard.innerHTML = [
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">',
+        '  <span style="font-size:16px;">' + (phase.hud.icon || '📍') + '</span>',
+        '  <strong style="font-size:14px;color:var(--paper);">' + phase.hud.title + '</strong>',
+        '</div>',
+        '<div style="font-size:12px;color:var(--soft);line-height:1.45;">' + phase.hud.desc + '</div>'
+      ].join('');
+    }
+
+    // 4. 动态目标视框 Reticle
+    var ret = document.getElementById('kx-ret');
+    var retTag = document.getElementById('kx-ret-tag');
+    if (ret) {
+      if (feat.id === 'capture' || feat.id === 'rearview' || feat.id === 'distance') {
+        ret.hidden = false;
+        ret.className = 'kx-ret ' + (state.phaseIdx === 1 ? 'danger' : (state.phaseIdx === 2 ? 'success' : ''));
+        if (state.phaseIdx === 0) {
+          ret.style.top = '34%'; ret.style.left = '48%'; ret.style.width = '130px'; ret.style.height = '130px';
+          if (retTag) retTag.textContent = 'DETECT 25m';
+        } else if (state.phaseIdx === 1) {
+          ret.style.top = '28%'; ret.style.left = '42%'; ret.style.width = '170px'; ret.style.height = '170px';
+          if (retTag) retTag.textContent = 'LOCKED · 动态追踪';
+        } else {
+          ret.style.top = '30%'; ret.style.left = '44%'; ret.style.width = '150px'; ret.style.height = '150px';
+          if (retTag) retTag.textContent = 'AUTO CAPTURED';
+        }
+      } else {
+        ret.hidden = true;
+      }
+    }
+
+    // 5. 快门闪光与抓拍弹窗
+    var shutter = document.getElementById('shutter-flash');
+    var capCard = document.getElementById('capture-card-overlay');
+    if (feat.id === 'capture') {
+      if (state.phaseIdx === 1) {
+        if (shutter) {
+          shutter.classList.remove('trigger');
+          void shutter.offsetWidth;
+          shutter.classList.add('trigger');
+        }
+      }
+      if (capCard) capCard.hidden = (state.phaseIdx !== 2);
     } else {
-      window.scrollTo(0,0);
+      if (capCard) capCard.hidden = true;
     }
+
+    // 6. 紧急制动红光光晕
+    var dangerVig = document.getElementById('danger-vignette');
+    if (dangerVig) {
+      var isDanger = (feat.id === 'brakelight' && state.phaseIdx === 1) || (feat.id === 'distance' && state.phaseIdx === 1) || (feat.id === 'crash' && state.phaseIdx === 0);
+      dangerVig.classList.toggle('on', isDanger);
+    }
+
+    // 7. 语音播报条
+    var voiceText = document.getElementById('kx-voice-text');
+    if (voiceText && phase.voice) voiceText.textContent = phase.voice;
+
+    // 8. 控制台大字号数值
+    var csVals = document.getElementById('cs-vals');
+    if (csVals && phase.vals) {
+      csVals.innerHTML = phase.vals.map(function (v) {
+        return [
+          '<div class="val-item">',
+          '  <small>' + v.k + '</small>',
+          '  <strong class="' + (v.cls || '') + '">' + v.v + '</strong>',
+          '</div>'
+        ].join('');
+      }).join('');
+    }
+
+    // 9. 小白一秒看懂收益 (仅一句话)
+    var punchline = document.getElementById('cs-punchline');
+    if (punchline && phase.punchline) {
+      punchline.innerHTML = '<b>💡 小白一秒看懂</b>' + phase.punchline;
+    }
+  }
+
+  // ==================== 全局路由中心 ====================
+  function onRoute() {
+    var hash = location.hash || '#/home';
+    var m = hash.match(/^#\/(home|s1|s2|s3|s4|s5)$/);
+    if (!m) {
+      history.replaceState(null, '', '#/home');
+      state.route = 'home';
+    } else {
+      state.route = m[1];
+    }
+
+    updateNav();
+
+    if (state.route === 'home') {
+      renderHome();
+    } else {
+      var sIdx = parseInt(state.route.substring(1), 10) - 1;
+      state.sceneIdx = Math.max(0, Math.min(4, sIdx));
+      state.featIdx = 0;
+      state.phaseIdx = 0;
+      state.progress = 0;
+      renderModulePage();
+    }
+
+    window.scrollTo(0, 0);
   }
 
   window.addEventListener('hashchange', onRoute);
 
-  if (autoBtn) {
-    autoBtn.addEventListener('click', function () {
-      if (state.timer) stopAuto();
-      else startAuto();
-    });
-  }
-
-  var fsBtn = document.getElementById('btn-fullscreen');
-  document.getElementById('btn-window').onclick = function () { if (document.fullscreenElement) document.exitFullscreen(); };
-  if (fsBtn) {
-    fsBtn.addEventListener('click', function () {
-      if (document.fullscreenElement && document.body.classList.contains('home-page')) return;
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  // 头部重播
+  if (replayBtn) {
+    replayBtn.addEventListener('click', function () {
+      if (state.route === 'home') {
+        renderHome();
       } else {
-        document.exitFullscreen && document.exitFullscreen();
+        setPhase(0, false);
+        startAuto();
       }
     });
   }
 
+  // 键盘快捷键
   document.addEventListener('keydown', function (e) {
-    if (document.body.classList.contains('home-page')) return;
-    if (e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
-    if (e.target && e.target.closest('input, textarea, select, button, a, [contenteditable]')) return;
-    var sc = SCENES[state.sceneIdx];
-    if (e.code === 'Space' && !teamPlayback) {
+    if (e.target.matches('input, textarea, select') || e.target.closest('.rl-gallery button')) return;
+    if (e.code === 'Space') {
       e.preventDefault();
-      toggleActive();
-    } else if (e.code === 'ArrowRight' && state.sceneIdx < SCENES.length - 1) {
-      location.hash = '#/s' + (state.sceneIdx + 2);
-    } else if (e.code === 'ArrowLeft' && state.sceneIdx > 0) {
-      location.hash = '#/s' + state.sceneIdx;
-    } else if (e.code === 'ArrowDown' || e.code === 'ArrowUp') {
-      e.preventDefault();
-      var direction = e.code === 'ArrowDown' ? 1 : -1;
-      selectFeature((state.featIdx + direction + sc.features.length) % sc.features.length,false);
+      if (state.route !== 'home') {
+        var nextP = (state.phaseIdx + 1) % 3;
+        setPhase(nextP, false);
+      }
+    } else if (e.code === 'ArrowRight') {
+      if (state.route === 'home') location.hash = '#/s1';
+      else if (state.sceneIdx < 4) location.hash = '#/s' + (state.sceneIdx + 2);
+    } else if (e.code === 'ArrowLeft') {
+      if (state.sceneIdx > 0) location.hash = '#/s' + state.sceneIdx;
+      else if (state.route !== 'home') location.hash = '#/home';
     }
   });
 
+  // 首次运行
   onRoute();
 })();
