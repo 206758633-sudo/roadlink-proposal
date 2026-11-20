@@ -1,36 +1,3 @@
-body:has(.rl-gallery) {background:#0b0e10}
-.rl-gallery {--signal:#ffd16a;color:#fcfaf2}
-.rl-gallery button:focus-visible,.rl-scenes a:focus-visible {outline:3px solid #ffd16a;outline-offset:-3px}
-.cockpit-hero {position:relative;isolation:isolate;overflow:hidden;background:#1b2731}
-.cockpit-frame {display:grid;align-items:center;height:clamp(420px, min(54vw,78svh), 930px);overflow:hidden;position:relative}
-.cockpit-image {position:relative;grid-area:1/1;width:100%;aspect-ratio:1672/941;align-self:center;container-type:inline-size}
-.cockpit-photo {width:100%;height:100%;display:block}
-.cockpit-image::after {content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#070c13cc 0%,#080e1699 22%,transparent 48%),linear-gradient(0deg,#090c0f59,transparent 20%);z-index:0}
-.cockpit-heading {position:absolute;top:50%;left:clamp(24px,5vw,106px);transform:translateY(-50%);z-index:2}
-.cockpit-heading h1 {margin:0 0 .48em;font-size:clamp(34px,4.4vw,84px);line-height:1.12;letter-spacing:-.068em;font-weight:740;color:#fffefa;text-shadow:0 2px 15px #0003}
-.cockpit-start,.rl-primary {background:var(--signal);color:#251d0f;font-weight:680;border-radius:5px;min-height:44px;padding:0 16px;font-size:14px}
-.cockpit-start span {display:inline-block;margin-left:8px}
-.cockpit-start:hover,.rl-primary:hover {background:#ffe19c}
-.cockpit-note {position:absolute;right:20px;bottom:14px;color:#fff;font-size:11px;text-shadow:0 1px 5px #000;pointer-events:none}
-.cockpit-phone,.cockpit-display,.cockpit-pin {position:absolute;z-index:1}
-.cockpit-phone {left:40.25%;top:30.76%;width:8.51%;height:33.18%;overflow:hidden;border-radius:.85cqw;display:grid;grid-template-rows:24% minmax(0,1fr) 20%;padding:0;background:#dfebdf;text-align:left}
-.cockpit-phone .mini-turn,.cockpit-phone small {display:flex;align-items:center;justify-content:center;white-space:nowrap}
-.cockpit-phone .mini-turn {color:#f2fff5;background:#205444;font-size:1.62cqw;font-weight:700}
-.cockpit-phone canvas {width:100%;height:100%;object-fit:cover;display:block}
-.cockpit-phone small {background:#eef3e8;color:#244536;font-size:1.01cqw;font-weight:700}
-.cockpit-display {left:55.93%;top:45.72%;width:13.18%;height:12.35%;padding:0;display:grid;align-content:center;justify-items:center;color:#ffe8ac;background:#171c1d;line-height:1.2;border-radius:.65cqw}
-.cockpit-display b {font:720 2.35cqw/1.1 var(--num)}
-.cockpit-display small {margin-top:.2cqw;font-weight:600;font-size:1.05cqw}
-.cockpit-pin {left:87.1%;top:45.9%;transform:translate(-50%,-50%);min-width:44px;min-height:44px;display:grid;place-items:center}
-.cockpit-pin i {width:12px;height:12px;border:2px solid white;border-radius:50%;background:#ffc85e;box-shadow:0 0 0 6px #ffce6966}
-.cockpit-pin span {position:absolute;bottom:90%;white-space:nowrap;background:#091014df;color:#fff4de;font-size:12px;line-height:1.3;border:1px solid #ddc59080;border-radius:4px;padding:4px 7px}
-.cockpit-legend {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding-inline:5%;background:#121719;border-block:1px solid #383d3e}
-.cockpit-legend button {display:grid;grid-template-columns:1fr auto;align-content:center;min-height:91px;gap:3px 6px;text-align:left;padding:12px clamp(12px,2.7vw,48px);border-inline-start:1px solid #33383a}
-.cockpit-legend button:last-child {border-inline-end:1px solid #33383a}
-.cockpit-legend button:hover {background:#1b2122}
-.cockpit-legend strong {font-size:clamp(15px,1.4vw,22px);font-weight:650;line-height:1.3}
-.cockpit-legend small {grid-row:2;color:#b0b9b9;font-size:13px}
-.cockpit-legend span {grid-row:1/3;grid-column:2;align-self:center;color:#ebc984}
 .cockpit-dialog {--signal:#ffd16a;width:min(760px,calc(100% - 24px));max-height:90vh;max-height:90dvh;padding:0;background:#111719;color:#f3f5ef;border:1px solid #4e585a;border-radius:16px;box-shadow:0 18px 80px #0008}
 .cockpit-dialog::backdrop {background:#070d11c9;backdrop-filter:blur(6px)}
 .cockpit-dialog>header,.device-actions {display:flex;align-items:center;padding:10px 18px;gap:12px}
@@ -53,27 +20,82 @@ body:has(.rl-gallery) {background:#0b0e10}
 .rl-links a {display:flex;align-items:center;justify-content:space-between;gap:6px;padding:14px 0;border-top:1px solid #393e3f;line-height:1.45;font-size:15px}
 .rl-links a span {color:#9a9f9c}
 .rl-links a:hover,.rl-links a:hover span {color:#f5c400}
-.rl-bar-readout {position:absolute;left:43.8%;top:33.8%;width:33%;height:29%;transform:translate(-50%,-50%) rotate(-4deg) skewX(9deg);display:grid;align-content:center;justify-content:center;gap:3px;text-align:center;color:#ffdb97;background:#131518;border-radius:12%;line-height:1.15}
-.rl-bar-readout span {font:650 clamp(8px,.85vw,14px)/1.2 var(--num);letter-spacing:.14em;color:#cfbc98}
-.rl-bar-readout strong {font-size:clamp(23px,3.3vw,54px);font-variant-numeric:tabular-nums}
-.rl-bar-readout small {font-size:clamp(11px,1.2vw,18px)}
 .rl-projection {position:absolute;left:55%;top:42%;display:flex;align-items:center;gap:10px;padding:7px 15px;color:#c6ffea;text-shadow:0 0 8px #439e89,0 1px 3px #0b1e1e;background:#123c3477;border-left:2px solid #b8ffe6;line-height:1.1}
 .rl-projection>b {font-size:clamp(34px,4.2vw,62px)}
 .rl-projection strong,.rl-projection small {display:block}
 .rl-projection strong {font:700 clamp(19px,2.2vw,33px)/1.15 var(--num)}
 .rl-projection small {margin-top:3px;font-size:clamp(12px,1vw,16px)}
-@media(max-width:700px) {
-  .cockpit-hero {display:flex;flex-direction:column;background:#111921}
-  .cockpit-heading {position:static;transform:none;order:-1;padding:24px 6% 18px}
-  .cockpit-heading h1 {font-size:clamp(34px,7.6vw,48px);margin-bottom:14px}
-  .cockpit-frame {height:auto;display:block;overflow:hidden}
-  .cockpit-image {width:149%;margin-left:-49%}
-  .cockpit-image::after {background:linear-gradient(180deg,#111921a6,transparent 15%),linear-gradient(0deg,#10161c70,transparent 20%)}
-  .cockpit-note {bottom:6px;right:10px;font-size:10px}
-  .cockpit-legend {padding:0 2%}
-  .cockpit-legend button {padding:10px 8px;min-height:66px}
-  .cockpit-legend strong {font-size:14px}.cockpit-legend small {font-size:11px}
-  .cockpit-legend span {font-size:12px}
+
+body:has(.cockpit-hero) {background:#0b1013}
+body:has(.cockpit-hero) .hdr {background:#0c1215f5}
+body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
+.rl-gallery {--signal:#ff8a30;color:#f5f7f7}
+.rl-gallery button:focus-visible,.rl-gallery a:focus-visible {outline:3px solid #ffab69;outline-offset:2px}
+.cockpit-hero {position:relative;isolation:isolate;overflow:hidden;background:#080d10}
+.cockpit-frame {position:absolute;inset:0;overflow:hidden;display:grid;align-items:center}
+.cockpit-image {grid-area:1/1;position:relative;isolation:isolate;width:100%;container-type:inline-size}
+.cockpit-photo {display:block;width:100%;height:auto}
+.cockpit-frame::after {content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#080c0ff0 0%,#080c0fb3 21%,transparent 49%),linear-gradient(0deg,#080d10 0%,transparent 16%,transparent 95%,#080d1033)}
+.cockpit-note {position:absolute;bottom:12px;right:3%;z-index:1;color:#bec6c6;font-size:10px;letter-spacing:.03em}
+.cockpit-content {position:relative;z-index:2;display:grid;justify-items:start;align-content:center;width:max-content;max-width:43%;margin-left:5.8%;min-height:clamp(635px,calc(100svh - 68px),980px);padding:clamp(32px,5vh,60px) 0;pointer-events:none}
+.cockpit-content button,.cockpit-content a {pointer-events:auto}
+.cockpit-brand {display:flex;align-items:center;gap:12px;margin:0 0 clamp(16px,2.6vh,28px);font-size:clamp(16px,1.5vw,24px);font-weight:700;color:#e3e8e7}
+.cockpit-brand span {color:#ff8a30;font:750 clamp(11px,.94vw,16px)/1 var(--num);letter-spacing:.25em}
+.cockpit-heading h1 {margin:0;font-size:clamp(48px,5.25vw,97px);line-height:1.09;letter-spacing:-.052em;font-weight:780;color:#f5f7f6}
+.cockpit-heading em {font-style:normal;color:#ff8629}
+.cockpit-lead {margin:clamp(14px,2.2vh,23px) 0 0;font-size:clamp(14px,1.06vw,18px);line-height:1.7;color:#c0c8ca;text-wrap:pretty}
+.cockpit-actions {margin:clamp(12px,2.1vh,22px) 0}
+.cockpit-start {display:inline-flex;align-items:center;gap:9px;border:1px solid #366951;background:#0b2019e8;color:#caf3dc;padding:0 15px;border-radius:40px;font-size:13px;font-weight:600;min-height:42px}
+.cockpit-start i {width:9px;height:9px;background:#48d790;border-radius:50%;box-shadow:0 0 12px #33d68466}
+.cockpit-start:hover {border-color:#6ece99;background:#132f23}
+.cockpit-legend {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;width:min(31vw,400px);margin:4px 0 0}
+.cockpit-legend button {padding:0;text-align:left;border:1px solid #343c3e;border-radius:14px;overflow:hidden;background:#101619ee}
+.cockpit-legend button:hover {border-color:#9d774e}
+.part-photo,.device-bar-detail,.device-optics-detail {display:block;background-image:url('../assets/roadlink-hud-system.webp');background-repeat:no-repeat}
+.part-photo {aspect-ratio:1.72;background-color:#161c1f}
+.part-optics {background-size:325% auto;background-position:100% 43%}
+.part-bar {background-size:330% auto;background-position:49% 48%}
+.part-copy {display:grid;padding:9px 13px 10px;gap:2px}
+.part-copy strong {font-size:clamp(13px,1vw,16px);line-height:1.4}
+.part-copy small {color:#a2adaf;font-size:clamp(11px,.88vw,14px)}
+.cockpit-shortcuts {display:flex;flex-wrap:wrap;gap:7px;margin-top:clamp(14px,2.5vh,28px)}
+.cockpit-shortcuts a {display:inline-flex;align-items:center;gap:8px;background:#0d1317c9;border:1px solid #30383a;border-radius:30px;min-height:36px;padding:0 12px;font-size:12px;color:#dae0e1}
+.cockpit-shortcuts a::after {content:'↗';color:#f7994d}
+.cockpit-phone {position:absolute;z-index:2;left:48%;top:29%;width:10%;border:1px solid #657c7e;border-radius:10px;overflow:hidden;display:grid;padding:0;text-align:left;color:#f4fffc;background:#132127;box-shadow:0 14px 28px #0008}
+.app-caption,.app-route {padding:.7cqw .8cqw}
+.app-caption {display:flex;align-items:center;justify-content:space-between;font:700 clamp(10px,.96cqw,17px)/1.2 var(--sans);color:#b9efe2}
+.cockpit-phone canvas {width:100%;height:auto;display:block}
+.app-route {display:grid;gap:.3cqw;line-height:1.2}
+.app-route b {font-size:clamp(10px,.93cqw,17px)}
+.mini-turn {color:#80e7cc;font:700 clamp(10px,1cqw,18px) var(--num)}
+.product-hit {position:absolute;z-index:2;min-width:32px;min-height:32px;background:transparent;border:0;border-radius:18%;padding:0}
+.product-hit:hover {box-shadow:0 0 0 1px #a2efdc99}
+.device-bar-detail,.device-optics-detail {aspect-ratio:16/9;background-color:#0c1113}
+.device-bar-detail {background-size:220% auto;background-position:49% 49%}
+.device-optics-detail {background-size:225% auto;background-position:100% 47%}
+.rl-bar-readout {position:absolute;left:48.5%;top:45%;width:20%;height:36%;transform:translate(-50%,-50%) rotate(-9deg);display:grid;place-content:center;justify-items:center;line-height:1.2;color:#8affdf;background:radial-gradient(circle at 38% 28%,#223c3c,#101c1f);border-radius:50%}
+.rl-bar-value {font:700 clamp(15px,3vw,36px) var(--num)}
+.rl-bar-tip {font-size:clamp(10px,1.2vw,14px)}
+.rl-primary {min-height:44px;border-radius:6px;padding:0 14px;background:#ffb378;color:#211912;font-weight:650}
+@media(max-width:800px) {
+  .cockpit-hero {display:grid;grid-template-columns:minmax(0,1fr);padding:24px 0;gap:14px}
+  .cockpit-content {display:contents}
+  .cockpit-heading,.cockpit-actions,.cockpit-legend,.cockpit-shortcuts {margin:0 6%}
+  .cockpit-heading {order:0}.cockpit-brand {font-size:15px;margin-bottom:12px}
+  .cockpit-heading h1 {font-size:clamp(39px,8vw,62px)}
+  .cockpit-lead {font-size:14px;margin-top:10px}
+  .cockpit-frame {position:relative;inset:auto;display:block;order:1}
+  .cockpit-image {width:154%;margin-left:-54%}
+  .cockpit-frame::after {background:linear-gradient(0deg,#080d10,transparent 15%,transparent 83%,#080d10)}
+  .cockpit-actions {order:2}.cockpit-legend {order:3;width:min(88%,430px)}.cockpit-shortcuts {order:4}
+  .cockpit-note {font-size:9px;bottom:6px}
+  .part-photo {aspect-ratio:2.1}.part-copy {padding:8px 10px}
+  .cockpit-start,.cockpit-shortcuts a {min-height:44px}
   .rl-links {grid-template-columns:repeat(2,minmax(0,1fr))}
-  .rl-scenes {padding:24px 0 40px}
+}
+.cockpit-display {left:61.7%;top:47.3%;width:10.4%;height:16.8%}
+.cockpit-pin {left:81.7%;top:44.8%;width:13%;height:12%}
+@media(max-width:800px) {
+  .cockpit-phone {left:43%;top:23%;width:13.4%}
+  .app-caption,.app-route b,.mini-turn {white-space:nowrap}
 }

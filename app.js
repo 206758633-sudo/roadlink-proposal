@@ -976,25 +976,31 @@
         <div class="cockpit-hero">
           <div class="cockpit-frame">
             <div class="cockpit-image">
-              <img class="cockpit-photo" src="${asset('cockpit-overlook')}" alt="停在山路旁的摩托车，手机和防水小屏固定在车把附近，头盔内装有透明投影贴片" fetchpriority="high">
-              <button class="cockpit-phone" data-open="app" aria-label="打开骑行 App">
-                <span class="mini-turn"></span><canvas width="640" height="420" aria-hidden="true"></canvas><small>松林观景台</small>
+              <img class="cockpit-photo" src="${asset('hud-system-hero')}" alt="山景车库内，车把上的防水圆屏与头盔内的透明 HUD 贴片同步显示右转箭头" fetchpriority="high">
+              <button class="cockpit-phone" data-open="app" aria-label="打开独立的手机 App 路线演示">
+                <span class="app-caption">手机 App <span aria-hidden="true">↗</span></span>
+                <canvas width="640" height="420" aria-hidden="true"></canvas>
+                <span class="app-route"><b>松林观景台</b><small class="mini-turn"></small></span>
               </button>
-              <button class="cockpit-display" data-open="bar" aria-label="查看车把防水屏"><b></b><small></small></button>
-              <button class="cockpit-pin" data-open="ride" aria-label="透过头盔贴片看导航"><i></i><span>HUD 贴片</span></button>
+              <button class="cockpit-display product-hit" data-open="bar" aria-label="查看车把防水圆屏"></button>
+              <button class="cockpit-pin product-hit" data-open="ride" aria-label="从头盔内看投影"></button>
             </div>
+            <small class="cockpit-note">产品概念图 · 示例路线</small>
           </div>
-          <header class="cockpit-heading">
-            <h1 id="rl-title">手机定路线，<br>头盔看转向。</h1>
-            <button class="cockpit-start" data-open="ride">体验头盔投影 <span aria-hidden="true">↗</span></button>
-          </header>
-          <small class="cockpit-note">概念演示 · 示例路线</small>
+          <div class="cockpit-content">
+            <header class="cockpit-heading">
+              <p class="cockpit-brand">骑行导航 <span>ROADLINK</span></p>
+              <h1 id="rl-title">路线在手机，<br><em>转向在眼前。</em></h1>
+              <p class="cockpit-lead">手机 App 规划路线，车把圆屏与头盔贴片同步提示。</p>
+            </header>
+            <div class="cockpit-actions"><button class="cockpit-start" data-open="ride"><i aria-hidden="true"></i>体验头盔内的导航 <span aria-hidden="true">→</span></button></div>
+            <div class="cockpit-legend" aria-label="两件加装硬件">
+              <button data-open="optics"><span class="part-photo part-optics" aria-hidden="true"></span><span class="part-copy"><strong>头盔 HUD 贴片</strong><small>透明投影 · 风镜内侧</small></span></button>
+              <button data-open="bar"><span class="part-photo part-bar" aria-hidden="true"></span><span class="part-copy"><strong>车把防水圆屏</strong><small>夹装车把 · 实体按键</small></span></button>
+            </div>
+            <nav class="cockpit-shortcuts" aria-label="场景快捷入口"><a href="#/s3">AI 手机操控</a><a href="#/s1">组队骑行</a><a href="#/s5">骑行社区</a></nav>
+          </div>
         </div>
-        <nav class="cockpit-legend" aria-label="查看设备">
-          <button data-open="app"><strong>手机 App</strong><small>规划路线</small><span aria-hidden="true">↗</span></button>
-          <button data-open="bar"><strong>车把防水屏</strong><small>同步路口提示</small><span aria-hidden="true">↗</span></button>
-          <button data-open="optics"><strong>头盔 HUD</strong><small>风镜内侧投影</small><span aria-hidden="true">↗</span></button>
-        </nav>
         <dialog class="cockpit-dialog" aria-labelledby="device-heading">
           <header><h2 id="device-heading"></h2><button class="device-close" aria-label="关闭设备演示">×</button></header>
           <div class="device-content">
@@ -1033,11 +1039,11 @@
 </nav>
 </div></div>
             <div class="device-view" data-panel="bar" hidden>
-              <img src="${asset('hardware-edge')}" alt="环形夹具把防水屏固定在车把上">
+              <div class="device-bar-detail" role="img" aria-label="夹在车把上的防水圆屏，下面有三个实体按键"></div>
               <div class="rl-bar-readout"><strong class="rl-bar-value"></strong><small class="rl-bar-tip"></small></div>
             </div>
             <div class="device-view" data-panel="optics" hidden>
-              <img src="${asset('home-hud-optics')}" alt="头盔内侧的微型投影器和透明光学贴片">
+              <div class="device-optics-detail" role="img" aria-label="头盔内侧的微型投影器与透明 HUD 贴片"></div>
               <button data-open="ride" class="detail-pin">从贴片看出去 ↗</button>
             </div>
             <div class="device-view" data-panel="ride" hidden>
@@ -1065,8 +1071,6 @@
       get('#device-heading').textContent = titles[view];
       gallery.querySelectorAll('[data-panel]').forEach(panel=>{panel.hidden = panel.dataset.panel !== view;});
       get('.mini-turn').textContent = nav ? turn.arrow+' '+turn.dist : '路线预览';
-      get('.cockpit-display b').textContent = nav ? turn.arrow+' '+turn.dist : '待导航';
-      get('.cockpit-display small').textContent = nav ? turn.tip : '等待手机路线';
       get('.rl-projection').hidden = !power;
       get('.rl-proj-arrow').textContent = nav ? turn.arrow : '◇';
       get('.rl-proj-dist').textContent = nav ? turn.dist : 'HUD 已启动';
