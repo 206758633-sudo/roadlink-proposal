@@ -1,5 +1,6 @@
 window.mountCrewRide = function (root, asset, speak) {
   'use strict';
+  const imageUrl = name => new URL(asset(name), document.baseURI).href;
   const chapters = [
     ['碰面','集合点','寻找附近骑友',5], ['面对面建队','四位组队口令','面对面建队',5],
     ['朋友入队','车队集合','朋友输入口令',7], ['一起出发','队伍出发','全队导航',7],
@@ -21,7 +22,7 @@ window.mountCrewRide = function (root, asset, speak) {
       <div class="ride-route-meta">川西摩旅 <span>／</span> 76 km</div></header>
     <div class="ride-body"><div class="ride-field">
         <svg class="ride-map" viewBox="0 0 740 345" role="img" aria-label="车队路线与成员位置示意">
-          <g class="ride-camera" id="roadlink-crew-map-content"><image href="${asset('crew-relief')}" x="-390" y="-240" width="1520" height="850" preserveAspectRatio="none"/>
+          <g class="ride-camera" id="roadlink-crew-map-content"><image href="${imageUrl('crew-relief')}" x="-390" y="-240" width="1520" height="850" preserveAspectRatio="none"/>
           <g class="ride-geography"><path d="M-65 307Q79 268 148 276T276 227T411 170T540 142T805 40" fill="none" stroke="#6ba5a4" stroke-opacity=".34" stroke-width="3"/>
           <text x="340" y="84">折 多 山</text><text x="466" y="260">横 断 山 区</text></g>
           <path class="ride-road" d="${route}"/><path class="ride-active-route" d="${route}" pathLength="100"/>
@@ -48,8 +49,7 @@ window.mountCrewRide = function (root, asset, speak) {
   const section=$('.ride'), road=$('.ride-road'), length=road.getTotalLength();
   const coord=f=>road.getPointAtLength(clamp(f)*length);
   const markers=all('.ride-marker'), chapterButtons=all('[data-chapter]');
-  section.style.setProperty('--trip-photo',`url("${asset('convoy')}")`);
-  section.style.setProperty('--visor-photo',`url("${asset('hardware-visor')}")`);
+  section.style.setProperty('--visor-photo',`url("${imageUrl('hardware-visor')}")`);
   function fitMap() {
     const field=$('.ride-field'), aspect=field.clientWidth/field.clientHeight;
     // Keep marker symbols circular and extend the relief to the edges on wide screens.
@@ -88,7 +88,7 @@ window.mountCrewRide = function (root, asset, speak) {
     }else{
       const arrived=stage===7 && local>=2;
       body=`<small>ROADLINK / 车队</small><h4>${arrived?'同行记录':'车队行程'}</h4>
-        ${arrived?`<div class="ride-cover" style="background-image:linear-gradient(0deg,#091a18ee,transparent),url('${asset('riderclub')}')"><small>同行记录</small><b>76 km</b></div>`:'<svg class="ride-pocket-map" viewBox="50 30 620 265" role="img" aria-label="手机上同步的车队地图"><use href="#roadlink-crew-map-content"/></svg>'}
+        ${arrived?`<div class="ride-cover" style="background-image:linear-gradient(0deg,#091a18ee,transparent),url('${imageUrl('riderclub')}')"><small>同行记录</small><b>76 km</b></div>`:'<svg class="ride-pocket-map" viewBox="50 30 620 265" role="img" aria-label="手机上同步的车队地图"><use href="#roadlink-crew-map-content"/></svg>'}
         <div class="ride-listhead">同行骑友<span>5 人</span></div><div class="ride-avatars">${riders.map((name,i)=>`<button data-focus="${i}" aria-label="在地图查看${name}" aria-pressed="${selectedRider===i}">${avatar(i)}</button>`).join('')}</div>
         <div class="ride-notice"><strong>${cue[0]}</strong><p>${cue[1]}</p></div>`;
     }
@@ -154,7 +154,7 @@ window.mountCrewRide = function (root, asset, speak) {
       section.dataset.stage=stage;
       $('.ride-tracking rect').setAttribute('x',stage===4?-91:18);
       $('.ride-tracking text').setAttribute('x',stage===4?-86:24);
-      section.style.setProperty('--trip-photo',`url("${asset(stage<3?'team':stage===7?'riderclub':'convoy')}")`);
+      section.style.setProperty('--trip-photo',`url("${imageUrl(stage<3?'team':stage===7?'riderclub':'convoy')}")`);
       chapterButtons.forEach((b,i)=>{b.setAttribute('aria-current',i===stage?'step':'false');b.classList.toggle('past',i<stage);});
     }
     const key=stage+'|'+cue.join('|')+'|'+playing;
