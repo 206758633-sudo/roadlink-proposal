@@ -975,17 +975,8 @@
       <section class="rl-gallery" aria-labelledby="rl-title">
         <div class="cockpit-hero">
           <div class="cockpit-frame">
-            <div class="cockpit-image">
-              <img class="cockpit-photo" src="${asset('hud-system-hero')}" alt="山景车库内，车把上的防水圆屏与头盔内的透明 HUD 贴片同步显示右转箭头" fetchpriority="high">
-              <button class="cockpit-phone" data-open="app" aria-label="打开独立的手机 App 路线演示">
-                <span class="app-caption">手机 App <span aria-hidden="true">↗</span></span>
-                <canvas width="640" height="420" aria-hidden="true"></canvas>
-                <span class="app-route"><b>松林观景台</b><small class="mini-turn"></small></span>
-              </button>
-              <button class="cockpit-display product-hit" data-open="bar" aria-label="查看车把防水圆屏"></button>
-              <button class="cockpit-pin product-hit" data-open="ride" aria-label="从头盔内看投影"></button>
-            </div>
-            <small class="cockpit-note">产品概念图 · 示例路线</small>
+            <img class="cockpit-photo" src="${asset('motorcycle-road-hero')}" alt="夕阳下，戴头盔的骑手驾驶摩托车沿山路行驶" fetchpriority="high">
+            <small class="cockpit-note">骑行场景示意</small>
           </div>
           <div class="cockpit-content">
             <header class="cockpit-heading">
@@ -993,7 +984,7 @@
               <h1 id="rl-title">路线在手机，<br><em>转向在眼前。</em></h1>
               <p class="cockpit-lead">手机 App 规划路线，车把圆屏与头盔贴片同步提示。</p>
             </header>
-            <div class="cockpit-actions"><button class="cockpit-start" data-open="ride"><i aria-hidden="true"></i>体验头盔内的导航 <span aria-hidden="true">→</span></button></div>
+            <div class="cockpit-actions"><button class="cockpit-start" data-open="ride"><i aria-hidden="true"></i>体验头盔内的导航 <span aria-hidden="true">→</span></button><button class="open-riding-app" data-open="app">打开骑行 App <span aria-hidden="true">↗</span></button></div>
             <div class="cockpit-legend" aria-label="两件加装硬件">
               <button data-open="optics"><span class="part-photo part-optics" aria-hidden="true"></span><span class="part-copy"><strong>头盔 HUD 贴片</strong><small>透明投影 · 风镜内侧</small></span></button>
               <button data-open="bar"><span class="part-photo part-bar" aria-hidden="true"></span><span class="part-copy"><strong>车把防水圆屏</strong><small>夹装车把 · 实体按键</small></span></button>
@@ -1070,7 +1061,6 @@
       const turn = trip[step];
       get('#device-heading').textContent = titles[view];
       gallery.querySelectorAll('[data-panel]').forEach(panel=>{panel.hidden = panel.dataset.panel !== view;});
-      get('.mini-turn').textContent = nav ? turn.arrow+' '+turn.dist : '路线预览';
       get('.rl-projection').hidden = !power;
       get('.rl-proj-arrow').textContent = nav ? turn.arrow : '◇';
       get('.rl-proj-dist').textContent = nav ? turn.dist : 'HUD 已启动';

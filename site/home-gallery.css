@@ -33,8 +33,7 @@ body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
 .rl-gallery button:focus-visible,.rl-gallery a:focus-visible {outline:3px solid #ffab69;outline-offset:2px}
 .cockpit-hero {position:relative;isolation:isolate;overflow:hidden;background:#080d10}
 .cockpit-frame {position:absolute;inset:0;overflow:hidden;display:grid;align-items:center}
-.cockpit-image {grid-area:1/1;position:relative;isolation:isolate;width:100%;container-type:inline-size}
-.cockpit-photo {display:block;width:100%;height:auto}
+.cockpit-photo {display:block;width:100%;height:100%;object-fit:contain;object-position:right center}
 .cockpit-frame::after {content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#080c0ff0 0%,#080c0fb3 21%,transparent 49%),linear-gradient(0deg,#080d10 0%,transparent 16%,transparent 95%,#080d1033)}
 .cockpit-note {position:absolute;bottom:12px;right:3%;z-index:1;color:#bec6c6;font-size:10px;letter-spacing:.03em}
 .cockpit-content {position:relative;z-index:2;display:grid;justify-items:start;align-content:center;width:max-content;max-width:43%;margin-left:5.8%;min-height:clamp(635px,calc(100svh - 68px),980px);padding:clamp(32px,5vh,60px) 0;pointer-events:none}
@@ -44,7 +43,7 @@ body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
 .cockpit-heading h1 {margin:0;font-size:clamp(48px,5.25vw,97px);line-height:1.09;letter-spacing:-.052em;font-weight:780;color:#f5f7f6}
 .cockpit-heading em {font-style:normal;color:#ff8629}
 .cockpit-lead {margin:clamp(14px,2.2vh,23px) 0 0;font-size:clamp(14px,1.06vw,18px);line-height:1.7;color:#c0c8ca;text-wrap:pretty}
-.cockpit-actions {margin:clamp(12px,2.1vh,22px) 0}
+.cockpit-actions {display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:clamp(12px,2.1vh,22px) 0}
 .cockpit-start {display:inline-flex;align-items:center;gap:9px;border:1px solid #366951;background:#0b2019e8;color:#caf3dc;padding:0 15px;border-radius:40px;font-size:13px;font-weight:600;min-height:42px}
 .cockpit-start i {width:9px;height:9px;background:#48d790;border-radius:50%;box-shadow:0 0 12px #33d68466}
 .cockpit-start:hover {border-color:#6ece99;background:#132f23}
@@ -61,15 +60,6 @@ body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
 .cockpit-shortcuts {display:flex;flex-wrap:wrap;gap:7px;margin-top:clamp(14px,2.5vh,28px)}
 .cockpit-shortcuts a {display:inline-flex;align-items:center;gap:8px;background:#0d1317c9;border:1px solid #30383a;border-radius:30px;min-height:36px;padding:0 12px;font-size:12px;color:#dae0e1}
 .cockpit-shortcuts a::after {content:'↗';color:#f7994d}
-.cockpit-phone {position:absolute;z-index:2;left:48%;top:29%;width:10%;border:1px solid #657c7e;border-radius:10px;overflow:hidden;display:grid;padding:0;text-align:left;color:#f4fffc;background:#132127;box-shadow:0 14px 28px #0008}
-.app-caption,.app-route {padding:.7cqw .8cqw}
-.app-caption {display:flex;align-items:center;justify-content:space-between;font:700 clamp(10px,.96cqw,17px)/1.2 var(--sans);color:#b9efe2}
-.cockpit-phone canvas {width:100%;height:auto;display:block}
-.app-route {display:grid;gap:.3cqw;line-height:1.2}
-.app-route b {font-size:clamp(10px,.93cqw,17px)}
-.mini-turn {color:#80e7cc;font:700 clamp(10px,1cqw,18px) var(--num)}
-.product-hit {position:absolute;z-index:2;min-width:32px;min-height:32px;background:transparent;border:0;border-radius:18%;padding:0}
-.product-hit:hover {box-shadow:0 0 0 1px #a2efdc99}
 .device-bar-detail,.device-optics-detail {aspect-ratio:16/9;background-color:#0c1113}
 .device-bar-detail {background-size:220% auto;background-position:49% 49%}
 .device-optics-detail {background-size:225% auto;background-position:100% 47%}
@@ -85,7 +75,8 @@ body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
   .cockpit-heading h1 {font-size:clamp(39px,8vw,62px)}
   .cockpit-lead {font-size:14px;margin-top:10px}
   .cockpit-frame {position:relative;inset:auto;display:block;order:1}
-  .cockpit-image {width:154%;margin-left:-54%}
+  .cockpit-frame {aspect-ratio:1.48}
+  .cockpit-photo {object-fit:cover;object-position:right center}
   .cockpit-frame::after {background:linear-gradient(0deg,#080d10,transparent 15%,transparent 83%,#080d10)}
   .cockpit-actions {order:2}.cockpit-legend {order:3;width:min(88%,430px)}.cockpit-shortcuts {order:4}
   .cockpit-note {font-size:9px;bottom:6px}
@@ -93,9 +84,5 @@ body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
   .cockpit-start,.cockpit-shortcuts a {min-height:44px}
   .rl-links {grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-.cockpit-display {left:61.7%;top:47.3%;width:10.4%;height:16.8%}
-.cockpit-pin {left:81.7%;top:44.8%;width:13%;height:12%}
-@media(max-width:800px) {
-  .cockpit-phone {left:43%;top:23%;width:13.4%}
-  .app-caption,.app-route b,.mini-turn {white-space:nowrap}
-}
+.open-riding-app {min-height:44px;padding:0 4px;color:#e6edf0;font:600 13px var(--sans)}
+.open-riding-app span {color:#ff9342}
