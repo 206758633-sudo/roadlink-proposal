@@ -56,34 +56,7 @@
       features: [
         {
           id: 'pair',
-          name: '车队快速配对/位置共享',
-          sub: 'UWB碰一碰秒级建队 · 动态网状雷达全域共享',
-          bg: 'convoy',
-          videoType: 'radar_convoy',
-          cam: [{ z: 1.04, ox: 0, oy: 0 }, { z: 1.16, ox: -15, oy: -10 }, { z: 1.08, ox: 8, oy: 5 }],
-          phases: [
-            {
-              step: '1 发生', title: '车友集合点碰一碰',
-              hud: { icon: '📡', title: '发现附近车友设备', desc: 'UWB 扫描到「05 老周」「18 阿岳」，相距 2.4m' },
-              voice: '检测到车队碰一碰，正在建立加密 MESH 自组网...',
-              vals: [{ k: '车队状态', v: '自组网建立中', cls: 'accent' }, { k: '对讲频段', v: '433.8 MHz' }, { k: '入网成员', v: '3 台机车' }],
-              punchline: '无需输群号，头盔/车把靠近 1 秒内无感完成自组网，无信号深山也能通对讲。'
-            },
-            {
-              step: '2 系统反应', title: '全队高精度雷达锁定',
-              hud: { icon: '⚡', title: '全员位置雷达锁定', desc: '10Hz 高频刷新，端到端延迟仅 18ms，掉队 500m 自动告警' },
-              voice: '车队雷达已锁定，阿岳领航 120m，老周伴随 45m。',
-              vals: [{ k: '网络延迟', v: '18 ms', cls: 'success' }, { k: '刷新频率', v: '10 Hz' }, { k: '掉队阈值', v: '500 m' }],
-              punchline: '仪表盘与 HUD 毫秒级同步全队每个人的方位和车速，车队再长也不会跟丢。'
-            },
-            {
-              step: '3 解决', title: '无缝编队巡航共享',
-              hud: { icon: '📍', title: '全队巡航阵型保持', desc: '全队平均时速 68km/h，间距 82m，失联概率 0.00%' },
-              voice: '全队位置共享生效中，前方 800m 进入山道。',
-              vals: [{ k: '平均时速', v: '68 km/h', cls: 'accent' }, { k: '队形间距', v: '82 m' }, { k: '失联概率', v: '0.00%', cls: 'success' }],
-              punchline: '小白秒懂：就像开着全天候车队雷达雷达屏，随时随地知道前后队友在哪。'
-            }
-          ]
+          name: '车队快速配对/位置共享'
         },
         {
           id: 'plate',
@@ -1115,6 +1088,8 @@
   }
 
   // ==================== 页面渲染：Knight 左右分屏模拟器模块页 ====================
+  var crewRide = null;
+
   function renderModulePage() {
     flushCleanups();
     var sc = SCENES[state.sceneIdx];
@@ -1139,7 +1114,7 @@
         ].join('');
       }).join(''),
       '  </div>',
-      '  <!-- 左右分屏模拟器 Frame -->',
+      feat.id === 'pair' ? '<div id="crew-ride"></div>' : [
       '  <div class="p1-frame">',
       '    <!-- 左侧实景视频与动态视效主舞台 -->',
       '    <div class="p1-visual" id="p1-visual">',
@@ -1220,6 +1195,7 @@
       '      </div>',
       '    </div>',
       '  </div>',
+      ].join(''),
       '  <!-- 底部上一章 / 下一章 -->',
       '  <div class="module-foot">',
       '    <div>ROADLINK 次世代智能机车系统 · 方案与投资路演专业版</div>',
@@ -1244,6 +1220,13 @@
         }
       });
     });
+
+    if (feat.id === 'pair') {
+      stopAuto();
+      crewRide = window.mountCrewRide(document.getElementById('crew-ride'), asset, speakText);
+      onCleanup(function () { crewRide.destroy(); crewRide = null; });
+      return;
+    }
 
     // 绑定 Phase 步进按钮
     var steps = mainContent.querySelectorAll('.kx-step, .sub-pill');
@@ -1433,6 +1416,8 @@
     replayBtn.addEventListener('click', function () {
       if (state.route === 'home') {
         renderHome();
+      } else if (crewRide) {
+        crewRide.replay();
       } else {
         setPhase(0, false);
         startAuto();
@@ -1443,6 +1428,10 @@
   // 键盘快捷键
   document.addEventListener('keydown', function (e) {
     if (e.target.matches('input, textarea, select') || e.target.closest('.rl-gallery button')) return;
+    if (crewRide && e.code === 'Space') {
+      if (!e.target.closest('button, a')) { e.preventDefault(); crewRide.toggle(); }
+      return;
+    }
     if (e.code === 'Space') {
       e.preventDefault();
       if (state.route !== 'home') {
