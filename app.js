@@ -802,7 +802,7 @@
 
   /* ==================== 页面渲染与交互控制器 ==================== */
   var root = document.getElementById('main-content');
-  var navLinks = Array.from(document.querySelectorAll('#scene-nav a'));
+  var navLinks = Array.from(document.querySelectorAll('#scene-nav a:not(#home-link)'));
   var autoBtn = document.getElementById('btn-auto-scene');
   var teamPlayback = null;
   var state = { sceneIdx: 0, featIdx: 0, active: false, captureArmed: false, timer: null };
@@ -920,7 +920,241 @@
     }
   }
 
+  function drawHomeAppMap(canvas) {
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(2,2);
+    ctx.fillStyle = '#edeee5';
+    ctx.fillRect(0,0,320,210);
+    ctx.fillStyle = '#d8e5cc';
+    ctx.fill(new Path2D('M0 0H320V48L281 43L239 58L178 43L123 57L72 40L0 66Z M0 138L42 120L105 139L82 186L27 210H0Z'));
+    ctx.fillStyle = '#bbd7db';
+    ctx.fill(new Path2D('M247 124Q256 102 275 112T303 124L320 133V183Q295 190 278 177T248 149Z'));
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    [
+      'M-10 78Q53 60 89 82T171 80Q212 68 247 79T333 65',
+      'M-8 124Q61 98 102 119T188 120Q217 110 235 96T328 96',
+      'M14 -8Q33 57 37 107T72 218',
+      'M110 -5Q95 48 115 105T137 219',
+      'M206 -7Q192 37 204 75T192 141Q171 185 176 220',
+      'M-10 161Q44 146 95 161T187 166Q212 163 239 179T330 192'
+    ].forEach(function (line) {
+      var road = new Path2D(line);
+      ctx.strokeStyle = '#cdd4c7';
+      ctx.lineWidth = 8;
+      ctx.stroke(road);
+      ctx.strokeStyle = '#fbfaf4';
+      ctx.lineWidth = 6;
+      ctx.stroke(road);
+    });
+
+    ctx.fillStyle = '#647a62';
+    ctx.font = '600 16px system-ui';
+    ctx.fillText('松林公园',117,24);
+    ctx.fillText('青石湖',261,152);
+    var route = new Path2D('M51 162Q67 157 90 159Q116 163 135 147L175 115Q190 102 200 81Q217 54 246 50L281 44');
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 14;
+    ctx.stroke(route);
+    ctx.strokeStyle = '#1f76bb';
+    ctx.lineWidth = 9;
+    ctx.stroke(route);
+    [[51,162,'#227bc8'],[281,44,'#276349']].forEach(function (pin) {
+      ctx.beginPath();
+      ctx.arc(pin[0],pin[1],9,0,Math.PI*2);
+      ctx.fillStyle = pin[2];
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    });
+  }
+
+  function renderHome() {
+    flushCleanups();
+    stopAuto();
+    root.innerHTML = `
+      <section class="rl-gallery" aria-labelledby="rl-title">
+        <div class="cockpit-hero">
+          <div class="cockpit-frame" hidden>
+            <div class="cockpit-image">
+              <img class="cockpit-photo" src="${asset('cockpit-overlook')}" alt="停在山路旁的摩托车，手机和防水小屏固定在车把附近，头盔内装有透明投影贴片" fetchpriority="high">
+              <button class="cockpit-phone" data-open="app" aria-label="打开骑行 App">
+                <span class="mini-turn"></span><canvas width="640" height="420" aria-hidden="true"></canvas><small>松林观景台</small>
+              </button>
+              <button class="cockpit-display" data-open="bar" aria-label="查看车把防水屏"><b></b><small></small></button>
+              <button class="cockpit-pin" data-open="ride" aria-label="透过头盔贴片看导航"><i></i><span>HUD 贴片</span></button>
+            </div>
+          </div>
+          <div class="rider-frame">
+            <img src="${asset('hardware-visor')}" alt="从头盔内看向山路，导航投影位于视野右侧">
+            <button class="rider-hud" data-open="ride" aria-label="查看头盔 HUD 投影"><span class="rider-arrow"></span><span><b class="rider-distance"></b><small class="rider-turn"></small></span></button>
+          </div>
+          <header class="cockpit-heading">
+            <h1 id="rl-title">手机定路线，<br>头盔看转向。</h1>
+            <div class="rider-actions"><button class="cockpit-start" data-action="next">模拟下一路口 <span aria-hidden="true">→</span></button><button class="compare-view" data-action="switch-view">看设备外观</button></div>
+          </header>
+          <small class="cockpit-note">概念演示 · 示例路线</small>
+        </div>
+        <nav class="cockpit-legend" aria-label="查看设备">
+          <button data-open="app"><strong>手机 App</strong><small>规划路线</small><span aria-hidden="true">↗</span></button>
+          <button data-open="bar"><strong>车把防水屏</strong><small>同步路口提示</small><span aria-hidden="true">↗</span></button>
+          <button data-open="optics"><strong>头盔 HUD</strong><small>风镜内侧投影</small><span aria-hidden="true">↗</span></button>
+        </nav>
+        <dialog class="cockpit-dialog" aria-labelledby="device-heading">
+          <header><h2 id="device-heading"></h2><button class="device-close" aria-label="关闭设备演示">×</button></header>
+          <div class="device-content">
+            <div class="device-view device-app" data-panel="app">              <div class="home-hw-phone" aria-label="ROADLINK 手机 App 交互演示">
+<div class="home-app-status" aria-hidden="true"><span>9:41</span><i></i><span class="home-app-battery"></span></div>
+<div class="home-app-top"><span>ROADLINK</span><strong id="home-app-title">路线规划</strong></div>
+<section class="home-app-panel" id="home-app-route" aria-label="路线">
+<div class="home-app-map">
+<canvas width="640" height="420" role="img" aria-label="从我的位置到松林观景台的示例路线"></canvas>
+<span class="home-app-map-tag">示意地图</span><span class="home-app-mate" hidden>阿岳</span>
+</div>
+<div class="home-app-trip" id="home-app-trip"><strong>松林观景台</strong><span>8.4 公里 · 预计 18 分钟</span></div>
+<div class="home-hw-phone-turn" id="home-app-next-turn" hidden><span class="home-app-turn-icon" aria-hidden="true"></span><span><b>300 m</b><small>前方右转</small></span></div>
+<button type="button" class="home-app-primary" id="home-app-navigation" aria-pressed="false">开始导航</button>
+</section>
+<section class="home-app-panel" id="home-app-team" aria-label="车队" hidden>
+<div class="home-app-section-head"><strong>松林骑队</strong><small>2 位成员</small></div>
+<ul class="home-app-list">
+<li><span class="home-app-avatar">陈</span><div><strong>陈默 · 我</strong><small id="home-app-share-state">未共享位置</small></div></li>
+<li><span class="home-app-avatar">岳</span><div><strong>阿岳</strong><small>正在共享位置</small></div></li>
+</ul>
+<button type="button" class="home-app-primary" id="home-app-share" aria-pressed="false">开启位置共享</button>
+</section>
+<section class="home-app-panel" id="home-app-devices" aria-label="设备" hidden>
+<div class="home-app-section-head"><strong>我的设备</strong><small>蓝牙连接示意</small></div>
+<ul class="home-app-list">
+<li><span class="home-app-device-icon car" aria-hidden="true"></span><div><strong>车把显示屏</strong><small>模拟连接</small></div></li>
+<li><span class="home-app-device-icon hud" aria-hidden="true"></span><div><strong>头盔 HUD</strong><small>模拟连接</small></div></li>
+</ul>
+<button type="button" class="home-app-primary" id="home-app-hud-preview">查看 HUD 画面</button>
+</section>
+<nav class="home-app-tabs" aria-label="App 页面">
+<button type="button" data-app-page="route" aria-pressed="true" aria-controls="home-app-route"><i aria-hidden="true"></i>路线</button>
+<button type="button" data-app-page="team" aria-pressed="false" aria-controls="home-app-team"><i aria-hidden="true"></i>车队</button>
+<button type="button" data-app-page="devices" aria-pressed="false" aria-controls="home-app-devices"><i aria-hidden="true"></i>设备</button>
+</nav>
+</div></div>
+            <div class="device-view" data-panel="bar" hidden>
+              <img src="${asset('hardware-edge')}" alt="环形夹具把防水屏固定在车把上">
+              <div class="rl-bar-readout"><strong class="rl-bar-value"></strong><small class="rl-bar-tip"></small></div>
+            </div>
+            <div class="device-view" data-panel="optics" hidden>
+              <img src="${asset('home-hud-optics')}" alt="头盔内侧的微型投影器和透明光学贴片">
+              <button data-open="ride" class="detail-pin">从贴片看出去 ↗</button>
+            </div>
+            <div class="device-view" data-panel="ride" hidden>
+              <img src="${asset('hardware-visor')}" alt="从头盔里看到的前方山路">
+              <div class="rl-projection"><b class="rl-proj-arrow"></b><span><strong class="rl-proj-dist"></strong><small class="rl-proj-tip"></small></span></div>
+            </div>
+          </div>
+          <footer class="device-actions"><button class="rl-primary"></button><button class="rl-secondary"></button></footer>
+        </dialog>
+      </section>
+      <section class="rl-scenes" aria-labelledby="rl-scenes-heading"><h2 id="rl-scenes-heading">骑行场景</h2>
+        <div class="rl-links">${SCENES.map((s,i)=>`<a href="#/s${i+1}">${s.name}<span aria-hidden="true">↗</span></a>`).join('')}</div>
+      </section>`;
+    const gallery = root.querySelector('.rl-gallery');
+    const get = selector => gallery.querySelector(selector);
+    const trip = [{arrow:'↱',dist:'300 m',tip:'前方右转'}, {arrow:'↰',dist:'80 m',tip:'路口左转'}, {arrow:'↑',dist:'500 m',tip:'沿湖路直行'}];
+    let view = 'ride', nav = true, power = true, shared = false, page = 'route', step = 0;
+    gallery.querySelectorAll('canvas').forEach(drawHomeAppMap);
+    const primary = get('.rl-primary'), secondary = get('.rl-secondary');
+
+    let riderView = true;
+    const dialog = get('.cockpit-dialog');
+    const titles = {app:'骑行 App',bar:'车把防水屏',optics:'风镜内侧的透明贴片',ride:'头盔内视角'};
+    function refresh() {
+      const turn = trip[step];
+      get('.cockpit-frame').hidden = riderView;
+      get('.rider-frame').hidden = !riderView;
+      get('.compare-view').textContent = riderView ? '看设备外观' : '看骑手视角';
+      get('.cockpit-start').dataset.action = nav ? 'next' : 'app';
+      get('.cockpit-start').textContent = nav ? '模拟下一路口 →' : '去 App 开始导航';
+      get('.rider-hud').hidden = !power;
+      get('.rider-arrow').textContent = nav ? turn.arrow : '◇';
+      get('.rider-distance').textContent = nav ? turn.dist : 'HUD 已启动';
+      get('.rider-turn').textContent = nav ? turn.tip : '等待手机导航';
+      get('#device-heading').textContent = titles[view];
+      gallery.querySelectorAll('[data-panel]').forEach(panel=>{panel.hidden = panel.dataset.panel !== view;});
+      get('.mini-turn').textContent = nav ? turn.arrow+' '+turn.dist : '路线预览';
+      get('.cockpit-display b').textContent = nav ? turn.arrow+' '+turn.dist : '待导航';
+      get('.cockpit-display small').textContent = nav ? turn.tip : '等待手机路线';
+      get('.rl-projection').hidden = !power;
+      get('.rl-proj-arrow').textContent = nav ? turn.arrow : '◇';
+      get('.rl-proj-dist').textContent = nav ? turn.dist : 'HUD 已启动';
+      get('.rl-proj-tip').textContent = nav ? turn.tip : '等待手机开始导航';
+      get('.rl-bar-value').textContent = nav ? turn.arrow+' '+turn.dist : '待导航';
+      get('.rl-bar-tip').textContent = nav ? turn.tip : '等待手机路线';
+      get('#home-app-trip').hidden = nav;
+      get('#home-app-next-turn').hidden = !nav;
+      get('#home-app-next-turn b').textContent = turn.dist;
+      get('#home-app-next-turn small').textContent = turn.tip;
+      get('.home-app-turn-icon').textContent = turn.arrow;
+      get('#home-app-navigation').textContent = nav ? '结束导航' : '开始导航';
+      get('#home-app-navigation').setAttribute('aria-pressed',nav);
+      get('#home-app-title').textContent = {route:nav?'导航中':'路线规划',team:'车队',devices:'设备'}[page];
+      get('.home-app-mate').hidden = !shared;
+      get('#home-app-share-state').textContent = shared?'正在共享位置':'未共享位置';
+      get('#home-app-share').textContent = shared?'停止位置共享':'开启位置共享';
+      get('#home-app-share').setAttribute('aria-pressed',shared);
+      gallery.querySelectorAll('[data-app-page]').forEach(b=>{
+        const active = b.dataset.appPage === page;
+        b.setAttribute('aria-pressed',active);
+        get('#'+b.getAttribute('aria-controls')).hidden = !active;
+      });
+      const actions = {
+        optics:[['看头盔内视角','ride']],
+        app:[['查看车把屏','bar']],
+        bar:nav?[['看头盔内视角','ride'],['模拟下一路口','next']]:[['去 App 开始导航','app']],
+        ride:[[power?'关闭 HUD':'启动 HUD','power'],nav&&power?['模拟下一路口','next']:['打开骑行 App','app']]
+      }[view];
+      [primary,secondary].forEach((b,i)=>{
+        b.hidden = !actions[i];
+        if (actions[i]) {b.textContent=actions[i][0];b.dataset.action=actions[i][1];}
+      });
+    }
+    gallery.addEventListener('click', e=>{
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.classList.contains('device-close')) {dialog.close();return;}
+      const action = b.dataset.action || b.dataset.open;
+      if (b.dataset.appPage) page = b.dataset.appPage;
+      else if (b.id === 'home-app-navigation') {nav = !nav;step = 0;}
+      else if (b.id === 'home-app-share') shared = !shared;
+      else if (action === 'next') step = (step+1)%trip.length;
+      else if (action === 'switch-view') riderView = !riderView;
+      else if (action === 'power') power = !power;
+      else if (action === 'ride' || b.id === 'home-app-hud-preview') {view='ride';power=true;}
+      else if (action) view=action;
+      refresh();
+      if (!dialog.open && (b.dataset.open || action === 'app')) dialog.showModal();
+      else if (b.closest('[hidden]') || b.hidden) get('.device-close').focus({preventScroll:true});
+    });
+    refresh();
+  }
+
   function onRoute() {
+    const queryView = new URLSearchParams(location.search).get('view');
+    const home = location.hash === '#/home' || (!location.hash && !['demo','capture'].includes(queryView));
+    document.body.classList.toggle('home-page',home);
+    const homeLink = document.getElementById('home-link');
+    autoBtn.hidden = home;
+    if (home) {
+      teamPlayback = null;
+      homeLink.setAttribute('aria-current','page');
+      navLinks.forEach(a=>a.removeAttribute('aria-current'));
+      document.title = 'ROADLINK · 骑行导航';
+      renderHome();
+      window.scrollTo(0,0);
+      return;
+    }
+    homeLink.removeAttribute('aria-current');
     var m = location.hash.match(/^#\/s([1-5])$/);
     var idx = m ? Number(m[1]) - 1 : 0;
     if (!m) history.replaceState(null, '', '#/s1');
@@ -960,6 +1194,7 @@
   }
 
   document.addEventListener('keydown', function (e) {
+    if (document.body.classList.contains('home-page')) return;
     if (e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) return;
     if (e.target && e.target.closest('input, textarea, select, button, a, [contenteditable]')) return;
     var sc = SCENES[state.sceneIdx];
