@@ -185,110 +185,8 @@
       ]
     },
     {
-      id: 's2',
-      num: '02',
-      eyebrow: 'DISPLAY & NAVIGATION',
-      title: '骑行显示与导航',
-      tagline: '头盔内导航贴片 · Glimpse圆屏二次开发 · 物理按键盲操 · CarPlay/HUD多屏协同',
-      features: [
-        {
-          id: 'visor',
-          name: '头盔内导航贴片',
-          sub: '光波导超微透镜 · 视线前方 3 米虚像浮空指引',
-          bg: 'hardware-visor',
-          videoType: 'hud_visor',
-          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: -16, oy: -10 }, { z: 1.10, ox: -5, oy: 0 }],
-          phases: [
-            {
-              step: '1 发生', title: '复杂路口视线盲区',
-              hud: { icon: '👁️', title: '视线不离前方道路', desc: '前方 150 米为五岔路口，低头看手机支架会导致 2.5 秒视线盲区' },
-              voice: '前方复杂路口，头盔贴片 HUD 进入引导模式。',
-              vals: [{ k: '虚像距离', v: '前方 3 米', cls: 'accent' }, { k: '镜片厚度', v: '1.8 mm' }, { k: '透过率', v: '> 85%' }],
-              punchline: '任何普通头盔均可磁吸贴装，信息投射在眼睛前方 3 米虚像，无需重新对焦。'
-            },
-            {
-              step: '2 系统反应', title: '极简黄色转向浮空',
-              hud: { icon: '↗️', title: '浮空动态路标', desc: '视野右上角浮现极简黄色箭头「80m 后右转辅道」，3000 nits 白天清晰' },
-              voice: '保持当前车道，80 米后由右侧辅道进入盘山公路。',
-              vals: [{ k: '转向距离', v: '80 m', cls: 'success' }, { k: '峰值亮度', v: '3,000 nits' }, { k: '视野遮挡', v: '0%' }],
-              punchline: '只显示最关键信息（转向、时速、盲区红框），绝不遮挡路面观察视线。'
-            },
-            {
-              step: '3 解决', title: '盲操过弯视线全专注',
-              hud: { icon: '🛡️', title: '安全通过复杂路口', desc: '骑手无需低头，眼睛全程注视前方弯心，过弯安全性提升 85%' },
-              voice: '转向完成，恢复标准巡航 HUD 视图。',
-              vals: [{ k: '低头盲区', v: '0 秒', cls: 'success' }, { k: '对焦延时', v: '0 ms' }, { k: '驾驶专注度', v: '100%', cls: 'accent' }],
-              punchline: '小白秒懂：告别在高速或山道低头看手机的致命隐患，像战斗机飞行员一样看浮空指引。'
-            }
-          ]
-        },
-        {
-          id: 'glimpse',
-          name: 'Glimpse圆屏与自定义按键',
-          sub: '1.4寸纯圆机械质感表盘 · 手把大拇指物理拨轮盲操',
-          bg: 'hardware-kit',
-          videoType: 'round_gauge',
-          cam: [{ z: 1.08, ox: 0, oy: 15 }, { z: 1.25, ox: 10, oy: 16 }, { z: 1.10, ox: 0, oy: 5 }],
-          phases: [
-            {
-              step: '1 发生', title: '复古纯圆仪表就绪',
-              hud: { icon: '🔘', title: 'Glimpse 智能圆屏', desc: '复刻机械表盘质感，开放开源二次开发接口' },
-              voice: 'Glimpse 车把表头已连接，当前加载复古时速表盘。',
-              vals: [{ k: '屏幕形态', v: '1.4寸 纯圆', cls: 'accent' }, { k: '分辨率', v: '454×454 Retina' }, { k: '安装位置', v: '手把中央上盖' }],
-              punchline: '兼顾复古机车美学与现代数字功能，小巧不破坏爱车整体颜值。'
-            },
-            {
-              step: '2 系统反应', title: '物理按键盲操切换',
-              hud: { icon: '🎛️', title: '拨轮切换多模态', desc: '大拇指轻推左侧五向拨轮，瞬间切至「胎温胎压监控」与「倾角罗盘」' },
-              voice: '切换至胎压监控，前轮 2.3 bar，后轮 2.5 bar。',
-              vals: [{ k: '前轮胎压', v: '2.3 bar', cls: 'success' }, { k: '后轮胎压', v: '2.5 bar', cls: 'accent' }, { k: '切屏响应', v: '16 ms' }],
-              punchline: '戴重型手套也能通过机械按键盲操切屏，长按还能一键对讲或打双闪。'
-            },
-            {
-              step: '3 解决', title: '关键数据尽在掌控',
-              hud: { icon: '✨', title: '多信息极简直观', desc: '胎压异常时边缘爆闪红色环形警示，指针指示领航方位' },
-              voice: '当前胎温胎压处于最佳抓地力区间，可放心过弯。',
-              vals: [{ k: '盲操准确率', v: '100%', cls: 'success' }, { k: '抗振等级', v: '车规 20G' }, { k: '个性皮肤', v: '自由定制' }],
-              punchline: '小白秒懂：大拇指一抠就能看胎压和罗盘，扎实省心，手机再也不会震坏脱落。'
-            }
-          ]
-        },
-        {
-          id: 'carplay_hud',
-          name: 'CarPlay屏与HUD协同',
-          sub: '中控7寸大屏全景规划 · 头盔HUD微光关键指引',
-          bg: 'hardware-installed',
-          videoType: 'cockpit_sync',
-          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.18, ox: -10, oy: 8 }, { z: 1.10, ox: 0, oy: 0 }],
-          phases: [
-            {
-              step: '1 发生', title: '双屏任务智能分配',
-              hud: { icon: '📱', title: 'CarPlay 中控连接', desc: '7 英寸高亮车规大屏无线直连 Apple CarPlay / HiCar' },
-              voice: '双屏协同已激活：大屏看全景路网，头盔负责关键转弯。',
-              vals: [{ k: '主屏形态', v: '7寸 车规大屏', cls: 'accent' }, { k: '无线协议', v: 'WiFi 6 + BLE' }, { k: '协同架构', v: '双屏异显' }],
-              punchline: '大屏看全城路况与拥堵红线，头盔 HUD 仅在临近路口弹窗精简黄色箭头。'
-            },
-            {
-              step: '2 系统反应', title: '视线焦点自动流转',
-              hud: { icon: '🔄', title: '焦点智能流转', desc: '直道大屏待机，入弯前头盔高亮锁定，盲区有车时边缘闪烁黄色预警' },
-              voice: '右后盲区有车辆接近，HUD 右下角已同步闪烁警示。',
-              vals: [{ k: '双屏同步差', v: '< 8 ms', cls: 'success' }, { k: '防雨触控', v: '手套触控' }, { k: '自动亮度', v: '双光感联动' }],
-              punchline: '不仅支持导航，还能将音乐歌词、来电与对讲频道在多屏之间智能分流。'
-            },
-            {
-              step: '3 解决', title: '沉浸式智能座舱体验',
-              hud: { icon: '🏍️', title: '顶级人机交互协同', desc: '全车信息井井有条，既有科技豪华感，又将安全风险降至最低' },
-              voice: '当前巡航模式已设定，双屏协同稳定工作中。',
-              vals: [{ k: '信息认知时耗', v: '-70%', cls: 'success' }, { k: '多端协同度', v: '100%' }, { k: '座舱科技感', v: '豪华尊享', cls: 'accent' }],
-              punchline: '小白秒懂：像开跑车一样骑摩托，车机大屏看宏观路线，头盔 HUD 引导过弯。'
-            }
-          ]
-        }
-      ]
-    },
-    {
       id: 's3',
-      num: '03',
+      num: '02',
       eyebrow: 'AI INTERACTION & PHONE CONTROL',
       title: 'AI 交互与手机操控',
       tagline: '戴手套小设备盲操 · 手把触感微控器 · 80km/h风噪过滤 · 语音总结与口述代发微信',
@@ -359,7 +257,7 @@
     },
     {
       id: 's4',
-      num: '04',
+      num: '03',
       eyebrow: 'ACTIVE SAFETY & PRE-WARNING',
       title: '安全与主动预警',
       tagline: 'AI 整合原车数据，将风险提示送到头盔视野。',
@@ -371,7 +269,7 @@
     },
     {
       id: 's5',
-      num: '05',
+      num: '04',
       eyebrow: 'RIDING COMMUNITY & DIGITAL AVATAR',
       title: '骑行社区',
       tagline: '大冰 3D 数字人在线问答 · 摩友金牌路书 · 个人数据六维战报 · 3D 虚拟机车改装工坊',
@@ -507,7 +405,7 @@
   // 全局交互状态
   var state = {
     route: 'home',
-    sceneIdx: 0,
+    sceneIdx: -1,
     featIdx: 0,
     phaseIdx: 0,
     isPlaying: true,
@@ -860,6 +758,7 @@
     flushCleanups();
     var sc = SCENES[state.sceneIdx];
     var feat = sc.features[state.featIdx];
+    var nextScene = SCENES[state.sceneIdx + 1];
 
     mainContent.innerHTML = [
       '<div class="shell module-page">',
@@ -968,8 +867,8 @@
       '  <div class="module-foot">',
       '    <div>ROADLINK 次世代智能机车系统 · 方案与投资路演专业版</div>',
       '    <div>',
-      state.sceneIdx < 4
-        ? '      <a href="#/s' + (state.sceneIdx + 2) + '">下一章节：' + SCENES[state.sceneIdx + 1].title + ' →</a>'
+      nextScene
+        ? '      <a href="#/' + nextScene.id + '">下一章节：' + nextScene.title + ' →</a>'
         : '      <a href="#/home">↺ 返回方案概览</a>',
       '    </div>',
       '  </div>',
@@ -1153,21 +1052,16 @@
   // ==================== 全局路由中心 ====================
   function onRoute() {
     var hash = location.hash || '#/home';
-    var m = hash.match(/^#\/(home|s1|s2|s3|s4|s5)$/);
-    if (!m) {
-      history.replaceState(null, '', '#/home');
-      state.route = 'home';
-    } else {
-      state.route = m[1];
-    }
-
+    var route = hash.slice(2);
+    var sceneIdx = hash.startsWith('#/') ? SCENES.findIndex(scene => scene.id === route) : -1;
+    if (sceneIdx < 0 && hash !== '#/home') history.replaceState(null, '', '#/home');
+    state.route = sceneIdx < 0 ? 'home' : route;
+    state.sceneIdx = sceneIdx;
     updateNav();
 
     if (state.route === 'home') {
       renderHome();
     } else {
-      var sIdx = parseInt(state.route.substring(1), 10) - 1;
-      state.sceneIdx = Math.max(0, Math.min(4, sIdx));
       state.featIdx = 0;
       state.phaseIdx = 0;
       state.progress = 0;
@@ -1207,10 +1101,11 @@
         setPhase(nextP, false);
       }
     } else if (e.code === 'ArrowRight') {
-      if (state.route === 'home') location.hash = '#/s1';
-      else if (state.sceneIdx < 4) location.hash = '#/s' + (state.sceneIdx + 2);
+      var nextScene = SCENES[state.sceneIdx + 1];
+      if (nextScene) location.hash = '#/' + nextScene.id;
     } else if (e.code === 'ArrowLeft') {
-      if (state.sceneIdx > 0) location.hash = '#/s' + state.sceneIdx;
+      var previousScene = SCENES[state.sceneIdx - 1];
+      if (previousScene) location.hash = '#/' + previousScene.id;
       else if (state.route !== 'home') location.hash = '#/home';
     }
   });

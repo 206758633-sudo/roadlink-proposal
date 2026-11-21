@@ -156,20 +156,15 @@
     glove:()=>action('试试相机语音指令','open-ai',{id:'camera',voice:'yes'},'btn primary','microphone'),
     wechat:()=>action('打开微信助手','open-ai',{id:'wechat'},'btn primary','chats-circle'),
     dabing:()=>action('与大冰对话','guide',{},'btn primary','chats-circle'),
-    routes:()=>action('查看附近骑行路线','route-tab',{id:'nearby'},'btn primary','map-trifold'),
-    glimpse:c=>action('预览对应圆屏固件','firmware-preview',{id:deviceDial(c)},'btn primary','gauge')
+    routes:()=>action('查看附近骑行路线','route-tab',{id:'nearby'},'btn primary','map-trifold')
   };
-
-  function deviceDial(c){return ['curve','tire','altitude'][c.phase] || 'tire';}
 
   function featureView(c) {
     const quick = openFeature[c.feature]?.(c);
     const related = c.feature==='dabing' || c.feature==='tuning' ? '骑行社区' :
-      c.feature==='glimpse' ? '骑行社区 · 固件库' :
       {ride:'骑行总览',ai:'AI 驾驶舱',routes:'路线图',me:'我的'}[c.page] || '骑行 App';
     const detail = c.feature==='wechat' && c.phase===2 ? 'AI 已生成回复草稿。可在微信助手确认后模拟发送。' : c.detail;
-    const footer = c.feature==='glimpse' ? dialFace(firmwareById(deviceDial(c))) :
-      c.feature==='capture' && c.phase===2 ? `<figure class="media-preview">${picture('capture','同行抓拍样张')}</figure>` : '';
+    const footer = c.feature==='capture' && c.phase===2 ? `<figure class="media-preview">${picture('capture','同行抓拍样张')}</figure>` : '';
     return `<section class="scene-card panel stack pad" aria-label="当前演示内容">
       <div class="row spread">${tag(related,'good')}${tag('演示联动')}</div>
       <div><h2>${esc(c.headline)}</h2><p class="muted small">${esc(detail)}</p></div>
@@ -201,11 +196,7 @@
     context=next;
     expectedPage=next.page;
     if (!follow) return;
-    if(next.feature==='glimpse') {
-      ui.communityTab='firmware';
-      if(next.phase===1){faceData.tires.value='2.3 / 2.5';faceData.tires.detail='当前场景 · 前轮 2.3 bar，后轮 2.5 bar';}
-    }
-    else if(next.feature==='dabing') ui.communityTab='guide';
+    if(next.feature==='dabing') ui.communityTab='guide';
     if(ui.page!==expectedPage) {
       if(sheet.open) sheet.close();
       history.replaceState(history.state,"","#"+expectedPage);

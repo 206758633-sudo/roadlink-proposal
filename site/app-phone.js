@@ -1,11 +1,10 @@
 (() => {
   'use strict';
 
-  const appURL = new URL('riding-app.html?v=phone-01', document.currentScript.src);
+  const appURL = new URL('riding-app.html?v=four-scenes-01', document.currentScript.src);
   const origin = location.protocol === 'file:' ? '*' : location.origin;
   const pageForFeature = {
     plate: 'me', ranking: 'ride', trajectory: 'routes', capture: 'ai',
-    visor: 'routes', glimpse: 'community', carplay_hud: 'routes',
     glove: 'ai', wechat: 'ai', dabing: 'community', routes: 'routes',
     report: 'me', tuning: 'community'
   };

@@ -16,7 +16,7 @@
 .rl-scenes {width:min(90%,1440px);margin-inline:auto}
 .rl-scenes {padding:34px 0 54px}
 .rl-scenes h2 {font-size:19px;font-weight:650;margin:0 0 13px}
-.rl-links {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0 20px}
+.rl-links {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 20px}
 .rl-links a {display:flex;align-items:center;justify-content:space-between;gap:6px;padding:14px 0;border-top:1px solid #393e3f;line-height:1.45;font-size:15px}
 .rl-links a span {color:#9a9f9c}
 .rl-links a:hover,.rl-links a:hover span {color:#f5c400}
