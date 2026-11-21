@@ -92,14 +92,22 @@ body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
 .cockpit-cost strong {color:#ffb884;font:750 17px/1 var(--num);font-variant-numeric:tabular-nums}
 .cockpit-cost small {color:#d8bda8;font-size:10px}
 .device-cost {padding:clamp(16px,4vw,28px);background:#151b1d}
-.hardware-cost-items,.hardware-cost-parts dl {margin:0}
-.hardware-cost-items div,.hardware-cost-parts dl div,.hardware-cost-total {display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.hardware-cost-items div {padding:12px 0;border-bottom:1px solid #3b4140}
-.hardware-cost-items dt,.hardware-cost-total span {font-weight:650}
-.hardware-cost-items dd,.hardware-cost-parts dd {margin:0;white-space:nowrap;font-variant-numeric:tabular-nums}
-.hardware-cost-items dd {font-size:21px;font-weight:750}
-.hardware-cost-parts {margin-top:11px;color:#ced4d3;font-size:13px}
-.hardware-cost-parts summary {min-height:44px;padding-block:10px;cursor:pointer;color:#f6c59f}
-.hardware-cost-parts dl div {padding-block:5px}
+.hardware-cost-cards {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hardware-cost-card {min-width:0;overflow:hidden;border:1px solid #404849;border-radius:10px;background:#1b2224}
+.hardware-cost-photo {display:block;width:100%;aspect-ratio:2.05;background-color:#0c1113}
+.hardware-cost-photo.part-bar {background-size:285% auto;background-position:49% 50%}
+.hardware-cost-optics {object-fit:cover;object-position:center 42%}
+.hardware-cost-card-body {padding:11px 12px 13px}
+.hardware-cost-card-head,.hardware-cost-parts div,.hardware-cost-total {display:flex;align-items:baseline;justify-content:space-between;gap:9px}
+.hardware-cost-card-head {padding-bottom:8px;border-bottom:1px solid #454948}
+.hardware-cost-card-head h3 {margin:0;color:#f3f6f5;font-size:clamp(14px,2.4vw,17px);line-height:1.35}
+.hardware-cost-card-head strong {color:#ffbb87;font:750 22px/1 var(--num);white-space:nowrap}
+.hardware-cost-caption {margin:9px 0 5px;color:#d7b69f;font-size:11px}
+.hardware-cost-round,.hardware-cost-parts {margin:0;color:#dae0df;font-size:13px}
+.hardware-cost-round {padding-left:17px;list-style:disc}
+.hardware-cost-round li,.hardware-cost-parts div {padding-block:3px}
+.hardware-cost-parts dd {margin:0;color:#e6e9e7;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cockpit-dialog:has(.device-cost:not([hidden]))>header {position:sticky;top:0;z-index:2;background:#111719}
+@media(max-width:530px) { .hardware-cost-cards {grid-template-columns:minmax(0,1fr)} }
 .hardware-cost-total {margin-top:14px;padding:10px 13px;border:1px solid #865c40;border-radius:8px;background:#2b221c;color:#ffbb87}
 .hardware-cost-total strong {font:750 clamp(25px,6vw,34px)/1 var(--num);white-space:nowrap}

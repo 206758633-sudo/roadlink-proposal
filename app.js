@@ -675,17 +675,35 @@
           <header><h2 id="device-heading"></h2><button class="device-close" aria-label="关闭设备演示">×</button></header>
           <div class="device-content">
             <div class="device-view device-cost" data-panel="cost" hidden>
-              <dl class="hardware-cost-items">
-                <div><dt>车把防水圆屏</dt><dd>¥${roundCost}</dd></div>
-                <div><dt>头盔 HUD 贴片</dt><dd>¥${opticsCost}</dd></div>
-              </dl>
-              <details class="hardware-cost-parts">
-                <summary>头盔贴片组件明细</summary>
-                <dl>
-                  ${opticsParts.map(([name, price]) => `<div><dt>${name}</dt><dd>¥${price}</dd></div>`).join('')}
-                  <div><dt>磁吸快拆底座</dt><dd>已含</dd></div>
-                </dl>
-              </details>
+              <div class="hardware-cost-cards">
+                <article class="hardware-cost-card" aria-labelledby="cost-round-title">
+                  <div class="part-photo part-bar hardware-cost-photo" role="img" aria-label="车把防水圆屏与安装底座示意"></div>
+                  <div class="hardware-cost-card-body">
+                    <header class="hardware-cost-card-head">
+                      <h3 id="cost-round-title">车把防水圆屏</h3><strong>¥${roundCost}</strong>
+                    </header>
+                    <p class="hardware-cost-caption">成本 BOM · 套件合并估算</p>
+                    <ul class="hardware-cost-round">
+                      <li>ESP32 主控与圆形彩屏</li>
+                      <li>防水外壳与实体按键</li>
+                      <li>车把夹装底座</li>
+                    </ul>
+                  </div>
+                </article>
+                <article class="hardware-cost-card" aria-labelledby="cost-optics-title">
+                  <img class="hardware-cost-photo hardware-cost-optics" src="${asset('home-hud-optics')}" alt="安装在头盔风镜内侧的微显光机与透明光波导贴片">
+                  <div class="hardware-cost-card-body">
+                    <header class="hardware-cost-card-head">
+                      <h3 id="cost-optics-title">头盔 HUD 贴片</h3><strong>¥${opticsCost}</strong>
+                    </header>
+                    <p class="hardware-cost-caption">成本 BOM · 部件预估</p>
+                    <dl class="hardware-cost-parts">
+                      ${opticsParts.map(([name, price]) => `<div><dt>${name}</dt><dd>¥${price}</dd></div>`).join('')}
+                      <div><dt>磁吸快拆底座</dt><dd>已含</dd></div>
+                    </dl>
+                  </div>
+                </article>
+              </div>
               <div class="hardware-cost-total"><span>两件硬件合计预估</span><strong>¥${hardwareCost}</strong></div>
             </div>
             <div class="device-view device-app" data-panel="app">
