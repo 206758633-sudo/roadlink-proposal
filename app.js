@@ -760,6 +760,26 @@
     var feat = sc.features[state.featIdx];
     var nextScene = SCENES[state.sceneIdx + 1];
 
+    if (sc.id === 's3') {
+      stopAuto();
+      mainContent.innerHTML = [
+        '<div class="shell module-page s3-ai-shell">',
+        '  <div id="ai-control-demo"></div>',
+        '  <div class="module-foot">',
+        '    <div>ROADLINK 次世代智能机车系统 · 方案与投资路演专业版</div>',
+        '    <div>',
+        nextScene
+          ? '      <a href="#/' + nextScene.id + '">下一章节：' + nextScene.title + ' →</a>'
+          : '      <a href="#/home">↺ 返回方案概览</a>',
+        '    </div>',
+        '  </div>',
+        '</div>'
+      ].join('');
+      activeDemo = window.mountAiControl(document.getElementById('ai-control-demo'), asset, speakText);
+      onCleanup(function () { activeDemo.destroy(); activeDemo = null; });
+      return;
+    }
+
     mainContent.innerHTML = [
       '<div class="shell module-page">',
       '  <div class="module-mast">',
@@ -1089,9 +1109,10 @@
 
   // 键盘快捷键
   document.addEventListener('keydown', function (e) {
-    if (e.target.matches('input, textarea, select') || e.target.closest('.rl-gallery button')) return;
+    var hit = e.composedPath ? e.composedPath()[0] : e.target;
+    if ((hit && hit.matches && hit.matches('input, textarea, select')) || e.target.closest('.rl-gallery button')) return;
     if (activeDemo && e.code === 'Space') {
-      if (!e.target.closest('button, a')) { e.preventDefault(); activeDemo.toggle(); }
+      if (!(hit && hit.closest && hit.closest('button, a, input, label'))) { e.preventDefault(); activeDemo.toggle(); }
       return;
     }
     if (e.code === 'Space') {

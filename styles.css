@@ -1549,3 +1549,7 @@ header.hero .lead {
   width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--accent);
   object-fit: cover; display: block;
 }
+
+.shell.s3-ai-shell {
+  width: min(calc(100% - var(--gut) * 2), 1360px);
+}
