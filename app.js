@@ -737,58 +737,6 @@
   }
 
   // ==================== 页面渲染：HOME 页面 ====================
-  function drawHomeAppMap(canvas) {
-    var ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.scale(2,2);
-    ctx.fillStyle = '#edeee5';
-    ctx.fillRect(0,0,320,210);
-    ctx.fillStyle = '#d8e5cc';
-    ctx.fill(new Path2D('M0 0H320V48L281 43L239 58L178 43L123 57L72 40L0 66Z M0 138L42 120L105 139L82 186L27 210H0Z'));
-    ctx.fillStyle = '#bbd7db';
-    ctx.fill(new Path2D('M247 124Q256 102 275 112T303 124L320 133V183Q295 190 278 177T248 149Z'));
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-
-    [
-      'M-10 78Q53 60 89 82T171 80Q212 68 247 79T333 65',
-      'M-8 124Q61 98 102 119T188 120Q217 110 235 96T328 96',
-      'M14 -8Q33 57 37 107T72 218',
-      'M110 -5Q95 48 115 105T137 219',
-      'M206 -7Q192 37 204 75T192 141Q171 185 176 220',
-      'M-10 161Q44 146 95 161T187 166Q212 163 239 179T330 192'
-    ].forEach(function (line) {
-      var road = new Path2D(line);
-      ctx.strokeStyle = '#cdd4c7';
-      ctx.lineWidth = 8;
-      ctx.stroke(road);
-      ctx.strokeStyle = '#fbfaf4';
-      ctx.lineWidth = 6;
-      ctx.stroke(road);
-    });
-
-    ctx.fillStyle = '#647a62';
-    ctx.font = '600 16px system-ui';
-    ctx.fillText('松林公园',117,24);
-    ctx.fillText('青石湖',261,152);
-    var route = new Path2D('M51 162Q67 157 90 159Q116 163 135 147L175 115Q190 102 200 81Q217 54 246 50L281 44');
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 14;
-    ctx.stroke(route);
-    ctx.strokeStyle = '#1f76bb';
-    ctx.lineWidth = 9;
-    ctx.stroke(route);
-    [[51,162,'#227bc8'],[281,44,'#276349']].forEach(function (pin) {
-      ctx.beginPath();
-      ctx.arc(pin[0],pin[1],9,0,Math.PI*2);
-      ctx.fillStyle = pin[2];
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-    });
-  }
-
   function renderHome() {
     flushCleanups();
     stopAuto();
@@ -816,40 +764,9 @@
         <dialog class="cockpit-dialog" aria-labelledby="device-heading">
           <header><h2 id="device-heading"></h2><button class="device-close" aria-label="关闭设备演示">×</button></header>
           <div class="device-content">
-            <div class="device-view device-app" data-panel="app">              <div class="home-hw-phone" aria-label="ROADLINK 手机 App 交互演示">
-<div class="home-app-status" aria-hidden="true"><span>9:41</span><i></i><span class="home-app-battery"></span></div>
-<div class="home-app-top"><span>ROADLINK</span><strong id="home-app-title">路线规划</strong></div>
-<section class="home-app-panel" id="home-app-route" aria-label="路线">
-<div class="home-app-map">
-<canvas width="640" height="420" role="img" aria-label="从我的位置到松林观景台的示例路线"></canvas>
-<span class="home-app-map-tag">示意地图</span><span class="home-app-mate" hidden>阿岳</span>
-</div>
-<div class="home-app-trip" id="home-app-trip"><strong>松林观景台</strong><span>8.4 公里 · 预计 18 分钟</span></div>
-<div class="home-hw-phone-turn" id="home-app-next-turn" hidden><span class="home-app-turn-icon" aria-hidden="true"></span><span><b>300 m</b><small>前方右转</small></span></div>
-<button type="button" class="home-app-primary" id="home-app-navigation" aria-pressed="false">开始导航</button>
-</section>
-<section class="home-app-panel" id="home-app-team" aria-label="车队" hidden>
-<div class="home-app-section-head"><strong>松林骑队</strong><small>2 位成员</small></div>
-<ul class="home-app-list">
-<li><span class="home-app-avatar">陈</span><div><strong>陈默 · 我</strong><small id="home-app-share-state">未共享位置</small></div></li>
-<li><span class="home-app-avatar">岳</span><div><strong>阿岳</strong><small>正在共享位置</small></div></li>
-</ul>
-<button type="button" class="home-app-primary" id="home-app-share" aria-pressed="false">开启位置共享</button>
-</section>
-<section class="home-app-panel" id="home-app-devices" aria-label="设备" hidden>
-<div class="home-app-section-head"><strong>我的设备</strong><small>蓝牙连接示意</small></div>
-<ul class="home-app-list">
-<li><span class="home-app-device-icon car" aria-hidden="true"></span><div><strong>车把显示屏</strong><small>模拟连接</small></div></li>
-<li><span class="home-app-device-icon hud" aria-hidden="true"></span><div><strong>头盔 HUD</strong><small>模拟连接</small></div></li>
-</ul>
-<button type="button" class="home-app-primary" id="home-app-hud-preview">查看 HUD 画面</button>
-</section>
-<nav class="home-app-tabs" aria-label="App 页面">
-<button type="button" data-app-page="route" aria-pressed="true" aria-controls="home-app-route"><i aria-hidden="true"></i>路线</button>
-<button type="button" data-app-page="team" aria-pressed="false" aria-controls="home-app-team"><i aria-hidden="true"></i>车队</button>
-<button type="button" data-app-page="devices" aria-pressed="false" aria-controls="home-app-devices"><i aria-hidden="true"></i>设备</button>
-</nav>
-</div></div>
+            <div class="device-view device-app" data-panel="app">
+              ${RoadlinkPhone.frameMarkup()}
+            </div>
             <div class="device-view" data-panel="bar" hidden>
               <div class="device-bar-detail" role="img" aria-label="夹在车把上的防水圆屏，下面有三个实体按键"></div>
               <div class="rl-bar-readout"><strong class="rl-bar-value"></strong><small class="rl-bar-tip"></small></div>
@@ -872,12 +789,30 @@
     const gallery = mainContent.querySelector('.rl-gallery');
     const get = selector => gallery.querySelector(selector);
     const trip = [{arrow:'↱',dist:'300 m',tip:'前方右转'}, {arrow:'↰',dist:'80 m',tip:'路口左转'}, {arrow:'↑',dist:'500 m',tip:'沿湖路直行'}];
-    let view = 'ride', nav = true, power = false, shared = false, page = 'route', step = 0;
-    gallery.querySelectorAll('canvas').forEach(drawHomeAppMap);
+    let view = 'ride', nav = true, power = false, shared = false, step = 0;
     const primary = get('.rl-primary'), secondary = get('.rl-secondary');
 
     const dialog = get('.cockpit-dialog');
     const titles = {app:'骑行 App',bar:'车把防水屏',optics:'风镜内侧的透明贴片',ride:'头盔内视角'};
+    function phoneContext() {
+      return {kind:'home', page:'routes', navigation:nav, shared,
+        turn:{distance:trip[step].dist, tip:trip[step].tip}};
+    }
+    let phone;
+    function ensurePhone() {
+      if (phone) return;
+      phone = RoadlinkPhone.mount(get('.device-app'), phoneContext(), action=>{
+        if (action==='home-navigation') {nav=!nav;step=0;}
+        else if (action==='home-share') shared=!shared;
+        else if (action==='home-next' && nav) advance();
+        refresh();
+      });
+    }
+    function advance() {
+      step=(step+1)%trip.length;
+      speakText(trip[step].dist+'，'+trip[step].tip);
+    }
+    onCleanup(() => phone?.destroy());
     function refresh() {
       const turn = trip[step];
       get('#device-heading').textContent = titles[view];
@@ -888,23 +823,8 @@
       get('.rl-proj-tip').textContent = nav ? turn.tip : '等待手机开始导航';
       get('.rl-bar-value').textContent = nav ? turn.arrow+' '+turn.dist : '待导航';
       get('.rl-bar-tip').textContent = nav ? turn.tip : '等待手机路线';
-      get('#home-app-trip').hidden = nav;
-      get('#home-app-next-turn').hidden = !nav;
-      get('#home-app-next-turn b').textContent = turn.dist;
-      get('#home-app-next-turn small').textContent = turn.tip;
-      get('.home-app-turn-icon').textContent = turn.arrow;
-      get('#home-app-navigation').textContent = nav ? '结束导航' : '开始导航';
-      get('#home-app-navigation').setAttribute('aria-pressed',nav);
-      get('#home-app-title').textContent = {route:nav?'导航中':'路线规划',team:'车队',devices:'设备'}[page];
-      get('.home-app-mate').hidden = !shared;
-      get('#home-app-share-state').textContent = shared?'正在共享位置':'未共享位置';
-      get('#home-app-share').textContent = shared?'停止位置共享':'开启位置共享';
-      get('#home-app-share').setAttribute('aria-pressed',shared);
-      gallery.querySelectorAll('[data-app-page]').forEach(b=>{
-        const active = b.dataset.appPage === page;
-        b.setAttribute('aria-pressed',active);
-        get('#'+b.getAttribute('aria-controls')).hidden = !active;
-      });
+      if(view==='app') ensurePhone();
+      phone?.update(phoneContext());
       const actions = {
         optics:[['看头盔内视角','ride']],
         app:[['查看车把屏','bar']],
@@ -921,12 +841,9 @@
       if (!b) return;
       if (b.classList.contains('device-close')) {dialog.close();return;}
       const action = b.dataset.action || b.dataset.open;
-      if (b.dataset.appPage) page = b.dataset.appPage;
-      else if (b.id === 'home-app-navigation') {nav = !nav;step = 0;}
-      else if (b.id === 'home-app-share') shared = !shared;
-      else if (action === 'next') {step = (step+1)%trip.length;speakText(trip[step].dist+'，'+trip[step].tip);}
+      if (action === 'next') advance();
       else if (action === 'power') power = !power;
-      else if (action === 'ride' || b.id === 'home-app-hud-preview') {view='ride';power=true;}
+      else if (action === 'ride') {view='ride';power=true;}
       else if (action) view=action;
       refresh();
       if (!dialog.open && b.dataset.open) dialog.showModal();
@@ -937,6 +854,7 @@
 
   // ==================== 页面渲染：Knight 左右分屏模拟器模块页 ====================
   var activeDemo = null;
+  var scenePhone = null;
 
   function renderModulePage() {
     flushCleanups();
@@ -963,7 +881,7 @@
       }).join(''),
       '  </div>',
       sc.id === 's4' ? '<div id="safety-demo"></div>' : feat.id === 'pair' ? '<div id="crew-ride"></div>' : [
-      '  <div class="p1-frame">',
+      '  <div class="p1-frame app-phone-stage">',
       '    <!-- 左侧实景视频与动态视效主舞台 -->',
       '    <div class="p1-visual" id="p1-visual">',
       '      <!-- 3-Phase Stepper 步骤 -->',
@@ -1040,6 +958,10 @@
       '        <canvas class="p1-chart" id="p1-chart"></canvas>',
       '      </div>',
       '    </div>',
+      '    <aside class="app-phone-panel" aria-label="当前功能对应的手机 App">',
+      '      <div class="app-phone-label"><b>手机 App</b><a target="_blank" rel="noopener" href="' + RoadlinkPhone.link(RoadlinkPhone.feature(feat, feat.phases[state.phaseIdx], state.phaseIdx).page) + '">打开完整 App ↗</a></div>',
+      RoadlinkPhone.frameMarkup(),
+      '    </aside>',
       '  </div>',
       ].join(''),
       '  <!-- 底部上一章 / 下一章 -->',
@@ -1075,6 +997,10 @@
       onCleanup(function () { activeDemo.destroy(); activeDemo = null; });
       return;
     }
+
+    scenePhone = RoadlinkPhone.mount(mainContent.querySelector('.app-phone-panel'),
+      RoadlinkPhone.feature(feat, feat.phases[state.phaseIdx], state.phaseIdx));
+    onCleanup(function () { scenePhone.destroy(); scenePhone = null; });
 
     // 绑定 Phase 步进按钮
     var steps = mainContent.querySelectorAll('.kx-step, .sub-pill');
@@ -1127,6 +1053,7 @@
     var feat = sc.features[state.featIdx];
     var phase = feat.phases[state.phaseIdx];
     if (!phase) return;
+    scenePhone?.update(RoadlinkPhone.feature(feat, phase, state.phaseIdx));
 
     // 1. Stepper 状态
     var steps = document.querySelectorAll('.kx-step');
