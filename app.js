@@ -844,7 +844,7 @@
         ].join('');
       }).join(''),
       '  </div>',
-      sc.id === 's4' ? '<div id="safety-demo"></div>' : feat.id === 'pair' ? '<div id="crew-ride"></div>' : [
+      sc.id === 's4' ? '<div id="safety-demo"></div>' : feat.id === 'pair' ? '<div id="crew-ride"></div>' : feat.id === 'tuning' ? '<div id="tuning-community"></div>' : [
       '  <div class="p1-frame app-phone-stage">',
       '    <!-- 左侧实景视频与动态视效主舞台 -->',
       '    <div class="p1-visual" id="p1-visual">',
@@ -953,11 +953,13 @@
       });
     });
 
-    if (sc.id === 's4' || feat.id === 'pair') {
+    if (sc.id === 's4' || feat.id === 'pair' || feat.id === 'tuning') {
       stopAuto();
       activeDemo = sc.id === 's4'
         ? window.mountSafetyDemo(document.getElementById('safety-demo'), feat.id, asset, speakText)
-        : window.mountCrewRide(document.getElementById('crew-ride'), asset, speakText);
+        : feat.id === 'pair'
+          ? window.mountCrewRide(document.getElementById('crew-ride'), asset, speakText)
+          : window.mountTuningCommunity(document.getElementById('tuning-community'), asset, speakText);
       onCleanup(function () { activeDemo.destroy(); activeDemo = null; });
       return;
     }

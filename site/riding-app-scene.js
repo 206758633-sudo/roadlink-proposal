@@ -149,6 +149,37 @@
     </div>`;
   }
 
+  function tuningView(c) {
+    return `${pageHead('AI 改装坊','1:1 同视角预览 · 合规抄作业',tag('100% 合规','good'))}
+    <div class="stack" data-scene-synced="tuning">
+      <section class="panel pad stack">
+        <div class="scene-tuning-hero">
+          <img src="${esc(c.img)}" alt="${esc(c.title)}">
+          <div class="scene-tuning-badge">${tag(c.shortTitle,'good')}${tag(c.copies+'人同款')}</div>
+        </div>
+        <div>
+          <h2>${esc(c.title)}</h2>
+          <p class="small muted">主理人：${esc(c.author)}</p>
+        </div>
+        <div class="scene-metrics">
+          <div><span class="muted tiny">直采总价</span><b>¥${esc(c.price)}</b></div>
+          <div><span class="muted tiny">轻量化</span><b>${esc(c.weight)}kg</b></div>
+          <div><span class="muted tiny">排气分贝</span><b>${esc(c.db)}dB</b></div>
+        </div>
+        <div class="scene-bom-rows">
+          ${(c.parts || []).map(([name, price]) => `<div class="scene-bom-row"><span>✓ ${esc(name)}</span><b>${esc(price)}</b></div>`).join('')}
+        </div>
+        ${box(c.booked ? '已下发排期 ' + c.shopCode : c.shopName,
+          c.booked ? c.shopName + ' · 到店免排队直装' : '距你 ' + c.shopDist + ' · 标准工时 ¥' + c.shopLabor + ' · 附备案色卡',
+          'info')}
+        <div class="row wrap">
+          ${syncButton(c.booked ? '已预约门店 ' + c.shopCode : '一键抄作业 · 约门店', 'tuning-book-shop', c.booked ? 'check-circle' : 'shopping-bag')}
+          <button class="btn" type="button" data-scene-action="tuning-next-build">${icon('sparkle')}换一套方案</button>
+        </div>
+      </section>
+    </div>`;
+  }
+
   const openFeature = {
     ranking:()=>action('查看完整榜单','rank',{},'btn primary','trophy'),
     trajectory:()=>action('查看最近骑行路线','open-route',{id:'miaofeng'},'btn primary','map-trifold'),
@@ -181,8 +212,8 @@
       if(context) screen.insertAdjacentHTML('afterbegin', followButton());
       return;
     }
-    if (context.kind==='crew' || context.kind==='home') {
-      screen.innerHTML=context.kind==='crew' ? crewView(context) : homeView(context);
+    if (context.kind==='crew' || context.kind==='home' || context.kind==='tuning') {
+      screen.innerHTML=context.kind==='crew' ? crewView(context) : context.kind==='tuning' ? tuningView(context) : homeView(context);
       requestMaps();
       if(context.kind==='crew') paintCrewPositions();
     } else {
@@ -197,6 +228,7 @@
     expectedPage=next.page;
     if (!follow) return;
     if(next.feature==='dabing') ui.communityTab='guide';
+    else if(next.feature==='tuning') ui.communityTab='tuning';
     if(ui.page!==expectedPage) {
       if(sheet.open) sheet.close();
       history.replaceState(history.state,"","#"+expectedPage);

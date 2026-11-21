@@ -1,0 +1,851 @@
+/* ==================== 机车 AI 改装娱乐社区 (Tuning Studio & Community) ==================== */
+.tc {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--paper);
+}
+
+.tc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.38fr) minmax(320px, 0.88fr) minmax(236px, 0.54fr);
+  border-radius: var(--r-lg);
+  background: var(--ink-2);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--sh-lg);
+  overflow: hidden;
+}
+
+/* ---------- 1. 左侧：1:1 暗房转台 AI 改装沙盘 ---------- */
+.tc-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #07090d;
+  min-width: 0;
+}
+
+.tc-stage-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(8, 10, 14, 0.96), rgba(8, 10, 14, 0.72));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+  z-index: 12;
+}
+
+.tc-stage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+.tc-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.tc-render-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(50, 213, 131, 0.14);
+  border: 1px solid rgba(50, 213, 131, 0.35);
+  color: var(--green);
+  font: 700 11px var(--num);
+}
+
+.tc-view-modes {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 2px;
+}
+
+.tc-view-modes button {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--dim);
+  transition: all 0.18s var(--ease);
+  white-space: nowrap;
+}
+
+.tc-view-modes button:hover {
+  color: var(--paper);
+}
+
+.tc-view-modes button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 800;
+}
+
+/* 16:9 同视角改前/改后对比视窗 */
+.tc-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9.2;
+  overflow: hidden;
+  background: #080a0e;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.tc-bike-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+}
+
+.tc-bike-before {
+  z-index: 2;
+  will-change: clip-path;
+}
+
+.tc-bike-after {
+  z-index: 1;
+}
+
+/* 改前/改后角标 */
+.tc-corner-label {
+  position: absolute;
+  top: 12px;
+  z-index: 6;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.tc-label-before {
+  left: 14px;
+  background: rgba(15, 18, 24, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tc-label-after {
+  right: 14px;
+  background: rgba(20, 18, 10, 0.88);
+  border: 1px solid rgba(245, 196, 0, 0.55);
+  color: var(--accent);
+}
+
+/* 可拖拽黄金对比分割线 */
+.tc-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 8;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(245, 196, 0, 0.2), #f5c400 20%, #f5c400 80%, rgba(245, 196, 0, 0.2));
+  box-shadow: 0 0 18px rgba(245, 196, 0, 0.65);
+  transform: translateX(-50%);
+  cursor: ew-resize;
+}
+
+.tc-divider-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #14120e;
+  border: 2px solid var(--accent);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85), 0 0 16px rgba(245, 196, 0, 0.45);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+/* AI 3D 激光扫描渲染动效 */
+@keyframes tcLaserSweep {
+  0% { left: 0%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.tc-scanline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(180deg, transparent, #32d583, #f5c400, transparent);
+  box-shadow: 0 0 28px 6px rgba(50, 213, 131, 0.55);
+}
+
+.tc-scanline.is-scanning {
+  animation: tcLaserSweep 1.05s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 车身可点击改装部件热点 */
+.tc-pins {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.tc-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(14, 17, 22, 0.88);
+  border: 1.8px solid rgba(245, 196, 0, 0.85);
+  color: var(--accent);
+  font: 800 11.5px var(--num);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(245, 196, 0, 0.16);
+  transition: transform 0.2s var(--ease), background 0.2s, border-color 0.2s;
+}
+
+.tc-pin:hover,
+.tc-pin.is-active {
+  transform: translate(-50%, -50%) scale(1.16);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85), 0 0 0 6px rgba(245, 196, 0, 0.3);
+}
+
+.tc-pin.is-muted {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.55);
+  box-shadow: none;
+}
+
+/* 部件规格浮窗 */
+.tc-part-pop {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 10;
+  max-width: min(360px, calc(100% - 28px));
+  padding: 10px 14px;
+  border-radius: 13px;
+  background: rgba(11, 14, 18, 0.9);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(245, 196, 0, 0.45);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.78);
+}
+
+.tc-part-pop-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tc-part-pop-top strong {
+  font-size: 13px;
+  color: var(--paper);
+}
+
+.tc-part-legal {
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  background: rgba(50, 213, 131, 0.16);
+  border: 1px solid rgba(50, 213, 131, 0.4);
+  color: var(--green);
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tc-part-pop-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11.5px;
+  color: var(--soft);
+}
+
+.tc-part-pop-meta b {
+  color: var(--accent);
+  font-family: var(--num);
+}
+
+/* ---------- 声浪试听与分贝合规台 (Exhaust Acoustic Studio) ---------- */
+.tc-soundbar {
+  padding: 12px 16px 14px;
+  background: linear-gradient(180deg, #0c1016, #090c10);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.tc-sound-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tc-sound-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+.tc-sound-note {
+  font-size: 11.5px;
+  color: var(--mute);
+}
+
+.tc-db-pill {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(50, 213, 131, 0.14);
+  border: 1px solid rgba(50, 213, 131, 0.38);
+  color: var(--green);
+  font: 700 11px var(--num);
+  white-space: nowrap;
+}
+
+.tc-sound-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tc-sound-btns {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.tc-btn-sound {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: rgba(245, 196, 0, 0.14);
+  border: 1px solid rgba(245, 196, 0, 0.5);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s var(--ease);
+  white-space: nowrap;
+}
+
+.tc-btn-sound:hover,
+.tc-btn-sound[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.tc-btn-rev {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-2);
+  color: var(--paper);
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.tc-btn-rev:hover,
+.tc-btn-rev.is-revving {
+  border-color: #fb7185;
+  background: rgba(244, 63, 94, 0.18);
+  color: #fda4af;
+}
+
+.tc-exhaust-switch {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tc-exhaust-switch button {
+  padding: 4px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--mute);
+  white-space: nowrap;
+}
+
+.tc-exhaust-switch button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--paper);
+}
+
+.tc-spectrum-wrap {
+  position: relative;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.tc-spectrum-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tc-rpm-readout {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 800 12px var(--num);
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(8, 10, 14, 0.72);
+  padding: 2px 7px;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+/* ---------- 2. 中间：AI 灵感改车 + 配件清单 + 车友抄作业 ---------- */
+.tc-console {
+  padding: 18px 20px;
+  background: var(--ink-2);
+  border-left: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.tc-prompt-form {
+  display: flex;
+  gap: 6px;
+}
+
+.tc-prompt-input {
+  flex: 1;
+  min-width: 0;
+  height: 35px;
+  padding: 0 11px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line-2);
+  color: var(--paper);
+  font: 500 12.5px var(--sans);
+}
+
+.tc-prompt-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.tc-prompt-submit {
+  height: 35px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 三大车友爆款方案切换卡 */
+.tc-builds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tc-build-btn {
+  padding: 8px 9px;
+  border-radius: 10px;
+  background: var(--ink-3);
+  border: 1px solid var(--line);
+  text-align: left;
+  transition: all 0.18s var(--ease);
+  min-width: 0;
+}
+
+.tc-build-btn:hover {
+  border-color: rgba(245, 196, 0, 0.45);
+}
+
+.tc-build-btn[aria-pressed="true"] {
+  background: rgba(245, 196, 0, 0.11);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(245, 196, 0, 0.25);
+}
+
+.tc-build-btn strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 750;
+  color: var(--paper);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tc-build-btn small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10.5px;
+  color: var(--mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tc-build-btn[aria-pressed="true"] small {
+  color: var(--accent);
+}
+
+/* 核心指标（零截断） */
+.tc-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tc-metric-card {
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.tc-metric-card small {
+  display: block;
+  font-size: 11px;
+  color: var(--mute);
+  margin-bottom: 2px;
+}
+
+.tc-metric-card strong {
+  display: block;
+  font: 800 17px/1.15 var(--num);
+  color: var(--paper);
+}
+
+.tc-metric-card strong.accent { color: var(--accent); }
+.tc-metric-card strong.success { color: var(--green); }
+
+/* 可勾选改装配件 BOM 清单 */
+.tc-bom {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tc-bom-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--mute);
+}
+
+.tc-bom-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.16s;
+  text-align: left;
+}
+
+.tc-bom-item:hover,
+.tc-bom-item.is-focused {
+  border-color: rgba(245, 196, 0, 0.55);
+  background: rgba(245, 196, 0, 0.06);
+}
+
+.tc-bom-item.is-unchecked {
+  opacity: 0.52;
+}
+
+.tc-bom-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tc-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--line-2);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.tc-bom-item:not(.is-unchecked) .tc-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.tc-bom-title {
+  min-width: 0;
+}
+
+.tc-bom-title b {
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--paper);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tc-bom-title span {
+  display: block;
+  font-size: 10.5px;
+  color: var(--green);
+}
+
+.tc-bom-price {
+  font: 700 12.5px var(--num);
+  color: var(--accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 交规合规条 + 社区抄作业落地栏 */
+.tc-compliance-bar {
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: rgba(50, 213, 131, 0.09);
+  border: 1px solid rgba(50, 213, 131, 0.3);
+  font-size: 11.5px;
+  color: #d1fae5;
+  line-height: 1.45;
+}
+
+.tc-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+.tc-like-btn {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line-2);
+  color: var(--soft);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.tc-like-btn.is-liked {
+  border-color: #fb7185;
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.14);
+}
+
+.tc-copy-cta {
+  flex: 1;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12.5px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.16s var(--ease), box-shadow 0.16s;
+  white-space: nowrap;
+}
+
+.tc-copy-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px var(--accent-glow);
+}
+
+.tc-copy-cta.is-booked {
+  background: var(--green);
+  color: #04180e;
+}
+
+/* ---------- 3. 底部四阶段故事播放条 ---------- */
+.tc-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.tc-transport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tc-transport button {
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-2);
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--soft);
+}
+
+.tc-transport button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tc-stages {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 260px;
+}
+
+.tc-stage-step {
+  position: relative;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  text-align: left;
+  font-size: 12px;
+  color: var(--mute);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tc-stage-step[aria-current="step"] {
+  border-color: rgba(245, 196, 0, 0.6);
+  color: var(--paper);
+  font-weight: 700;
+  background: rgba(245, 196, 0, 0.08);
+}
+
+.tc-stage-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2.5px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+@media (max-width: 1180px) {
+  .tc-grid {
+    grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.9fr);
+  }
+  .tc-grid .app-phone-panel {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 820px) {
+  .tc-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tc-console {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .tc-stages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .tc-part-pop {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .tc-builds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tc-stage-top,
+  .tc-console,
+  .tc-soundbar {
+    padding-inline: 12px;
+  }
+}
