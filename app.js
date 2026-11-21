@@ -362,163 +362,11 @@
       num: '04',
       eyebrow: 'ACTIVE SAFETY & PRE-WARNING',
       title: '安全与主动预警',
-      tagline: '头盔减速刹车灯 · 后视盲区摄像头 · 摔车监测自动求救 · 疲劳检测 · 安全车距预警',
+      tagline: 'AI 整合原车数据，将风险提示送到头盔视野。',
       features: [
-        {
-          id: 'brakelight',
-          name: '头盔减速刹车灯',
-          sub: '六轴 IMU 感知负加速度 · 发动机制动 8ms 超频爆闪',
-          bg: 'helmet',
-          videoType: 'brake_flash',
-          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: 0, oy: -15 }, { z: 1.10, ox: 0, oy: -5 }],
-          phases: [
-            {
-              step: '1 发生', title: '降档发动机制动',
-              hud: { icon: '🛑', title: '发动机制动发生', desc: '降档车速骤降，但未捏物理刹车杆，传统车尾灯不亮' },
-              voice: '降档减速入弯，物理刹车灯未通电点亮。',
-              vals: [{ k: '减速度', v: '-0.42 G', cls: 'accent' }, { k: '物理刹车杆', v: '未触发' }, { k: '后车视线', v: '易追尾盲区' }],
-              punchline: '老手降档发动机制动时车速骤降，但传统尾灯不亮，后方 SUV 极易追尾！'
-            },
-            {
-              step: '2 系统反应', title: '头盔高位刹车灯爆闪',
-              hud: { icon: '💡', title: '头盔高位超频爆闪', desc: '内置 IMU 检测到负加速度，高位矩阵灯带 8ms 内超频爆闪' },
-              voice: '惯性传感器检测到紧急减速，头盔高位警示灯爆闪中。',
-              vals: [{ k: '响应时间', v: '8 ms', cls: 'danger' }, { k: '发光高度', v: '人眼 1.5 米' }, { k: '可视距离', v: '500 m' }],
-              punchline: '处于后车司机眼睛最敏感的 1.5 米平视高度，穿透雨雾能力极强。'
-            },
-            {
-              step: '3 解决', title: '后车平缓刹车防追尾',
-              hud: { icon: '🛡️', title: '追尾风险直降 92%', desc: '后方车辆第一时间收到减速信号并平缓刹车，保持 28m 间距' },
-              voice: '后车已同步减速，保持安全间距 28 米。',
-              vals: [{ k: '追尾防范率', v: '92%', cls: 'success' }, { k: '安装适配', v: '磁吸免破线' }, { k: '续航能力', v: '30 小时' }],
-              punchline: '小白秒懂：哪怕只是松油门降档，头盔也能自动替你亮灯提醒后车，保命护体。'
-            }
-          ]
-        },
-        {
-          id: 'rearview',
-          name: '后视摄像头与盲区感知',
-          sub: '170° 星光夜视超微光镜头 · 盲区逼近 HUD 动态红框',
-          bg: 'corner',
-          videoType: 'rear_reticle',
-          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: 18, oy: 10 }, { z: 1.10, ox: 5, oy: 0 }],
-          phases: [
-            {
-              step: '1 发生', title: '盲区车辆快速插上',
-              hud: { icon: '👀', title: '传统后视镜死角', desc: '后方一辆轿车正以 85km/h 从右后死角盲区插上，物理后视镜看不到' },
-              voice: '警告：右后方盲区发现高速逼近目标，正处于物理死角。',
-              vals: [{ k: '目标车速', v: '85 km/h', cls: 'accent' }, { k: '盲区位置', v: '右后 45°' }, { k: '碰撞预计', v: '2.8 秒后' }],
-              punchline: '摩托车后视镜常被骑手肩膀遮挡，车尾集成 170° 星光夜视镜头全天候戒备。'
-            },
-            {
-              step: '2 系统反应', title: 'HUD 亮起危险红框',
-              hud: { icon: '⚠️', title: '盲区超车高亮锁定', desc: 'HUD 右边缘亮起危险红框，圆屏切出流媒体画面，禁止向右变道' },
-              voice: '右侧盲区有车超车！请切勿向右变道！',
-              vals: [{ k: '预警延迟', v: '< 20 ms', cls: 'danger' }, { k: '视场角度', v: '170° 超广角' }, { k: '流媒体延迟', v: '32 ms' }],
-              punchline: '测算逼近速度（TTC 时间），若骑手打右转向灯，耳机会发出急促蜂鸣警示。'
-            },
-            {
-              step: '3 解决', title: '安然避让安全过弯',
-              hud: { icon: '✅', title: '危险目标超车完毕', desc: '目标车辆安全掠过，HUD 警示自动撤销，恢复标准导航视图' },
-              voice: '危险目标已越过，盲区恢复安全状态。',
-              vals: [{ k: '侧翻风险', v: '完全规避', cls: 'success' }, { k: '夜视感度', v: '0.001 Lux' }, { k: '雨天可视', v: '疏水涂层' }],
-              punchline: '小白秒懂：就像脑后长了眼睛，变道过弯再也不用别扭扭头回看后方。'
-            }
-          ]
-        },
-        {
-          id: 'crash',
-          name: '摔车监测与自动求救',
-          sub: '倾覆姿态冲击算法 · 60s 倒计时呼救与北斗卫星短报文',
-          bg: 'rescue',
-          videoType: 'crash_sos',
-          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: -15, oy: 15 }, { z: 1.10, ox: 0, oy: 5 }],
-          phases: [
-            {
-              step: '1 发生', title: '弯道滑倒车身倾覆',
-              hud: { icon: '🚨', title: '严重碰撞倾覆 78°', desc: '车身倾角达 78.5°，六轴加速度达 6.8G，发动机自动熄火' },
-              voice: '检测到摔车姿态与强烈冲击，正在检测生命体征！',
-              vals: [{ k: '车身倾角', v: '78.5° (倒地)', cls: 'danger' }, { k: '冲击峰值', v: '6.8 G' }, { k: '引擎状态', v: '防爆燃熄火' }],
-              punchline: '最怕摔车后人晕倒在无人荒郊野岭、手机摔飞无法求救。车备有独立电池与传感器。'
-            },
-            {
-              step: '2 系统反应', title: '60秒防误报倒计时',
-              hud: { icon: '⏱️', title: '紧急救助倒计时 48s', desc: '耳机大声询问状态，若无车手按键或语音取消，倒计时结束发 SOS' },
-              voice: '您还好吗？若无大碍请按手把任意键取消；48 秒后自动呼救！',
-              vals: [{ k: '倒计时剩余', v: '48 秒', cls: 'danger' }, { k: '高精定位', v: '北斗三号双频' }, { k: '坐标锁定', v: '30.184°N, 120.218°E' }],
-              punchline: '结合车速与心率综合研判，轻微原地倒车只要扶起车子或按键即可随时取消。'
-            },
-            {
-              step: '3 解决', title: '北斗卫星发射求救信',
-              hud: { icon: '🚑', title: 'SOS 报警已自动发出', desc: '向 120 中心与紧急联系人发送准确定位，赢得 45 分钟黄金时间' },
-              voice: '紧急联系人已收到您的遇险短信与求救电话，救援力量正在赶往。',
-              vals: [{ k: '报警时效', v: '即刻发送', cls: 'success' }, { k: '通信通道', v: '4G + 卫星短报文' }, { k: '黄金时间', v: '赢得 45 分钟', cls: 'accent' }],
-              punchline: '小白秒懂：深山没手机信号也能发坐标，一个人跑长途，家里人最放心的定心丸。'
-            }
-          ]
-        },
-        {
-          id: 'fatigue',
-          name: '疲劳检测与提醒',
-          sub: '连续骑行微操僵硬分析 · 主动规划咖啡驿站',
-          bg: 'guard',
-          videoType: 'fatigue_rest',
-          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.15, ox: -10, oy: -10 }, { z: 1.08, ox: 0, oy: 0 }],
-          phases: [
-            {
-              step: '1 发生', title: '连续骑行 2.5 小时',
-              hud: { icon: '☕', title: '疲劳表征显现', desc: '连续骑行 150km，龙头微修正频率下降 40%，反应灵敏度衰减' },
-              voice: '系统监测到您已连续骑行 150 公里，反应灵敏度出现疲劳衰减。',
-              vals: [{ k: '连续时长', v: '2 小时 34 分', cls: 'accent' }, { k: '微操反应率', v: '下降 40%' }, { k: '心率均值', v: '118 bpm' }],
-              punchline: '长途跑高速容易产生公路催眠，系统精准判断中枢神经疲劳程度。'
-            },
-            {
-              step: '2 系统反应', title: '主动提议就近补给',
-              hud: { icon: '💡', title: '推荐就近机车驿站', desc: '前方 3.8 公里有「莫干山观景服务区」，备有机车水吧与充气桩' },
-              voice: '前方 3.8 公里有很棒的机车驿站，我们进去喝杯咖啡活动下肩颈吧？',
-              vals: [{ k: '推荐驿站', v: '莫干山驿站' }, { k: '距离', v: '3.8 km', cls: 'success' }, { k: '车友评价', v: '4.9 分 ★★★★★' }],
-              punchline: '像一位懂你的老车友副驾驶，按一下车把拨轮即可将该休息点顺畅插入导航。'
-            },
-            {
-              step: '3 解决', title: '进站休整精力满血',
-              hud: { icon: '🔋', title: '体能状态满血复原', desc: '打卡服务区喝水拉伸 15 分钟，指标恢复绿色优良，安全继续启程' },
-              voice: '休整完毕，疲劳指数已清零，为您规划剩余 65 公里山道。',
-              vals: [{ k: '疲劳指数', v: '优良 (绿色)', cls: 'success' }, { k: '补给完成', v: '精力充沛' }, { k: '安全系数', v: '顶级', cls: 'accent' }],
-              punchline: '小白秒懂：长途不再硬撑死扛，AI 成为贴身健康副驾驶，骑行从容舒适。'
-            }
-          ]
-        },
-        {
-          id: 'distance',
-          name: '安全车距主动预警',
-          sub: '前向毫米波雷达测距 · 急刹 FCW 红色防撞方框',
-          bg: 'guard',
-          videoType: 'distance_fcw',
-          cam: [{ z: 1.05, ox: 0, oy: 0 }, { z: 1.25, ox: 0, oy: 15 }, { z: 1.10, ox: 0, oy: 5 }],
-          phases: [
-            {
-              step: '1 发生', title: '前车突发急刹变道',
-              hud: { icon: '🚗', title: '前车车距骤减', desc: '前方大货车突然紧急制动，跟车距离从 45m 瞬间缩至 16m' },
-              voice: '前向雷达告警：前车突发制动，两车间距快速缩减！',
-              vals: [{ k: '两车间距', v: '16.4 m', cls: 'danger' }, { k: '相对减速', v: '-38 km/h' }, { k: '碰撞时间', v: '1.2 秒' }],
-              punchline: '新手制动反应往往有 0.8 到 1.2 秒迟滞，车头高精毫米波雷达每秒测距 50 次戒备。'
-            },
-            {
-              step: '2 系统反应', title: 'HUD 红色防撞方框',
-              hud: { icon: '⚠️', title: 'FCW 碰撞警告', desc: 'HUD 对准前车贴合动态红色预警方框，车把震动提示音同步急促响起' },
-              voice: '急刹！注意减速！',
-              vals: [{ k: '告警级别', v: 'Level 3 紧急', cls: 'danger' }, { k: '声光触同步', v: '毫秒级' }, { k: '建议刹车力', v: '75%' }],
-              punchline: '红色警告框直接贴合在前车实景车尾上，车把微电机震动指尖，消除走神。'
-            },
-            {
-              step: '3 解决', title: '从容刹停留足余量',
-              hud: { icon: '🛡️', title: '安全制动完毕', desc: '比人眼提前 0.8 秒预警，车手从容重刹降速，稳稳停在安全间距外' },
-              voice: '车距已恢复安全标准，前向碰撞警报解除。',
-              vals: [{ k: '刹停余量', v: '8.2 米', cls: 'success' }, { k: 'ABS 触发', v: '平稳受控' }, { k: '追尾风险', v: '0%', cls: 'accent' }],
-              punchline: '小白秒懂：提前 0.8 秒提醒就是生死之别，雷达当第三只眼，杜绝追尾。'
-            }
-          ]
-        }
+        { id: 'distance', name: '安全车距主动预警' },
+        { id: 'rearview', name: '后视摄像头与盲区感知' },
+        { id: 'crash', name: '摔车监测与自动求救' }
       ]
     },
     {
@@ -1088,7 +936,7 @@
   }
 
   // ==================== 页面渲染：Knight 左右分屏模拟器模块页 ====================
-  var crewRide = null;
+  var activeDemo = null;
 
   function renderModulePage() {
     flushCleanups();
@@ -1114,7 +962,7 @@
         ].join('');
       }).join(''),
       '  </div>',
-      feat.id === 'pair' ? '<div id="crew-ride"></div>' : [
+      sc.id === 's4' ? '<div id="safety-demo"></div>' : feat.id === 'pair' ? '<div id="crew-ride"></div>' : [
       '  <div class="p1-frame">',
       '    <!-- 左侧实景视频与动态视效主舞台 -->',
       '    <div class="p1-visual" id="p1-visual">',
@@ -1143,8 +991,6 @@
       '      </div>',
       '      <!-- 快门拍照闪光层 -->',
       '      <div class="shutter-flash" id="shutter-flash"></div>',
-      '      <!-- 紧急制动红光光晕 -->',
-      '      <div class="danger-vignette" id="danger-vignette"></div>',
       '      <!-- 悬浮抓拍大片弹窗 (自动抓拍特性) -->',
       '      <div class="capture-card-overlay" id="capture-card-overlay" hidden>',
       '        <img src="assets/roadlink-ride-capture-small.webp" alt="并骑抓拍大片">',
@@ -1221,10 +1067,12 @@
       });
     });
 
-    if (feat.id === 'pair') {
+    if (sc.id === 's4' || feat.id === 'pair') {
       stopAuto();
-      crewRide = window.mountCrewRide(document.getElementById('crew-ride'), asset, speakText);
-      onCleanup(function () { crewRide.destroy(); crewRide = null; });
+      activeDemo = sc.id === 's4'
+        ? window.mountSafetyDemo(document.getElementById('safety-demo'), feat.id, asset, speakText)
+        : window.mountCrewRide(document.getElementById('crew-ride'), asset, speakText);
+      onCleanup(function () { activeDemo.destroy(); activeDemo = null; });
       return;
     }
 
@@ -1317,7 +1165,7 @@
     var ret = document.getElementById('kx-ret');
     var retTag = document.getElementById('kx-ret-tag');
     if (ret) {
-      if (feat.id === 'capture' || feat.id === 'rearview' || feat.id === 'distance') {
+      if (feat.id === 'capture') {
         ret.hidden = false;
         ret.className = 'kx-ret ' + (state.phaseIdx === 1 ? 'danger' : (state.phaseIdx === 2 ? 'success' : ''));
         if (state.phaseIdx === 0) {
@@ -1349,13 +1197,6 @@
       if (capCard) capCard.hidden = (state.phaseIdx !== 2);
     } else {
       if (capCard) capCard.hidden = true;
-    }
-
-    // 6. 紧急制动红光光晕
-    var dangerVig = document.getElementById('danger-vignette');
-    if (dangerVig) {
-      var isDanger = (feat.id === 'brakelight' && state.phaseIdx === 1) || (feat.id === 'distance' && state.phaseIdx === 1) || (feat.id === 'crash' && state.phaseIdx === 0);
-      dangerVig.classList.toggle('on', isDanger);
     }
 
     // 7. 语音播报条
@@ -1416,8 +1257,8 @@
     replayBtn.addEventListener('click', function () {
       if (state.route === 'home') {
         renderHome();
-      } else if (crewRide) {
-        crewRide.replay();
+      } else if (activeDemo) {
+        activeDemo.replay();
       } else {
         setPhase(0, false);
         startAuto();
@@ -1428,8 +1269,8 @@
   // 键盘快捷键
   document.addEventListener('keydown', function (e) {
     if (e.target.matches('input, textarea, select') || e.target.closest('.rl-gallery button')) return;
-    if (crewRide && e.code === 'Space') {
-      if (!e.target.closest('button, a')) { e.preventDefault(); crewRide.toggle(); }
+    if (activeDemo && e.code === 'Space') {
+      if (!e.target.closest('button, a')) { e.preventDefault(); activeDemo.toggle(); }
       return;
     }
     if (e.code === 'Space') {

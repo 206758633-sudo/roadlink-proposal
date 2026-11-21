@@ -1,0 +1,56 @@
+.sf {--mint:#9cf4cc;--amber:#ffce65;--muted:#a3b2ad;display:grid;grid-template-columns:minmax(0,1.75fr) minmax(260px,1fr);background:#101817;color:#f4f4e9;border:1px solid #3a4741;border-radius:18px;overflow:hidden}
+.sf *, .sf *::after {box-sizing:border-box}
+.sf button {cursor:pointer;font:inherit;color:inherit}
+.sf button:focus-visible {outline:3px solid #8ae7ff;outline-offset:-3px}
+.sf [hidden]{display:none}
+.sf-view {position:relative;min-width:0;min-height:clamp(380px,35vw,520px);isolation:isolate;overflow:hidden;background:#101719}
+.sf-road,.sf-glass {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.sf-road {transform:scale(var(--z,1));transform-origin:50% 47%}
+.sf-glass {z-index:-1;box-shadow:inset 0 8px 32px #070c13af,inset 0 -15px 45px #060c12c2;background:linear-gradient(180deg,#08131878,transparent 28%,transparent 64%,#08120fe8)}
+.sf-glass::before,.sf-glass::after {content:"";display:block;position:absolute;left:-6%;width:112%;height:11%;border-radius:50%;background:linear-gradient(180deg,#0a1113,#182324);box-shadow:0 2px 5px #050b0c88}
+.sf-glass::before {top:-8%}.sf-glass::after {bottom:-9%}
+.sf-view header {position:absolute;top:22px;left:22px;display:flex;align-items:center;gap:8px;color:#fff;text-shadow:0 1px 5px #000;font-size:14px;font-weight:650}
+.sf-view header small {font-size:10px;letter-spacing:.08em;font-weight:500;padding:3px 8px;border-radius:20px;border:1px solid #ffffff66;background:#14212177}
+.sf-eye {width:13px;height:8px;border:1px solid var(--mint);border-radius:70% 30%;transform:rotate(18deg);background:radial-gradient(circle,var(--mint) 0 1.5px,transparent 2px)}
+.sf-caption {position:absolute;bottom:7%;left:5%;right:5%;text-shadow:0 2px 6px #09110e}
+.sf-caption span,.sf-overline,.sf-decision small {font-size:11px;font-weight:700;letter-spacing:.1em}
+.sf-caption span {color:#c1dccb}
+.sf-caption h2 {font-size:clamp(22px,2.15vw,34px);line-height:1.35;margin:6px 0 0;letter-spacing:-.03em;text-wrap:balance}
+.sf-hud {position:absolute;left:7%;top:30%;display:flex;gap:10px;align-items:center;max-width:85%;color:#ffda88;text-shadow:0 0 6px #ad781c70;background:linear-gradient(95deg,#211c11eb,#201d1370);padding:10px 14px;border-left:3px solid currentColor;border-radius:2px 10px 10px 2px}
+.sf-hud span {text-align:center;font-size:16px;line-height:29px;min-width:29px;border:1px solid currentColor;border-radius:6px;font-weight:bold}
+.sf-hud b,.sf-hud small {display:block}.sf-hud b {font-weight:680;font-size:clamp(19px,2vw,27px);line-height:1.25}
+.sf-hud small {font-size:11px;margin-top:3px}
+.sf[data-case=rearview] .sf-hud {left:auto;right:6%;border:0;border-right:3px solid currentColor;background:linear-gradient(270deg,#201c10ed,#231e127d)}
+.sf[data-alert=clear] .sf-hud {color:var(--mint);background:#132820cf}
+.sf[data-case=crash][data-alert=clear] .sf-hud {color:#deece4}
+.sf-data {min-width:0;align-self:center;padding:clamp(18px,2.5vw,40px);display:grid;gap:12px}
+.sf-overline {color:#bacac0}.sf-overline i {font-style:normal;color:var(--amber);padding:0 2px}
+.sf-data h3 {font-size:clamp(23px,2vw,30px);line-height:1.25;margin:0 0 4px}
+.sf-source {display:flex;align-items:center;gap:14px;padding:7px 0;border-bottom:1px solid #34423a}
+.sf-source small,.sf-note {font-size:12px;color:var(--muted)}
+.sf-source strong {font-size:clamp(15px,1.35vw,19px);display:block;color:#edf3e9;margin-top:3px;font-variant-numeric:tabular-nums}
+.sf-chart,.sf-preview {width:85px;aspect-ratio:100/62;flex:none;overflow:hidden;border-radius:7px;border:1px solid #51665a80;background:#192823;position:relative;display:grid;place-items:center}
+.sf-chart svg,.sf-preview img {width:100%;height:100%;object-fit:cover;display:block}
+.sf-track {stroke:#576d60;stroke-width:1.3;stroke-dasharray:4 3;fill:none}.sf-fan{fill:#599f762e;stroke:#719c7d;stroke-width:1}
+.sf-self {fill:#afedc7}.sf-target {fill:#ffcd65;stroke:#f8e7bb;stroke-width:1.3}.sf-bike {fill:none;stroke:var(--mint);stroke-width:2;transform-origin:50px 41px}
+.sf-preview i {position:absolute;left:39%;top:18%;width:24%;height:62%;border:1.5px solid var(--amber);border-radius:3px}
+.sf[data-case=rearview] .sf-preview i {left:52%;top:30%;width:10%;height:28%}
+.sf-preview.inactive img {opacity:.45}.sf-preview.inactive i {display:none}.sf-preview span {font-size:27px;color:var(--mint)}
+.sf-decision {padding:3px 0 3px 12px;border-left:2px solid var(--amber)}.sf-decision small {color:var(--amber)}
+.sf-decision p {font-size:15px;margin:4px 0 0;line-height:1.5}.sf-note{font-size:11px;line-height:1.55}
+.sf-controls {grid-column:1/-1;display:flex;gap:20px;align-items:center;background:#131e19;border-top:1px solid #3b4940;padding:14px 22px}
+.sf-tools {display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sf-tools button,.sf-stages button {border:0;background:transparent;font-size:12px;padding:6px;color:#cfdbcd}
+.sf-tools [data-play] {border-radius:15px;background:var(--amber);color:#272013;font-weight:700;padding:6px 12px}
+.sf-tools [data-cancel] {border:1px solid #baa275;border-radius:8px;color:#ffe0a2}
+.sf-time {font:11px ui-monospace,monospace;color:#abb7ad}
+.sf-stages {flex:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.sf-stages button {text-align:left;padding:4px;line-height:1.35}.sf-stages i {display:block;height:3px;background:#384a3e;margin-bottom:6px}
+.sf-stages .past i {background:#89845e}.sf-stages [aria-current=step] {color:#ffdf81}
+.sf-stages [aria-current=step] i {background:linear-gradient(90deg,var(--amber) var(--pct,0%),#6d6849 0)}
+@media(max-width:760px){
+ .sf{grid-template-columns:1fr}.sf-view{min-height:0;aspect-ratio:1.52}.sf-data{padding:16px;gap:8px}.sf-view header{top:12px;left:14px;font-size:12px}
+ .sf-caption h2{font-size:19px}.sf-caption span{font-size:10px}.sf-hud{top:29%;padding:6px 9px;gap:6px}.sf-hud b{font-size:16px}.sf-hud small{font-size:10px}.sf-hud span{font-size:12px;line-height:22px;min-width:22px}
+ .sf-source{padding:3px 0 7px}.sf-chart,.sf-preview{width:67px}.sf-data h3{font-size:20px}
+ .sf-controls{display:block;padding:10px}.sf-stages{margin-top:8px;gap:2px}.sf-stages button{font-size:11px}
+}
