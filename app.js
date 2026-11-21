@@ -638,6 +638,12 @@
   function renderHome() {
     flushCleanups();
     stopAuto();
+    const opticsParts = [
+      ['光波导镜片',120], ['微显光机',82], ['ESP32 主板',46], ['500 mAh 锂电池',32]
+    ];
+    const roundCost = 80;
+    const opticsCost = opticsParts.reduce((sum, part) => sum + part[1], 0);
+    const hardwareCost = roundCost + opticsCost;
     mainContent.innerHTML = `
       <section class="rl-gallery" aria-labelledby="rl-title">
         <div class="cockpit-hero">
@@ -651,7 +657,13 @@
               <h1 id="rl-title">路线在手机，<br><em>转向在眼前。</em></h1>
               <p class="cockpit-lead">手机 App 规划路线，车把圆屏与头盔贴片同步提示。</p>
             </header>
-            <div class="cockpit-actions"><button class="cockpit-start" data-open="ride"><i aria-hidden="true"></i>体验头盔内的导航 <span aria-hidden="true">→</span></button><button class="open-riding-app" data-open="app">打开骑行 App <span aria-hidden="true">↗</span></button></div>
+            <div class="cockpit-actions">
+              <button class="cockpit-start" data-open="ride"><i aria-hidden="true"></i>体验头盔内的导航 <span aria-hidden="true">→</span></button>
+              <button class="open-riding-app" data-open="app">打开骑行 App <span aria-hidden="true">↗</span></button>
+              <button type="button" class="cockpit-cost" data-open="cost" aria-haspopup="dialog">
+                <span>硬件成本</span><strong>¥${hardwareCost}</strong><small>预估</small>
+              </button>
+            </div>
             <div class="cockpit-legend" aria-label="两件加装硬件">
               <button data-open="optics"><span class="part-photo part-optics" aria-hidden="true"></span><span class="part-copy"><strong>头盔 HUD 贴片</strong><small>透明投影 · 风镜内侧</small></span></button>
               <button data-open="bar"><span class="part-photo part-bar" aria-hidden="true"></span><span class="part-copy"><strong>车把防水圆屏</strong><small>夹装车把 · 实体按键</small></span></button>
@@ -662,6 +674,20 @@
         <dialog class="cockpit-dialog" aria-labelledby="device-heading">
           <header><h2 id="device-heading"></h2><button class="device-close" aria-label="关闭设备演示">×</button></header>
           <div class="device-content">
+            <div class="device-view device-cost" data-panel="cost" hidden>
+              <dl class="hardware-cost-items">
+                <div><dt>车把防水圆屏</dt><dd>¥${roundCost}</dd></div>
+                <div><dt>头盔 HUD 贴片</dt><dd>¥${opticsCost}</dd></div>
+              </dl>
+              <details class="hardware-cost-parts">
+                <summary>头盔贴片组件明细</summary>
+                <dl>
+                  ${opticsParts.map(([name, price]) => `<div><dt>${name}</dt><dd>¥${price}</dd></div>`).join('')}
+                  <div><dt>磁吸快拆底座</dt><dd>已含</dd></div>
+                </dl>
+              </details>
+              <div class="hardware-cost-total"><span>两件硬件合计预估</span><strong>¥${hardwareCost}</strong></div>
+            </div>
             <div class="device-view device-app" data-panel="app">
               ${RoadlinkPhone.frameMarkup()}
             </div>
@@ -691,7 +717,7 @@
     const primary = get('.rl-primary'), secondary = get('.rl-secondary');
 
     const dialog = get('.cockpit-dialog');
-    const titles = {app:'骑行 App',bar:'车把防水屏',optics:'风镜内侧的透明贴片',ride:'头盔内视角'};
+    const titles = {cost:'硬件成本预估',app:'骑行 App',bar:'车把防水屏',optics:'风镜内侧的透明贴片',ride:'头盔内视角'};
     function phoneContext() {
       return {kind:'home', page:'routes', navigation:nav, shared,
         turn:{distance:trip[step].dist, tip:trip[step].tip}};
@@ -724,6 +750,7 @@
       if(view==='app') ensurePhone();
       phone?.update(phoneContext());
       const actions = {
+        cost:[['查看圆屏演示','bar'],['查看贴片演示','optics']],
         optics:[['看头盔内视角','ride']],
         app:[['查看车把屏','bar']],
         bar:nav?[['看头盔内视角','ride'],['模拟下一路口','next']]:[['去 App 开始导航','app']],

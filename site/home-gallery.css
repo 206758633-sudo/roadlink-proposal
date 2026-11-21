@@ -86,3 +86,20 @@ body:has(.cockpit-hero) .nav a::after {background:#ff8a30}
 }
 .open-riding-app {min-height:44px;padding:0 4px;color:#e6edf0;font:600 13px var(--sans)}
 .open-riding-app span {color:#ff9342}
+
+.cockpit-cost {display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 10px;border:1px solid #9b633b;border-radius:8px;background:#241b15ec;color:#f5e3d4;white-space:nowrap;font-size:12px;font-weight:600}
+.cockpit-cost:hover {border-color:#ffb37b;background:#332318}
+.cockpit-cost strong {color:#ffb884;font:750 17px/1 var(--num);font-variant-numeric:tabular-nums}
+.cockpit-cost small {color:#d8bda8;font-size:10px}
+.device-cost {padding:clamp(16px,4vw,28px);background:#151b1d}
+.hardware-cost-items,.hardware-cost-parts dl {margin:0}
+.hardware-cost-items div,.hardware-cost-parts dl div,.hardware-cost-total {display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.hardware-cost-items div {padding:12px 0;border-bottom:1px solid #3b4140}
+.hardware-cost-items dt,.hardware-cost-total span {font-weight:650}
+.hardware-cost-items dd,.hardware-cost-parts dd {margin:0;white-space:nowrap;font-variant-numeric:tabular-nums}
+.hardware-cost-items dd {font-size:21px;font-weight:750}
+.hardware-cost-parts {margin-top:11px;color:#ced4d3;font-size:13px}
+.hardware-cost-parts summary {min-height:44px;padding-block:10px;cursor:pointer;color:#f6c59f}
+.hardware-cost-parts dl div {padding-block:5px}
+.hardware-cost-total {margin-top:14px;padding:10px 13px;border:1px solid #865c40;border-radius:8px;background:#2b221c;color:#ffbb87}
+.hardware-cost-total strong {font:750 clamp(25px,6vw,34px)/1 var(--num);white-space:nowrap}
